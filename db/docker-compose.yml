@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sharemeet-db-postgres
+    environment:
+      POSTGRES_USER: ${DB_USER:-sharemeet}
+      POSTGRES_PASSWORD: ${DB_PASS:-local_dev_password}
+      POSTGRES_DB: sharemeet_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - sharemeet-net
+
+  mongodb:
+    image: mongo:7.0
+    container_name: sharemeet-db-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${DB_USER:-sharemeet}
+      MONGO_INITDB_ROOT_PASSWORD: ${DB_PASS:-local_dev_password}
+      MONGO_INITDB_DATABASE: sharemeet_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - sharemeet-net
+
+volumes:
+  postgres_data:
+  mongodb_data:
+
+networks:
+  sharemeet-net:
+    driver: bridge
