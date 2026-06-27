@@ -2,6 +2,14 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-06-27
+
+- Usunięto eksperymentalną implementację `backend/src/auth/` i `backend/src/users/`.
+- Uproszczono `backend/src/app.module.ts` do czystego szkieletu NestJS.
+- Usunięto tymczasowe zależności Passport/JWT/Google OAuth z `backend/package.json`.
+- Potwierdzono decyzję: users/auth odbudowujemy od zera na PostgreSQL + Prisma.
+- Zweryfikowano `backend`: `npm install`, `npm run format`, `npm run build`, `npm test` i `npm run test:e2e` przechodzą.
+
 ## 2026-06-22
 
 - Dodano standard workflow AI: `AGENTS.md`, `plan.md`, `project_state.md`.

@@ -10,7 +10,7 @@ Projekt ma być edukacyjny: architektura powinna być jasna, opisana i rozwijana
 
 | Moduł | Odpowiedzialność | Status |
 |---|---|---|
-| `backend/` | API, auth, users, logika biznesowa | w trakcie, build obecnie nie przechodzi |
+| `backend/` | API, auth, users, logika biznesowa | czysty szkielet NestJS; auth/users usunięte do odbudowy |
 | `frontend/` | UI użytkownika | TODO |
 | `db/` | Docker Compose dla PostgreSQL i MongoDB | częściowo gotowe |
 | `docs/` | architektura i decyzje techniczne | gotowe jako szkielet |
@@ -23,7 +23,7 @@ W devlogu przyjęto architekturę hybrydową:
 - PostgreSQL: users, friends, posts, comments
 - MongoDB: media uploads, activity logs, notifications
 
-Aktualny kod `users.schema.ts` używa jednak Mongoose/MongoDB dla users, więc wymaga decyzji i uporządkowania przed dalszym kodowaniem.
+Aktualny kod auth/users oparty o Mongoose został usunięty 2026-06-27 jako eksperyment niespójny z planem. Następna implementacja users/auth ma powstać od zera na PostgreSQL + Prisma.
 
 ## Rekomendowany kierunek MVP
 
@@ -33,7 +33,7 @@ Na podstawie dotychczasowego planu najbardziej spójny kierunek to:
 - MongoDB zostawić na późniejsze media/logi/notyfikacje,
 - Google OAuth odłożyć do momentu, gdy prosty email/password + JWT działa stabilnie.
 
-To nadal wymaga formalnego potwierdzenia w `docs/decisions.md` przed zmianami w kodzie.
+To zostało formalnie potwierdzone decyzją z 2026-06-27 w `docs/decisions.md`.
 
 ## Priorytety architektoniczne
 

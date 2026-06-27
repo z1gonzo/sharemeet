@@ -16,9 +16,11 @@ Przygotować repo pod spokojną sesję kodowania w VSCode/Cline i ustabilizować
 - [x] Usunąć osobny pusty projekt `sharemeet-devlog` z aktywnego workspace przez archiwizację
 - [x] Zainicjalizować git w głównym projekcie
 - [x] Uporządkować README i pliki workflow
-- [ ] Podjąć decyzję: PostgreSQL/Prisma vs MongoDB/Mongoose dla users/auth
-- [ ] Naprawić build backendu
-- [ ] Doprowadzić JWT auth do działającego minimum
+- [x] Podjąć decyzję: PostgreSQL/Prisma dla users/auth
+- [x] Usunąć eksperymentalny, niespójny kod auth/users
+- [x] Naprawić build backendu przez powrót do czystego szkieletu NestJS
+- [ ] Dodać Prisma i model `User`
+- [ ] Odbudować minimalne email/password JWT auth
 - [ ] Dodać minimalne testy lub e2e smoke test dla auth/users
 
 ## Faza 0 — Organizacja repo i workflow
@@ -33,20 +35,21 @@ Przygotować repo pod spokojną sesję kodowania w VSCode/Cline i ustabilizować
 
 ### Zakres
 
-- [ ] Backend NestJS buduje się bez błędów
+- [x] Backend NestJS buduje się bez błędów jako czysty szkielet po resecie eksperymentalnego auth/users
 - [ ] Konfiguracja env przez `@nestjs/config`
-- [ ] Moduł users działa z wybraną bazą danych
+- [ ] Prisma podłączona do PostgreSQL
+- [ ] Moduł users działa z PostgreSQL + Prisma
 - [ ] Register/login zwracają access token
 - [ ] Refresh token ma jasną implementację albo jest odłożony do backlogu
 - [ ] Google OAuth jest poprawnie zaimplementowany albo wyłączony do czasu podstawowego JWT
 
 ### Kryteria ukończenia
 
-- [ ] `npm run build` w `backend/` przechodzi
-- [ ] `npm test` przechodzi albo istnieje jawny blocker
+- [x] `npm run build` w `backend/` przechodzi dla czystego szkieletu NestJS
+- [x] `npm test` i `npm run test:e2e` przechodzą dla istniejących smoke testów aplikacji
 - [ ] README opisuje aktualny start backendu i baz
 - [ ] `project_state.md` zawiera aktualny stan bez sprzeczności
-- [ ] `docs/decisions.md` zapisuje decyzję storage dla users/auth
+- [x] `docs/decisions.md` zapisuje decyzję storage/reset dla users/auth
 
 ## Faza 2 — Core Social MVP
 

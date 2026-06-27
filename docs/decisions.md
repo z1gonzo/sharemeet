@@ -70,24 +70,31 @@ Devlog zostaje w głównym repo jako `devlog/`. Osobny projekt `sharemeet-devlog
 
 ---
 
-## Pending — storage dla users/auth
+## 2026-06-27 — Reset eksperymentalnego auth/users i PostgreSQL + Prisma dla MVP
 
-Status: proposed / do rozstrzygnięcia przed kodowaniem
+Status: accepted
 
-### Pytanie
+### Kontekst
 
-Czy w MVP users/auth idą przez PostgreSQL + Prisma, czy przez MongoDB + Mongoose?
+Backend miał eksperymentalny kod auth/users, który mieszał kilka kierunków naraz:
 
-### Rekomendacja robocza
+- Mongoose/MongoDB dla users,
+- plan PostgreSQL dla users/auth,
+- Google OAuth przed działającym email/password JWT,
+- zdublowane JWT guardy,
+- placeholderowe metody i niespójne zależności.
 
-Trzymać users/auth w PostgreSQL, zgodnie z pierwotnym devlogiem. MongoDB zostawić na media/logi/notyfikacje.
+Kod nie budował się i był gorszą bazą do nauki niż czysty start.
 
-### Dlaczego
+### Decyzja
 
-- Users, auth, relacje, posty i komentarze są relacyjne.
-- PostgreSQL ułatwia spójność danych i późniejsze relacje/friends.
-- Unikamy mieszania dwóch modeli danych w jednym module.
+- Usuwamy eksperymentalną implementację `backend/src/auth/` i `backend/src/users/`.
+- Przyjmujemy, że MVP users/auth będzie odbudowane od zera na PostgreSQL + Prisma.
+- MongoDB zostaje w architekturze docelowej jako późniejsze miejsce na media uploads, activity logs i notifications.
+- Google OAuth wróci dopiero po stabilnym email/password + JWT.
 
-### Następny krok
+### Konsekwencje
 
-Potwierdzić tę decyzję w sesji `grill-with-docs` lub podczas planowania w Hermesie, a potem naprawić kod backendu zgodnie z wybranym kierunkiem.
+- Obecny backend wraca do czystego szkieletu NestJS, który ma przechodzić `npm run build` i `npm test`.
+- Kolejne zadanie to dodanie Prisma, modelu `User`, migracji i minimalnego auth.
+- Nie próbujemy ratować starego kodu Mongoose/Passport/Google OAuth.
