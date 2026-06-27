@@ -14,6 +14,8 @@ Current foundation:
 - first `User` model and migration exist,
 - `UsersService` currently provides `createUser`, `findByEmail` and `findById`.
 - `AuthModule` currently provides `POST /auth/register`, `POST /auth/login` and `GET /auth/me`.
+- Register/login DTOs are validated through a global `ValidationPipe`.
+- Duplicate email/username returns friendly `409 Conflict` responses.
 - Login returns a JWT access token.
 - `GET /auth/me` is protected by `JwtAuthGuard`.
 
@@ -72,6 +74,6 @@ postgresql://sharemeet:<local-password>@localhost:5433/sharemeet_db?schema=publi
 ## Next coding task
 
 1. Decide whether refresh tokens are in Milestone 1 or moved to backlog.
-2. Add DTO validation for register/login.
-3. Add friendly conflict handling for duplicate email/username.
+2. Add a short auth endpoint reference for register/login/me.
+3. Optionally standardize error response examples.
 4. Keep `npm run lint && npm run build && npm test && npm run test:e2e` green.

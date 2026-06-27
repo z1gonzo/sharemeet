@@ -2,6 +2,16 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-06-27 — Auth validation/conflicts foundation
+
+- Dodano `class-validator` i `class-transformer`.
+- Dodano wspólną konfigurację `configureApp` z globalnym `ValidationPipe`.
+- Dodano walidację `RegisterDto` i `LoginDto`.
+- Dodano przyjazne `409 Conflict` dla zajętego emaila albo username.
+- Dodano devlog `devlog/07_auth-validation-conflicts.md` i ADR w `docs/decisions.md`.
+- Zweryfikowano realnie invalid register/login, duplicate register oraz flow register/login/me lokalnie na porcie `3001`.
+- Zweryfikowano `backend`: `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test`, `npm run test:e2e` przechodzą.
+
 ## 2026-06-27 — Auth me/JWT guard foundation
 
 - Dodano `JwtAuthGuard`.

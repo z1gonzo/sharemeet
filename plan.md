@@ -26,6 +26,7 @@ Przygotować repo pod spokojną sesję kodowania w VSCode/Cline i ustabilizować
 - [x] Dodać minimalne testy i e2e smoke test dla auth/register
 - [x] Dodać login z JWT access token
 - [x] Dodać protected route / JWT guard
+- [x] Dodać DTO validation i obsługę konfliktów email/username
 - [ ] Rozstrzygnąć refresh token: backlog albo prosty flow
 
 ## Faza 0 — Organizacja repo i workflow
@@ -47,6 +48,8 @@ Przygotować repo pod spokojną sesję kodowania w VSCode/Cline i ustabilizować
 - [x] Minimalny `UsersModule` korzysta z `PrismaService`
 - [x] Register tworzy użytkownika i nie zwraca `passwordHash`
 - [x] Login zwraca access token
+- [x] Register/login mają walidację DTO
+- [x] Duplicate email/username zwraca czytelne `409 Conflict`
 - [ ] Refresh token ma jasną implementację albo jest odłożony do backlogu
 - [ ] Google OAuth jest poprawnie zaimplementowany albo wyłączony do czasu podstawowego JWT
 

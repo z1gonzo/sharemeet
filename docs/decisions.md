@@ -94,6 +94,28 @@ Po resecie auth/users potrzebny jest pierwszy stabilny fundament danych. Users/a
 
 ---
 
+## 2026-06-27 — class-validator/class-transformer dla kontraktów HTTP
+
+Status: accepted
+
+### Kontekst
+
+Po dodaniu register/login/me backend potrzebuje jawnej walidacji wejścia HTTP. Bez tego kontrolery przyjmowały dowolne payloady, a błędy trafiały głębiej do serwisów lub bazy.
+
+### Decyzja
+
+- Używamy `class-validator` i `class-transformer` dla DTO NestJS.
+- Globalna konfiguracja aplikacji używa `ValidationPipe` z `whitelist`, `forbidNonWhitelisted` i `transform`.
+- Testy e2e używają tej samej konfiguracji przez `configureApp`.
+
+### Konsekwencje
+
+- Nieznane pola w payloadzie są odrzucane.
+- Register/login zwracają `400 Bad Request` dla niepoprawnych danych.
+- DTO stają się publicznym kontraktem HTTP.
+
+---
+
 ## 2026-06-27 — Reset eksperymentalnego auth/users i PostgreSQL + Prisma dla MVP
 
 Status: accepted

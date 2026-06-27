@@ -1,10 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { ConflictException, INestApplication } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { compare, hash } from 'bcryptjs';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
+import { configureApp } from './../src/app.config';
 import { CreateUserDto } from './../src/users/dto/create-user.dto';
 import { UsersService } from './../src/users/users.service';
 
@@ -63,6 +64,7 @@ describe('AuthController (e2e)', () => {
       .compile();
 
     app = moduleFixture.createNestApplication();
+    configureApp(app);
     await app.init();
   });
 
@@ -105,6 +107,40 @@ describe('AuthController (e2e)', () => {
     expect(response.body).not.toHaveProperty('passwordHash');
   });
 
+  it('POST /auth/register rejects invalid input', async () => {
+    await request(app.getHttpServer())
+      .post('/auth/register')
+      .send({
+        email: 'not-an-email',
+        username: 'no spaces',
+        password: 'short',
+        unexpectedField: 'should be rejected',
+      })
+      .expect(400);
+
+    expect(usersService.createUser).not.toHaveBeenCalled();
+  });
+
+  it('POST /auth/register returns 409 for duplicate email or username', async () => {
+    usersService.createUser.mockRejectedValue(
+      new ConflictException('Email is already registered'),
+    );
+
+    const response = await request(app.getHttpServer())
+      .post('/auth/register')
+      .send({
+        email: 'lukasz@example.com',
+        username: 'z1gonzo',
+        password: 'plain-password',
+        displayName: 'Łukasz',
+      })
+      .expect(409);
+
+    expect(response.body).toMatchObject({
+      message: 'Email is already registered',
+    });
+  });
+
   it('POST /auth/login returns an access token for valid credentials', async () => {
     usersService.findByEmail.mockResolvedValue({
       ...existingUser,
@@ -129,6 +165,18 @@ describe('AuthController (e2e)', () => {
       },
     });
     expect(JSON.stringify(response.body)).not.toContain('passwordHash');
+  });
+
+  it('POST /auth/login rejects invalid input', async () => {
+    await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({
+        email: 'not-an-email',
+        password: 'short',
+      })
+      .expect(400);
+
+    expect(usersService.findByEmail).not.toHaveBeenCalled();
   });
 
   it('POST /auth/login rejects invalid credentials', async () => {

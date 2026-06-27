@@ -1,3 +1,5 @@
+import { ConflictException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from './users.service';
@@ -98,5 +100,41 @@ describe('UsersService', () => {
     await expect(
       service.findById('8b2777e0-0f29-4c73-8708-9c27f98d34aa'),
     ).resolves.toEqual(user);
+  });
+
+  it('returns a friendly conflict when email is already registered', async () => {
+    prisma.user.create.mockRejectedValue(
+      new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+        code: 'P2002',
+        clientVersion: '6.19.3',
+        meta: { target: ['email'] },
+      }),
+    );
+
+    await expect(
+      service.createUser({
+        email: 'lukasz@example.com',
+        username: 'z1gonzo',
+        passwordHash: 'hashed-password',
+      }),
+    ).rejects.toThrow(new ConflictException('Email is already registered'));
+  });
+
+  it('returns a friendly conflict when username is already taken', async () => {
+    prisma.user.create.mockRejectedValue(
+      new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+        code: 'P2002',
+        clientVersion: '6.19.3',
+        meta: { target: ['username'] },
+      }),
+    );
+
+    await expect(
+      service.createUser({
+        email: 'lukasz@example.com',
+        username: 'z1gonzo',
+        passwordHash: 'hashed-password',
+      }),
+    ).rejects.toThrow(new ConflictException('Username is already taken'));
   });
 });

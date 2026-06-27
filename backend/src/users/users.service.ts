@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 
@@ -6,8 +7,16 @@ import { CreateUserDto } from './dto/create-user.dto';
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  createUser(data: CreateUserDto) {
-    return this.prisma.user.create({ data });
+  async createUser(data: CreateUserDto) {
+    try {
+      return await this.prisma.user.create({ data });
+    } catch (error) {
+      if (this.isUniqueConstraintError(error)) {
+        throw new ConflictException(this.getUniqueConstraintMessage(error));
+      }
+
+      throw error;
+    }
   }
 
   findByEmail(email: string) {
@@ -16,5 +25,30 @@ export class UsersService {
 
   findById(id: string) {
     return this.prisma.user.findUnique({ where: { id } });
+  }
+
+  private isUniqueConstraintError(
+    error: unknown,
+  ): error is Prisma.PrismaClientKnownRequestError {
+    return (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2002'
+    );
+  }
+
+  private getUniqueConstraintMessage(
+    error: Prisma.PrismaClientKnownRequestError,
+  ) {
+    const target = error.meta?.target;
+
+    if (Array.isArray(target) && target.includes('email')) {
+      return 'Email is already registered';
+    }
+
+    if (Array.isArray(target) && target.includes('username')) {
+      return 'Username is already taken';
+    }
+
+    return 'User with these details already exists';
   }
 }
