@@ -7,8 +7,8 @@
 - Etap: Milestone 1 — Auth Foundation
 - Ostatnia sesja: 2026-06-27
 - Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
-- Główne ryzyko: auth/users jest dopiero odbudowywane; aktualnie mamy fundament Prisma + `UsersService`, ale bez endpointów register/login
-- Następny krok: dodać `AuthModule` z email/password register, a JWT login zostawić jako kolejny mały krok
+- Główne ryzyko: auth/users jest dopiero odbudowywane; rejestracja działa, ale login/JWT jeszcze nie
+- Następny krok: dodać `AuthService.login`, `POST /auth/login` i JWT access token
 
 ## Organizacja projektu
 
@@ -27,9 +27,10 @@
 - Istnieje i została zastosowana migracja `init_user` tworząca tabelę `users`.
 - `PrismaModule` i `PrismaService` są dodane do backendu.
 - Minimalny `UsersModule` i `UsersService` obsługują tworzenie użytkownika oraz wyszukiwanie po email/id.
+- `AuthModule` obsługuje `POST /auth/register`, hashuje hasło i nie zwraca `passwordHash` w odpowiedzi.
 - PostgreSQL z Docker Compose działa lokalnie na porcie hosta `5433`.
 - `npm run build` w `backend/` przechodzi.
-- `npm test` i `npm run test:e2e` w `backend/` przechodzą: 3 test suites, 5 testów łącznie.
+- `npm test` i `npm run test:e2e` w `backend/` przechodzą: 5 test suites, 7 testów łącznie.
 - Istnieje devlog opisujący plan PostgreSQL + MongoDB: `devlog/01_db-choice.md`.
 - Repo ma standardowe pliki workflow dla pracy Hermes ↔ VSCode/Cline/Codex.
 
@@ -37,11 +38,20 @@
 
 Zweryfikowane przez `npm run build && npm test && npm run test:e2e` w `backend/` na 2026-06-27:
 
-- Auth endpointy nie są obecnie zaimplementowane — poprzedni eksperymentalny kod został usunięty zamiast naprawiany.
-- Brakuje `AuthModule`, register/login/JWT.
-- Brakuje smoke testu dla auth/users.
+- Login/JWT nie jest jeszcze zaimplementowany.
+- Brakuje protected route / JWT guard.
+- Brakuje smoke testu dla login/JWT.
 
 ## Ostatnio wykonane
+
+Data: 2026-06-27 — Auth register foundation
+
+- Dodano `AuthModule`, `AuthService`, `AuthController` i `RegisterDto`.
+- Dodano `POST /auth/register`.
+- Dodano `bcryptjs` do hashowania haseł w `AuthService`.
+- Dodano test jednostkowy rejestracji i test e2e dla endpointu register.
+- Zweryfikowano lokalnie przez uruchomienie aplikacji na porcie `3001`, wykonanie `POST /auth/register`, sprawdzenie w PostgreSQL że hasło jest zapisane jako hash, a potem usunięcie testowego użytkownika.
+- Uruchomiono `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test` i `npm run test:e2e` w `backend/` — wszystko przechodzi.
 
 Data: 2026-06-27 — UsersService foundation
 
@@ -87,7 +97,8 @@ Data: 2026-06-22
 - [x] Dodać Prisma i skonfigurować połączenie z PostgreSQL.
 - [x] Dodać model `User` i pierwszą migrację.
 - [x] Odbudować minimalne `UsersModule` i `UsersService`.
-- [ ] Dodać `AuthModule` z register/login + JWT access token.
+- [x] Dodać `AuthModule` z register.
+- [ ] Dodać login + JWT access token.
 - [ ] Dodać minimalny smoke test auth/users.
 
 ## Decyzje techniczne
@@ -98,7 +109,7 @@ Data: 2026-06-22
 | 2026-06-22 | Wprowadzamy `plan.md` + `project_state.md` + `AGENTS.md` | Jeden wspólny stan dla Hermesa, VSCode/Cline/Codex i człowieka |
 | 2026-06-22 | Devlog zostaje w głównym repo jako `devlog/` | Proces nauki powinien być widoczny obok kodu i decyzji |
 | 2026-06-27 | Resetujemy eksperymentalny auth/users i odbudowujemy na PostgreSQL + Prisma | Czysty start jest tańszy i bardziej edukacyjny niż naprawianie niespójnego kodu |
-| 2026-06-27 | Dodajemy minimalny `UsersService` na Prisma | Rozdzielamy odpowiedzialność: users zapis/odczyt, auth rejestracja/logowanie/tokeny |
+| 2026-06-27 | Dodajemy `POST /auth/register` z hashowaniem hasła | Auth odpowiada za hashowanie i publiczną rejestrację; UsersService tylko zapisuje/odczytuje użytkowników |
 
 ## Otwarte pytania
 

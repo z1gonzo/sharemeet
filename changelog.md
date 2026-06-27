@@ -2,6 +2,15 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-06-27 — Auth register foundation
+
+- Dodano `AuthModule`, `AuthService`, `AuthController` i `RegisterDto`.
+- Dodano `POST /auth/register`.
+- Dodano `bcryptjs` do hashowania haseł.
+- Dodano test jednostkowy dla `AuthService.register` i test e2e dla `POST /auth/register`.
+- Zweryfikowano realny endpoint lokalnie na porcie `3001`; testowy użytkownik został usunięty z bazy po sprawdzeniu.
+- Zweryfikowano `backend`: `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test`, `npm run test:e2e` przechodzą.
+
 ## 2026-06-27 — UsersService foundation
 
 - Dodano minimalny `UsersModule` i `UsersService` korzystający z `PrismaService`.

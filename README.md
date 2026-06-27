@@ -69,7 +69,7 @@ npm run build
 npm run start:dev
 ```
 
-> Current state: backend is build-green with a clean NestJS skeleton, Prisma 6, PostgreSQL on local port `5433`, the first `User` model/migration, and a minimal `UsersService`. `npm run build`, `npm test` and `npm run test:e2e` pass. Next step: add `AuthModule` with email/password register. See `project_state.md`.
+> Current state: backend is build-green with Prisma 6, PostgreSQL on local port `5433`, `UsersService`, and `POST /auth/register` with password hashing. `npm run build`, `npm test` and `npm run test:e2e` pass. Next step: add login with JWT access token. See `project_state.md`.
 
 ## AI-assisted workflow
 

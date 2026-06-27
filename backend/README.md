@@ -12,8 +12,9 @@ Current foundation:
 - PostgreSQL configured through Docker Compose on host port `5433`,
 - Prisma 6 configured as the data access layer,
 - first `User` model and migration exist,
-- auth/users endpoints are not rebuilt yet.
 - `UsersService` currently provides `createUser`, `findByEmail` and `findById`.
+- `AuthModule` currently provides `POST /auth/register`.
+- Login/JWT are not implemented yet.
 
 Before adding new features, read:
 
@@ -69,7 +70,7 @@ postgresql://sharemeet:<local-password>@localhost:5433/sharemeet_db?schema=publi
 
 ## Next coding task
 
-1. Add `AuthModule` with a small register flow.
-2. Hash passwords in `AuthService`, not in `UsersService`.
-3. Add `POST /auth/register` and a behavior test for registration.
-4. Add JWT login as the next separate step.
+1. Add `AuthService.login`.
+2. Add `@nestjs/jwt` and JWT access-token signing.
+3. Add `POST /auth/login`.
+4. Add tests proving valid credentials return an access token and invalid credentials fail safely.
