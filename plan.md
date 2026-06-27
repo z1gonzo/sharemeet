@@ -25,7 +25,8 @@ Przygotować repo pod spokojną sesję kodowania w VSCode/Cline i ustabilizować
 - [x] Dodać `AuthModule` z email/password registration
 - [x] Dodać minimalne testy i e2e smoke test dla auth/register
 - [x] Dodać login z JWT access token
-- [ ] Dodać protected route / JWT guard
+- [x] Dodać protected route / JWT guard
+- [ ] Rozstrzygnąć refresh token: backlog albo prosty flow
 
 ## Faza 0 — Organizacja repo i workflow
 

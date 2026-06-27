@@ -2,6 +2,15 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-06-27 — Auth me/JWT guard foundation
+
+- Dodano `JwtAuthGuard`.
+- Dodano chronione `GET /auth/me`.
+- Dodano `AuthService.getCurrentUser`.
+- Dodano testy jednostkowe i e2e dla braku tokena, błędnego tokena i poprawnego tokena.
+- Zweryfikowano realny flow `register → login → me` lokalnie na porcie `3001`; testowy użytkownik został usunięty z bazy.
+- Zweryfikowano `backend`: `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test`, `npm run test:e2e` przechodzą.
+
 ## 2026-06-27 — Auth login/JWT foundation
 
 - Dodano `@nestjs/jwt`.

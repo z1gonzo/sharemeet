@@ -13,9 +13,9 @@ Current foundation:
 - Prisma 6 configured as the data access layer,
 - first `User` model and migration exist,
 - `UsersService` currently provides `createUser`, `findByEmail` and `findById`.
-- `AuthModule` currently provides `POST /auth/register` and `POST /auth/login`.
+- `AuthModule` currently provides `POST /auth/register`, `POST /auth/login` and `GET /auth/me`.
 - Login returns a JWT access token.
-- Protected routes/JWT guard are not implemented yet.
+- `GET /auth/me` is protected by `JwtAuthGuard`.
 
 Before adding new features, read:
 
@@ -71,7 +71,7 @@ postgresql://sharemeet:<local-password>@localhost:5433/sharemeet_db?schema=publi
 
 ## Next coding task
 
-1. Add JWT strategy/guard or a simple token verification guard.
-2. Add `GET /auth/me`.
-3. Add tests proving missing/invalid token returns 401.
-4. Add tests proving valid token returns the public user.
+1. Decide whether refresh tokens are in Milestone 1 or moved to backlog.
+2. Add DTO validation for register/login.
+3. Add friendly conflict handling for duplicate email/username.
+4. Keep `npm run lint && npm run build && npm test && npm run test:e2e` green.

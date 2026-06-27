@@ -26,6 +26,7 @@ describe('AuthService', () => {
   let usersService: {
     createUser: jest.Mock<Promise<CreatedUser>, [CreateUserDto]>;
     findByEmail: jest.Mock<Promise<CreatedUser | null>, [string]>;
+    findById: jest.Mock<Promise<CreatedUser | null>, [string]>;
   };
   let jwtService: {
     signAsync: jest.Mock<Promise<string>, [Record<string, string>]>;
@@ -35,6 +36,7 @@ describe('AuthService', () => {
     usersService = {
       createUser: jest.fn<Promise<CreatedUser>, [CreateUserDto]>(),
       findByEmail: jest.fn<Promise<CreatedUser | null>, [string]>(),
+      findById: jest.fn<Promise<CreatedUser | null>, [string]>(),
     };
     jwtService = {
       signAsync: jest.fn<Promise<string>, [Record<string, string>]>(),
@@ -138,5 +140,33 @@ describe('AuthService', () => {
       }),
     ).rejects.toThrow('Invalid email or password');
     expect(jwtService.signAsync).not.toHaveBeenCalled();
+  });
+
+  it('returns the current public user from a valid JWT payload', async () => {
+    usersService.findById.mockResolvedValue(existingUser);
+
+    await expect(
+      service.getCurrentUser({
+        sub: '8b2777e0-0f29-4c73-8708-9c27f98d34aa',
+        email: 'lukasz@example.com',
+        username: 'z1gonzo',
+      }),
+    ).resolves.toMatchObject({
+      id: '8b2777e0-0f29-4c73-8708-9c27f98d34aa',
+      email: 'lukasz@example.com',
+      username: 'z1gonzo',
+    });
+  });
+
+  it('rejects current-user lookup when the JWT subject no longer exists', async () => {
+    usersService.findById.mockResolvedValue(null);
+
+    await expect(
+      service.getCurrentUser({
+        sub: 'missing-user-id',
+        email: 'missing@example.com',
+        username: 'missing',
+      }),
+    ).rejects.toThrow('User no longer exists');
   });
 });

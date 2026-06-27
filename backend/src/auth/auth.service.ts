@@ -4,6 +4,7 @@ import { compare, hash } from 'bcryptjs';
 import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { JwtPayload } from './jwt-auth.guard';
 
 type UserRecord = Awaited<ReturnType<UsersService['createUser']>>;
 
@@ -45,6 +46,16 @@ export class AuthService {
       accessToken: await this.signAccessToken(user),
       user: publicUser,
     };
+  }
+
+  async getCurrentUser(payload: JwtPayload): Promise<PublicUser> {
+    const user = await this.usersService.findById(payload.sub);
+
+    if (!user) {
+      throw new UnauthorizedException('User no longer exists');
+    }
+
+    return this.toPublicUser(user);
   }
 
   private async signAccessToken(user: UserRecord): Promise<string> {

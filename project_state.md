@@ -7,8 +7,8 @@
 - Etap: Milestone 1 — Auth Foundation
 - Ostatnia sesja: 2026-06-27
 - Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
-- Główne ryzyko: auth/users jest dopiero odbudowywane; register/login działają, ale protected route/JWT guard jeszcze nie
-- Następny krok: dodać protected route / JWT guard, np. `GET /auth/me`
+- Główne ryzyko: auth foundation działa w minimalnym zakresie, ale refresh token i walidacja DTO nie są jeszcze rozstrzygnięte
+- Następny krok: zdecydować refresh token vs backlog, potem dodać DTO validation i obsługę konfliktów email/username
 
 ## Organizacja projektu
 
@@ -29,9 +29,10 @@
 - Minimalny `UsersModule` i `UsersService` obsługują tworzenie użytkownika oraz wyszukiwanie po email/id.
 - `AuthModule` obsługuje `POST /auth/register`, hashuje hasło i nie zwraca `passwordHash` w odpowiedzi.
 - `AuthModule` obsługuje `POST /auth/login`, porównuje hasło i zwraca JWT access token.
+- `AuthModule` obsługuje chronione `GET /auth/me` przez `JwtAuthGuard`.
 - PostgreSQL z Docker Compose działa lokalnie na porcie hosta `5433`.
 - `npm run build` w `backend/` przechodzi.
-- `npm test` i `npm run test:e2e` w `backend/` przechodzą: 5 test suites, 7 testów łącznie.
+- `npm test` i `npm run test:e2e` w `backend/` przechodzą: 5 test suites, 16 testów łącznie.
 - Istnieje devlog opisujący plan PostgreSQL + MongoDB: `devlog/01_db-choice.md`.
 - Repo ma standardowe pliki workflow dla pracy Hermes ↔ VSCode/Cline/Codex.
 
@@ -39,11 +40,20 @@
 
 Zweryfikowane przez `npm run build && npm test && npm run test:e2e` w `backend/` na 2026-06-27:
 
-- Protected route / JWT guard nie jest jeszcze zaimplementowany.
-- Brakuje `GET /auth/me`.
-- Brakuje smoke testu dla login/JWT.
+- Refresh token nie jest jeszcze zaimplementowany ani formalnie przesunięty do backlogu.
+- Brakuje walidacji DTO dla register/login.
+- Brakuje przyjaznej obsługi konfliktów unikalności email/username.
 
 ## Ostatnio wykonane
+
+Data: 2026-06-27 — Auth me/JWT guard foundation
+
+- Dodano `JwtAuthGuard`.
+- Dodano chronione `GET /auth/me`.
+- Dodano `AuthService.getCurrentUser`.
+- Dodano testy jednostkowe i e2e: brak tokena → `401`, błędny token → `401`, poprawny token → publiczny użytkownik bez `passwordHash`.
+- Zweryfikowano lokalnie pełny flow `register → login → me` na porcie `3001`; testowy użytkownik został usunięty z bazy.
+- Uruchomiono `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test` i `npm run test:e2e` w `backend/` — wszystko przechodzi.
 
 Data: 2026-06-27 — Auth login/JWT foundation
 
@@ -110,8 +120,10 @@ Data: 2026-06-22
 - [x] Odbudować minimalne `UsersModule` i `UsersService`.
 - [x] Dodać `AuthModule` z register.
 - [x] Dodać login + JWT access token.
-- [ ] Dodać protected route / JWT guard.
-- [ ] Dodać minimalny smoke test auth/users.
+- [x] Dodać protected route / JWT guard.
+- [x] Dodać minimalny smoke test auth/users.
+- [ ] Rozstrzygnąć refresh token: backlog albo prosty flow.
+- [ ] Dodać DTO validation i obsługę konfliktów email/username.
 
 ## Decyzje techniczne
 
@@ -121,7 +133,7 @@ Data: 2026-06-22
 | 2026-06-22 | Wprowadzamy `plan.md` + `project_state.md` + `AGENTS.md` | Jeden wspólny stan dla Hermesa, VSCode/Cline/Codex i człowieka |
 | 2026-06-22 | Devlog zostaje w głównym repo jako `devlog/` | Proces nauki powinien być widoczny obok kodu i decyzji |
 | 2026-06-27 | Resetujemy eksperymentalny auth/users i odbudowujemy na PostgreSQL + Prisma | Czysty start jest tańszy i bardziej edukacyjny niż naprawianie niespójnego kodu |
-| 2026-06-27 | Dodajemy login z JWT access token | Po działającej rejestracji potwierdzamy podstawowy flow email/password przed refresh tokenem i guardami |
+| 2026-06-27 | Dodajemy protected `GET /auth/me` przez `JwtAuthGuard` | Domykamy minimalny flow `register → login → token → me` przed decyzją o refresh tokenie |
 
 ## Otwarte pytania
 

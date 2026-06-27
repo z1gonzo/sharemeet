@@ -10,6 +10,12 @@ import { UsersService } from './../src/users/users.service';
 
 type CreatedUser = Awaited<ReturnType<UsersService['createUser']>>;
 
+interface JwtPayload {
+  sub: string;
+  email: string;
+  username: string;
+}
+
 const existingUser: CreatedUser = {
   id: '8b2777e0-0f29-4c73-8708-9c27f98d34aa',
   email: 'lukasz@example.com',
@@ -29,18 +35,22 @@ describe('AuthController (e2e)', () => {
   let usersService: {
     createUser: jest.Mock<Promise<CreatedUser>, [CreateUserDto]>;
     findByEmail: jest.Mock<Promise<CreatedUser | null>, [string]>;
+    findById: jest.Mock<Promise<CreatedUser | null>, [string]>;
   };
   let jwtService: {
     signAsync: jest.Mock<Promise<string>, [Record<string, string>]>;
+    verifyAsync: jest.Mock<Promise<JwtPayload>, [string]>;
   };
 
   beforeEach(async () => {
     usersService = {
       createUser: jest.fn<Promise<CreatedUser>, [CreateUserDto]>(),
       findByEmail: jest.fn<Promise<CreatedUser | null>, [string]>(),
+      findById: jest.fn<Promise<CreatedUser | null>, [string]>(),
     };
     jwtService = {
       signAsync: jest.fn<Promise<string>, [Record<string, string>]>(),
+      verifyAsync: jest.fn<Promise<JwtPayload>, [string]>(),
     };
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -133,6 +143,41 @@ describe('AuthController (e2e)', () => {
         email: 'lukasz@example.com',
         password: 'wrong-password',
       })
+      .expect(401);
+  });
+
+  it('GET /auth/me rejects requests without a bearer token', async () => {
+    await request(app.getHttpServer()).get('/auth/me').expect(401);
+  });
+
+  it('GET /auth/me returns the current public user for a valid bearer token', async () => {
+    jwtService.verifyAsync.mockResolvedValue({
+      sub: '8b2777e0-0f29-4c73-8708-9c27f98d34aa',
+      email: 'lukasz@example.com',
+      username: 'z1gonzo',
+    });
+    usersService.findById.mockResolvedValue(existingUser);
+
+    const response = await request(app.getHttpServer())
+      .get('/auth/me')
+      .set('authorization', 'Bearer signed-access-token')
+      .expect(200);
+
+    expect(jwtService.verifyAsync).toHaveBeenCalledWith('signed-access-token');
+    expect(response.body).toMatchObject({
+      id: '8b2777e0-0f29-4c73-8708-9c27f98d34aa',
+      email: 'lukasz@example.com',
+      username: 'z1gonzo',
+    });
+    expect(response.body).not.toHaveProperty('passwordHash');
+  });
+
+  it('GET /auth/me rejects requests with an invalid bearer token', async () => {
+    jwtService.verifyAsync.mockRejectedValue(new Error('invalid token'));
+
+    await request(app.getHttpServer())
+      .get('/auth/me')
+      .set('authorization', 'Bearer invalid-token')
       .expect(401);
   });
 });

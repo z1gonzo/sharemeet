@@ -69,7 +69,7 @@ npm run build
 npm run start:dev
 ```
 
-> Current state: backend is build-green with Prisma 6, PostgreSQL on local port `5433`, `UsersService`, `POST /auth/register`, and `POST /auth/login` returning JWT access tokens. `npm run build`, `npm test` and `npm run test:e2e` pass. Next step: add protected route/JWT guard. See `project_state.md`.
+> Current state: backend is build-green with Prisma 6, PostgreSQL on local port `5433`, `UsersService`, `POST /auth/register`, `POST /auth/login`, and protected `GET /auth/me`. `npm run build`, `npm test` and `npm run test:e2e` pass. Next step: decide refresh token vs backlog, then DTO validation/conflict handling. See `project_state.md`.
 
 ## AI-assisted workflow
 
