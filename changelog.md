@@ -2,6 +2,13 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-06-27 — Lightweight profile content policy
+
+- Dodano `docs/profile-content-policy.md`.
+- Ustalono, że publiczny `avatarUrl` zostaje i nie blokujemy MVP automatyczną moderacją avatarów.
+- Przyszłe reportowanie profilu/avatarów zapisano jako backlog, nie bieżący zakres.
+- Rekomendowany późniejszy fallback: report → ręczny review → usunięcie avatara/placeholder.
+
 ## 2026-06-27 — Public profile foundation
 
 - Dodano `UsersService.findByUsername`.

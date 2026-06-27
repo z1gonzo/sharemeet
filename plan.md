@@ -69,7 +69,7 @@ Przygotować repo pod spokojną sesję kodowania w VSCode/Cline i ustabilizować
   - [x] Dodać walidację DTO profilu
   - [x] Dodać testy e2e profilu
   - [x] Dodać publiczny odczyt profilu, np. `GET /users/:username`
-  - [ ] Zaplanować moderację avatarów / politykę treści profilu
+  - [x] Zapisać lekką politykę avatarów / przyszłego reportowania profilu
 - [ ] Posty tekstowe
 - [ ] Relacje/friends/follows
 - [ ] Podstawowy frontend — odłożony na później

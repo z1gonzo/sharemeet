@@ -69,7 +69,7 @@ npm run build
 npm run start:dev
 ```
 
-> Current state: backend is build-green with Prisma 6, PostgreSQL on local port `5433`, email/password JWT auth, DTO validation, protected `GET /auth/me`, protected `PATCH /users/me`, and public `GET /users/:username`. Avatar URLs are public for now; moderation/content-safety policy is the next profile risk to decide. `npm run build`, `npm test` and `npm run test:e2e` pass. See `project_state.md`.
+> Current state: backend is build-green with Prisma 6, PostgreSQL on local port `5433`, email/password JWT auth, DTO validation, protected `GET /auth/me`, protected `PATCH /users/me`, and public `GET /users/:username`. Avatar URLs are public for now; profile/avatar reporting is documented as future backlog, not current scope. `npm run build`, `npm test` and `npm run test:e2e` pass. See `project_state.md`.
 
 ## AI-assisted workflow
 

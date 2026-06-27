@@ -74,6 +74,6 @@ postgresql://sharemeet:<local-password>@localhost:5433/sharemeet_db?schema=publi
 
 ## Next coding task
 
-1. Decide avatar moderation/content-safety policy.
-2. Start text posts or add a short profile policy doc.
+1. Start text posts.
+2. Keep profile/avatar reporting as backlog unless abuse becomes a real concern.
 3. Keep `npm run lint && npm run build && npm test && npm run test:e2e` green.

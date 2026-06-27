@@ -13,7 +13,7 @@ Projekt ma być edukacyjny: architektura powinna być jasna, opisana i rozwijana
 | `backend/` | API, auth, users, logika biznesowa | NestJS + Prisma 6 + auth + public/private profile basics |
 | `frontend/` | UI użytkownika | TODO |
 | `db/` | Docker Compose dla PostgreSQL i MongoDB | PostgreSQL działa lokalnie na porcie hosta `5433`; MongoDB na później |
-| `docs/` | architektura, decyzje techniczne i krótkie referencje API | auth API opisane w `docs/auth-api.md` |
+| `docs/` | architektura, decyzje techniczne i krótkie referencje API | auth API i lekka polityka profilu opisane w `docs/` |
 | `devlog/` | dokumentacja nauki i uzasadnień | część głównego repo |
 
 ## Plan baz danych

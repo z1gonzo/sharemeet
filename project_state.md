@@ -7,8 +7,8 @@
 - Etap: Faza 2 — Core Social MVP / Profil użytkownika
 - Ostatnia sesja: 2026-06-27
 - Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
-- Główne ryzyko: avatary są na razie publicznym URL-em bez moderacji treści
-- Następny krok: zaplanować moderację avatarów/content-safety albo przejść do postów tekstowych
+- Główne ryzyko: avatary są na razie publicznym URL-em bez automatycznej moderacji, ale jest lekka polityka i backlog reportowania
+- Następny krok: przejść do postów tekstowych albo dodać minimalne profile reports później
 
 ## Organizacja projektu
 
@@ -36,7 +36,7 @@
 - Istnieje dokumentacja auth API: `docs/auth-api.md`.
 - `UsersModule` obsługuje chronione `PATCH /users/me` dla aktualizacji profilu.
 - `UsersModule` obsługuje publiczne `GET /users/:username` bez ujawniania email/passwordHash/isActive.
-- Avatar URL jest publiczny na razie, ale moderacja avatarów/content-safety jest otwartym ryzykiem.
+- Avatar URL jest publiczny na razie; automatyczna moderacja jest odłożona, a przyszłe reportowanie profilu/avatarów opisuje `docs/profile-content-policy.md`.
 - PostgreSQL z Docker Compose działa lokalnie na porcie hosta `5433`.
 - `npm run build` w `backend/` przechodzi.
 - `npm test` i `npm run test:e2e` w `backend/` przechodzą: 6 test suites, 28 testów łącznie.
@@ -47,11 +47,18 @@
 
 Zweryfikowane przez `npm run build && npm test && npm run test:e2e` w `backend/` na 2026-06-27:
 
-- Brakuje moderacji avatarów — aktualnie `avatarUrl` jest zwykłym publicznym URL-em.
-- Brakuje decyzji, czy później avatar upload idzie przez własny storage + moderation status.
 - Brakuje postów tekstowych.
+- Brakuje relacji/friends/follows.
+- Reportowanie profilu/avatarów jest świadomie w backlogu, nie w bieżącym zakresie.
 
 ## Ostatnio wykonane
+
+Data: 2026-06-27 — Lightweight profile content policy
+
+- Dodano `docs/profile-content-policy.md`.
+- Ustalono, że `avatarUrl` zostaje publiczny i nie blokujemy teraz profilu automatyczną moderacją.
+- Zapisano przyszły kierunek: reportowanie profilu/avatarów, ręczny review i placeholder po odrzuceniu.
+- Moderacja uploadowanych avatarów zostaje na później, gdy ShareMeet będzie hostował obrazy.
 
 Data: 2026-06-27 — Public profile foundation
 
@@ -167,7 +174,7 @@ Data: 2026-06-22
 - [x] Przygotować krótką dokumentację endpointów auth.
 - [x] Dodać protected `PATCH /users/me` dla profilu.
 - [x] Dodać publiczny odczyt profilu, np. `GET /users/:username`.
-- [ ] Zaplanować moderację avatarów / politykę treści profilu.
+- [x] Zapisać lekką politykę avatarów / przyszłego reportowania profilu.
 - [ ] Dodać posty tekstowe.
 
 ## Decyzje techniczne
@@ -178,12 +185,11 @@ Data: 2026-06-22
 | 2026-06-22 | Wprowadzamy `plan.md` + `project_state.md` + `AGENTS.md` | Jeden wspólny stan dla Hermesa, VSCode/Cline/Codex i człowieka |
 | 2026-06-22 | Devlog zostaje w głównym repo jako `devlog/` | Proces nauki powinien być widoczny obok kodu i decyzji |
 | 2026-06-27 | Resetujemy eksperymentalny auth/users i odbudowujemy na PostgreSQL + Prisma | Czysty start jest tańszy i bardziej edukacyjny niż naprawianie niespójnego kodu |
-| 2026-06-27 | Publiczne `GET /users/:username` | Profil publiczny pokazuje avatar/bio/display name, ale nie email ani pola auth; moderacja avatarów zostaje jako jawne ryzyko |
+| 2026-06-27 | Lekką politykę avatarów odkładamy do backlogu reportowania | Nie blokujemy MVP automatyczną moderacją; publiczny `avatarUrl` zostaje, a nadużycia obsłużymy później przez report/review/placeholder |
 
 ## Otwarte pytania
 
-- Jaką przyjmujemy politykę avatarów: allowlista URL, własny upload + moderation status, czy tymczasowy placeholder po zgłoszeniu?
-- Czy avatar moderation robimy przed postami, czy zapisujemy jako backlog do momentu uploadu plików?
+- Czy posty tekstowe zaczynamy od `POST /posts` + `GET /posts/:id`, czy od listy postów użytkownika?
 
 ## Instrukcja dla agenta
 
