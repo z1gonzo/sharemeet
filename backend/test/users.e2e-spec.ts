@@ -34,6 +34,7 @@ describe('UsersController (e2e)', () => {
   let app: INestApplication<App>;
   let usersService: {
     updateProfile: jest.Mock<Promise<UserRecord>, [string, UpdateProfileDto]>;
+    findByUsername: jest.Mock<Promise<UserRecord | null>, [string]>;
   };
   let jwtService: {
     verifyAsync: jest.Mock<Promise<JwtPayload>, [string]>;
@@ -42,6 +43,7 @@ describe('UsersController (e2e)', () => {
   beforeEach(async () => {
     usersService = {
       updateProfile: jest.fn<Promise<UserRecord>, [string, UpdateProfileDto]>(),
+      findByUsername: jest.fn<Promise<UserRecord | null>, [string]>(),
     };
     jwtService = {
       verifyAsync: jest.fn<Promise<JwtPayload>, [string]>(),
@@ -63,6 +65,40 @@ describe('UsersController (e2e)', () => {
 
   afterEach(async () => {
     await app.close();
+  });
+
+  it('GET /users/:username returns a public profile without private auth fields', async () => {
+    usersService.findByUsername.mockResolvedValue({
+      ...existingUser,
+      bio: 'Building ShareMeet',
+      avatarUrl: 'https://example.com/avatar.png',
+      isPrivate: true,
+    });
+
+    const response = await request(app.getHttpServer())
+      .get('/users/z1gonzo')
+      .expect(200);
+
+    expect(usersService.findByUsername).toHaveBeenCalledWith('z1gonzo');
+    expect(response.body).toMatchObject({
+      id: '8b2777e0-0f29-4c73-8708-9c27f98d34aa',
+      username: 'z1gonzo',
+      displayName: 'Łukasz',
+      bio: 'Building ShareMeet',
+      avatarUrl: 'https://example.com/avatar.png',
+      isPrivate: true,
+    });
+    expect(response.body).toHaveProperty('createdAt');
+    expect(response.body).not.toHaveProperty('email');
+    expect(response.body).not.toHaveProperty('passwordHash');
+    expect(response.body).not.toHaveProperty('isActive');
+    expect(response.body).not.toHaveProperty('updatedAt');
+  });
+
+  it('GET /users/:username returns 404 for missing profiles', async () => {
+    usersService.findByUsername.mockResolvedValue(null);
+
+    await request(app.getHttpServer()).get('/users/missinguser').expect(404);
   });
 
   it('PATCH /users/me updates current user profile', async () => {

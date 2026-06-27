@@ -7,8 +7,8 @@
 - Etap: Faza 2 — Core Social MVP / Profil użytkownika
 - Ostatnia sesja: 2026-06-27
 - Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
-- Główne ryzyko: publiczny model profilu nie jest jeszcze rozdzielony od prywatnego/current-user view
-- Następny krok: dodać publiczny odczyt profilu, np. `GET /users/:username`, z zasadami prywatności
+- Główne ryzyko: avatary są na razie publicznym URL-em bez moderacji treści
+- Następny krok: zaplanować moderację avatarów/content-safety albo przejść do postów tekstowych
 
 ## Organizacja projektu
 
@@ -35,9 +35,11 @@
 - Refresh token i Google OAuth są odłożone do backlogu.
 - Istnieje dokumentacja auth API: `docs/auth-api.md`.
 - `UsersModule` obsługuje chronione `PATCH /users/me` dla aktualizacji profilu.
+- `UsersModule` obsługuje publiczne `GET /users/:username` bez ujawniania email/passwordHash/isActive.
+- Avatar URL jest publiczny na razie, ale moderacja avatarów/content-safety jest otwartym ryzykiem.
 - PostgreSQL z Docker Compose działa lokalnie na porcie hosta `5433`.
 - `npm run build` w `backend/` przechodzi.
-- `npm test` i `npm run test:e2e` w `backend/` przechodzą: 6 test suites, 25 testów łącznie.
+- `npm test` i `npm run test:e2e` w `backend/` przechodzą: 6 test suites, 28 testów łącznie.
 - Istnieje devlog opisujący plan PostgreSQL + MongoDB: `devlog/01_db-choice.md`.
 - Repo ma standardowe pliki workflow dla pracy Hermes ↔ VSCode/Cline/Codex.
 
@@ -45,11 +47,23 @@
 
 Zweryfikowane przez `npm run build && npm test && npm run test:e2e` w `backend/` na 2026-06-27:
 
-- Brakuje publicznego odczytu profilu, np. `GET /users/:username`.
-- Brakuje decyzji, które pola profilu są publiczne przy kontach prywatnych.
-- Brakuje uploadu avatara — aktualnie `avatarUrl` jest zwykłym URL-em.
+- Brakuje moderacji avatarów — aktualnie `avatarUrl` jest zwykłym publicznym URL-em.
+- Brakuje decyzji, czy później avatar upload idzie przez własny storage + moderation status.
+- Brakuje postów tekstowych.
 
 ## Ostatnio wykonane
+
+Data: 2026-06-27 — Public profile foundation
+
+- Dodano `UsersService.findByUsername`.
+- Dodano publiczne `GET /users/:username`.
+- Publiczny profil zwraca `id`, `username`, `displayName`, `bio`, `avatarUrl`, `isPrivate`, `createdAt`.
+- Publiczny profil nie zwraca `email`, `passwordHash`, `isActive`, `updatedAt`.
+- Dodano `404 User profile not found` dla brakujących profili.
+- Zapisano ryzyko moderacji avatarów: `avatarUrl` jest publiczny, ale bez moderacji treści.
+- Dodano devlog `devlog/09_public-profile.md`.
+- Zweryfikowano lokalnie flow `register → login → PATCH /users/me → GET /users/:username` na porcie `3001`; testowy użytkownik został usunięty z bazy.
+- Uruchomiono `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test` i `npm run test:e2e` w `backend/` — wszystko przechodzi.
 
 Data: 2026-06-27 — User profile foundation
 
@@ -152,7 +166,9 @@ Data: 2026-06-22
 - [x] Rozstrzygnąć refresh token: backlog na razie.
 - [x] Przygotować krótką dokumentację endpointów auth.
 - [x] Dodać protected `PATCH /users/me` dla profilu.
-- [ ] Dodać publiczny odczyt profilu, np. `GET /users/:username`.
+- [x] Dodać publiczny odczyt profilu, np. `GET /users/:username`.
+- [ ] Zaplanować moderację avatarów / politykę treści profilu.
+- [ ] Dodać posty tekstowe.
 
 ## Decyzje techniczne
 
@@ -162,12 +178,12 @@ Data: 2026-06-22
 | 2026-06-22 | Wprowadzamy `plan.md` + `project_state.md` + `AGENTS.md` | Jeden wspólny stan dla Hermesa, VSCode/Cline/Codex i człowieka |
 | 2026-06-22 | Devlog zostaje w głównym repo jako `devlog/` | Proces nauki powinien być widoczny obok kodu i decyzji |
 | 2026-06-27 | Resetujemy eksperymentalny auth/users i odbudowujemy na PostgreSQL + Prisma | Czysty start jest tańszy i bardziej edukacyjny niż naprawianie niespójnego kodu |
-| 2026-06-27 | Protected `PATCH /users/me` dla profilu | Zostawiamy frontend na później i zaczynamy Core Social MVP od profilu użytkownika |
+| 2026-06-27 | Publiczne `GET /users/:username` | Profil publiczny pokazuje avatar/bio/display name, ale nie email ani pola auth; moderacja avatarów zostaje jako jawne ryzyko |
 
 ## Otwarte pytania
 
-- Czy publiczny profil ma ukrywać `bio`/`avatarUrl` dla kont prywatnych, czy tylko relacje/posty?
-- Czy avatar zostaje na razie jako zewnętrzny URL, czy w kolejnym kroku planujemy upload/media pipeline?
+- Jaką przyjmujemy politykę avatarów: allowlista URL, własny upload + moderation status, czy tymczasowy placeholder po zgłoszeniu?
+- Czy avatar moderation robimy przed postami, czy zapisujemy jako backlog do momentu uploadu plików?
 
 ## Instrukcja dla agenta
 

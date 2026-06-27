@@ -86,6 +86,33 @@ Authorization: Bearer <accessToken>
 | `200` | Zwrócono publicznego użytkownika |
 | `401` | Brak tokena albo token niepoprawny |
 
+## `GET /users/:username`
+
+Zwraca publiczny profil użytkownika. Endpoint nie wymaga tokena.
+
+### Response `200`
+
+```json
+{
+  "id": "uuid",
+  "username": "z1gonzo",
+  "displayName": "Łukasz G.",
+  "bio": "Building ShareMeet",
+  "avatarUrl": "https://example.com/avatar.png",
+  "isPrivate": true,
+  "createdAt": "2026-06-27T00:00:00.000Z"
+}
+```
+
+Publiczny profil nie zwraca `email`, `passwordHash`, `isActive` ani `updatedAt`.
+
+### Responses
+
+| Status | Znaczenie |
+|---|---|
+| `200` | Zwrócono publiczny profil |
+| `404` | Profil nie istnieje |
+
 ## `PATCH /users/me`
 
 Aktualizuje profil aktualnego użytkownika. Endpoint wymaga JWT access tokena.

@@ -28,6 +28,10 @@ export class UsersService {
     return this.prisma.user.findUnique({ where: { id } });
   }
 
+  findByUsername(username: string) {
+    return this.prisma.user.findUnique({ where: { username } });
+  }
+
   updateProfile(id: string, data: UpdateProfileDto) {
     return this.prisma.user.update({
       where: { id },

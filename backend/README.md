@@ -12,9 +12,9 @@ Current foundation:
 - PostgreSQL configured through Docker Compose on host port `5433`,
 - Prisma 6 configured as the data access layer,
 - first `User` model and migration exist,
-- `UsersService` currently provides `createUser`, `findByEmail`, `findById` and `updateProfile`.
+- `UsersService` currently provides `createUser`, `findByEmail`, `findById`, `findByUsername` and `updateProfile`.
 - `AuthModule` currently provides `POST /auth/register`, `POST /auth/login` and `GET /auth/me`.
-- `UsersModule` currently provides protected `PATCH /users/me`.
+- `UsersModule` currently provides public `GET /users/:username` and protected `PATCH /users/me`.
 - Register/login/profile DTOs are validated through a global `ValidationPipe`.
 - Duplicate email/username returns friendly `409 Conflict` responses.
 - Login returns a JWT access token.
@@ -74,6 +74,6 @@ postgresql://sharemeet:<local-password>@localhost:5433/sharemeet_db?schema=publi
 
 ## Next coding task
 
-1. Add public profile read, e.g. `GET /users/:username`.
-2. Decide public/private profile field rules.
+1. Decide avatar moderation/content-safety policy.
+2. Start text posts or add a short profile policy doc.
 3. Keep `npm run lint && npm run build && npm test && npm run test:e2e` green.

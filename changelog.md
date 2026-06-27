@@ -2,6 +2,16 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-06-27 — Public profile foundation
+
+- Dodano `UsersService.findByUsername`.
+- Dodano publiczne `GET /users/:username`.
+- Publiczny profil nie zwraca `email`, `passwordHash`, `isActive`, `updatedAt`.
+- Zapisano ryzyko moderacji avatarów: `avatarUrl` jest publiczny, ale bez moderacji treści.
+- Dodano devlog `devlog/09_public-profile.md`.
+- Zweryfikowano realny flow `register → login → PATCH /users/me → GET /users/:username` lokalnie na porcie `3001`; testowy użytkownik został usunięty z bazy.
+- Zweryfikowano `backend`: `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test`, `npm run test:e2e` przechodzą.
+
 ## 2026-06-27 — User profile foundation
 
 - Refresh token i Google OAuth przesunięto do backlogu.

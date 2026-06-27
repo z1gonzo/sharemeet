@@ -79,6 +79,16 @@ describe('UsersService', () => {
     ).resolves.toEqual(user);
   });
 
+  it('finds a user by username', async () => {
+    prisma.user.findUnique.mockResolvedValue(user);
+
+    await expect(service.findByUsername('z1gonzo')).resolves.toEqual(user);
+
+    expect(prisma.user.findUnique).toHaveBeenCalledWith({
+      where: { username: 'z1gonzo' },
+    });
+  });
+
   it('updates profile fields', async () => {
     const updatedUser = {
       ...user,
