@@ -2,6 +2,17 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-06-27 — User post list
+
+- Dodano `PostsService.findByAuthorId`.
+- Dodano publiczne `GET /users/:username/posts`.
+- Lista postów użytkownika jest sortowana od najnowszych (`createdAt desc`).
+- Dla istniejącego profilu bez postów endpoint zwraca `[]`.
+- Dla brakującego profilu endpoint zwraca `404 User profile not found`.
+- Dodano devlog `devlog/11_user-post-list.md`.
+- Zweryfikowano realny flow `register → login → POST /posts x2 → GET /users/:username/posts` lokalnie na porcie `3001`; testowy użytkownik został usunięty z bazy.
+- Zweryfikowano `backend`: `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test`, `npm run test:e2e` przechodzą.
+
 ## 2026-06-27 — Text posts foundation
 
 - Dodano model Prisma `Post` i migrację `20260627160203_add_posts`.

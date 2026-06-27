@@ -5,10 +5,12 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import { configureApp } from './../src/app.config';
 import { AppModule } from './../src/app.module';
+import { PostsService } from './../src/posts/posts.service';
 import { UpdateProfileDto } from './../src/users/dto/update-profile.dto';
 import { UsersService } from './../src/users/users.service';
 
 type UserRecord = Awaited<ReturnType<UsersService['updateProfile']>>;
+type PostRecord = Awaited<ReturnType<PostsService['createPost']>>;
 
 interface JwtPayload {
   sub: string;
@@ -30,11 +32,29 @@ const existingUser: UserRecord = {
   updatedAt: new Date('2026-06-27T00:00:00.000Z'),
 };
 
+const existingPost: PostRecord = {
+  id: '1f2557e7-96d8-46a6-95c7-b6790f595c85',
+  authorId: existingUser.id,
+  content: 'Hello ShareMeet',
+  createdAt: new Date('2026-06-27T01:00:00.000Z'),
+  updatedAt: new Date('2026-06-27T01:00:00.000Z'),
+  author: {
+    id: existingUser.id,
+    username: existingUser.username,
+    displayName: existingUser.displayName,
+    avatarUrl: existingUser.avatarUrl,
+    isPrivate: existingUser.isPrivate,
+  },
+};
+
 describe('UsersController (e2e)', () => {
   let app: INestApplication<App>;
   let usersService: {
     updateProfile: jest.Mock<Promise<UserRecord>, [string, UpdateProfileDto]>;
     findByUsername: jest.Mock<Promise<UserRecord | null>, [string]>;
+  };
+  let postsService: {
+    findByAuthorId: jest.Mock<Promise<PostRecord[]>, [string]>;
   };
   let jwtService: {
     verifyAsync: jest.Mock<Promise<JwtPayload>, [string]>;
@@ -45,6 +65,9 @@ describe('UsersController (e2e)', () => {
       updateProfile: jest.fn<Promise<UserRecord>, [string, UpdateProfileDto]>(),
       findByUsername: jest.fn<Promise<UserRecord | null>, [string]>(),
     };
+    postsService = {
+      findByAuthorId: jest.fn<Promise<PostRecord[]>, [string]>(),
+    };
     jwtService = {
       verifyAsync: jest.fn<Promise<JwtPayload>, [string]>(),
     };
@@ -54,6 +77,8 @@ describe('UsersController (e2e)', () => {
     })
       .overrideProvider(UsersService)
       .useValue(usersService)
+      .overrideProvider(PostsService)
+      .useValue(postsService)
       .overrideProvider(JwtService)
       .useValue(jwtService)
       .compile();
@@ -93,6 +118,52 @@ describe('UsersController (e2e)', () => {
     expect(response.body).not.toHaveProperty('passwordHash');
     expect(response.body).not.toHaveProperty('isActive');
     expect(response.body).not.toHaveProperty('updatedAt');
+  });
+
+  it('GET /users/:username/posts returns public posts for a profile', async () => {
+    usersService.findByUsername.mockResolvedValue(existingUser);
+    postsService.findByAuthorId.mockResolvedValue([existingPost]);
+
+    const response = await request(app.getHttpServer())
+      .get('/users/z1gonzo/posts')
+      .expect(200);
+
+    expect(usersService.findByUsername).toHaveBeenCalledWith('z1gonzo');
+    expect(postsService.findByAuthorId).toHaveBeenCalledWith(existingUser.id);
+    expect(response.body).toHaveLength(1);
+    expect(response.body).toMatchObject([
+      {
+        id: existingPost.id,
+        content: 'Hello ShareMeet',
+        author: {
+          id: existingUser.id,
+          username: 'z1gonzo',
+        },
+      },
+    ]);
+    expect(JSON.stringify(response.body)).not.toContain('email');
+    expect(JSON.stringify(response.body)).not.toContain('passwordHash');
+  });
+
+  it('GET /users/:username/posts returns an empty list for profiles without posts', async () => {
+    usersService.findByUsername.mockResolvedValue(existingUser);
+    postsService.findByAuthorId.mockResolvedValue([]);
+
+    const response = await request(app.getHttpServer())
+      .get('/users/z1gonzo/posts')
+      .expect(200);
+
+    expect(response.body).toEqual([]);
+  });
+
+  it('GET /users/:username/posts returns 404 for missing profiles', async () => {
+    usersService.findByUsername.mockResolvedValue(null);
+
+    await request(app.getHttpServer())
+      .get('/users/missinguser/posts')
+      .expect(404);
+
+    expect(postsService.findByAuthorId).not.toHaveBeenCalled();
   });
 
   it('GET /users/:username returns 404 for missing profiles', async () => {

@@ -10,14 +10,31 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import type { AuthenticatedRequest } from '../common/guards/jwt-auth.guard';
+import { PostsService } from '../posts/posts.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UsersService } from './users.service';
 
 type UserRecord = Awaited<ReturnType<UsersService['updateProfile']>>;
+type PostRecord = Awaited<ReturnType<PostsService['createPost']>>;
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly postsService: PostsService,
+  ) {}
+
+  @Get(':username/posts')
+  async getPublicProfilePosts(@Param('username') username: string) {
+    const user = await this.usersService.findByUsername(username);
+
+    if (!user) {
+      throw new NotFoundException('User profile not found');
+    }
+
+    const posts = await this.postsService.findByAuthorId(user.id);
+    return posts.map((post) => this.toPublicPost(post));
+  }
 
   @Get(':username')
   async getPublicProfile(@Param('username') username: string) {
@@ -64,6 +81,16 @@ export class UsersController {
       avatarUrl: user.avatarUrl,
       isPrivate: user.isPrivate,
       createdAt: user.createdAt,
+    };
+  }
+
+  private toPublicPost(post: PostRecord) {
+    return {
+      id: post.id,
+      content: post.content,
+      createdAt: post.createdAt,
+      updatedAt: post.updatedAt,
+      author: post.author,
     };
   }
 }

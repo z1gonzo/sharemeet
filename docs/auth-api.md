@@ -113,6 +113,19 @@ Publiczny profil nie zwraca `email`, `passwordHash`, `isActive` ani `updatedAt`.
 | `200` | Zwrócono publiczny profil |
 | `404` | Profil nie istnieje |
 
+## `GET /users/:username/posts`
+
+Zwraca publiczną listę postów konkretnego użytkownika. Endpoint nie wymaga tokena.
+
+Posty są sortowane od najnowszych: `createdAt desc`.
+
+### Responses
+
+| Status | Znaczenie |
+|---|---|
+| `200` | Zwrócono listę postów; może być pusta `[]` |
+| `404` | Profil nie istnieje |
+
 ## `PATCH /users/me`
 
 Aktualizuje profil aktualnego użytkownika. Endpoint wymaga JWT access tokena.

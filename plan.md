@@ -74,7 +74,8 @@ Przygotować repo pod spokojną sesję kodowania w VSCode/Cline i ustabilizować
   - [x] Dodać model `Post` i migrację PostgreSQL
   - [x] Dodać protected `POST /posts`
   - [x] Dodać publiczne `GET /posts/:id`
-  - [ ] Dodać listę postów użytkownika albo prosty feed
+  - [x] Dodać listę postów użytkownika `GET /users/:username/posts`
+  - [ ] Dodać prosty globalny feed `GET /posts` albo paginację list
 - [ ] Relacje/friends/follows
 - [ ] Podstawowy frontend — odłożony na później
 

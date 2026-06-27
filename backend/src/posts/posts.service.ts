@@ -36,4 +36,12 @@ export class PostsService {
       include: postInclude,
     });
   }
+
+  findByAuthorId(authorId: string) {
+    return this.prisma.post.findMany({
+      where: { authorId },
+      include: postInclude,
+      orderBy: { createdAt: 'desc' },
+    });
+  }
 }

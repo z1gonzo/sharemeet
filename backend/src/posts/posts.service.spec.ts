@@ -25,6 +25,7 @@ describe('PostsService', () => {
     post: {
       create: jest.Mock;
       findUnique: jest.Mock;
+      findMany: jest.Mock;
     };
   };
 
@@ -33,6 +34,7 @@ describe('PostsService', () => {
       post: {
         create: jest.fn(),
         findUnique: jest.fn(),
+        findMany: jest.fn(),
       },
     };
 
@@ -73,6 +75,18 @@ describe('PostsService', () => {
     expect(prisma.post.findUnique).toHaveBeenCalledWith({
       where: { id: post.id },
       include: postInclude,
+    });
+  });
+
+  it('finds posts by author id newest first', async () => {
+    prisma.post.findMany.mockResolvedValue([post]);
+
+    await expect(service.findByAuthorId(author.id)).resolves.toEqual([post]);
+
+    expect(prisma.post.findMany).toHaveBeenCalledWith({
+      where: { authorId: author.id },
+      include: postInclude,
+      orderBy: { createdAt: 'desc' },
     });
   });
 });

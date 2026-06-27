@@ -7,8 +7,8 @@
 - Etap: Faza 2 — Core Social MVP / Posty tekstowe
 - Ostatnia sesja: 2026-06-27
 - Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
-- Główne ryzyko: posty mają tylko pojedynczy odczyt; brakuje list/feedu i zasad prywatności wokół prywatnych profili
-- Następny krok: dodać listę postów użytkownika `GET /users/:username/posts` albo minimalny feed `GET /posts`
+- Główne ryzyko: posty nie mają jeszcze globalnego feedu ani paginacji
+- Następny krok: dodać prosty globalny feed `GET /posts` albo paginację listy postów użytkownika
 
 ## Organizacja projektu
 
@@ -37,10 +37,10 @@
 - `UsersModule` obsługuje chronione `PATCH /users/me` dla aktualizacji profilu.
 - `UsersModule` obsługuje publiczne `GET /users/:username` bez ujawniania email/passwordHash/isActive.
 - Avatar URL jest publiczny na razie; automatyczna moderacja jest odłożona, a przyszłe reportowanie profilu/avatarów opisuje `docs/profile-content-policy.md`.
-- `PostsModule` obsługuje chronione `POST /posts` i publiczne `GET /posts/:id`.
+- `PostsModule` obsługuje chronione `POST /posts`, publiczne `GET /posts/:id` i listę postów użytkownika `GET /users/:username/posts` przez `UsersModule`.
 - PostgreSQL z Docker Compose działa lokalnie na porcie hosta `5433`.
 - `npm run build` w `backend/` przechodzi.
-- `npm test` i `npm run test:e2e` w `backend/` przechodzą: 8 test suites, 35 testów łącznie.
+- `npm test` i `npm run test:e2e` w `backend/` przechodzą: 8 test suites, 39 testów łącznie.
 - Istnieje devlog opisujący plan PostgreSQL + MongoDB: `devlog/01_db-choice.md`.
 - Repo ma standardowe pliki workflow dla pracy Hermes ↔ VSCode/Cline/Codex.
 
@@ -48,12 +48,25 @@
 
 Zweryfikowane przez `npm run build && npm test && npm run test:e2e` w `backend/` na 2026-06-27:
 
-- Brakuje listy postów użytkownika albo globalnego feedu.
+- Brakuje globalnego feedu `GET /posts`.
+- Brakuje paginacji dla list postów.
 - Brakuje edycji/usuwania postów.
 - Brakuje relacji/friends/follows.
 - Reportowanie profilu/avatarów jest świadomie w backlogu, nie w bieżącym zakresie.
 
 ## Ostatnio wykonane
+
+Data: 2026-06-27 — User post list
+
+- Dodano `PostsService.findByAuthorId`.
+- Wyeksportowano `PostsService` z `PostsModule` i użyto go w `UsersModule`.
+- Dodano publiczne `GET /users/:username/posts`.
+- Lista postów użytkownika jest sortowana od najnowszych (`createdAt desc`).
+- Dla istniejącego profilu bez postów endpoint zwraca `[]`.
+- Dla brakującego profilu endpoint zwraca `404 User profile not found`.
+- Dodano devlog `devlog/11_user-post-list.md`.
+- Zweryfikowano lokalnie flow `register → login → POST /posts x2 → GET /users/:username/posts` na porcie `3001`; testowy użytkownik został usunięty z bazy.
+- Uruchomiono `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test` i `npm run test:e2e` w `backend/` — wszystko przechodzi.
 
 Data: 2026-06-27 — Text posts foundation
 
@@ -188,7 +201,8 @@ Data: 2026-06-22
 - [x] Dodać publiczny odczyt profilu, np. `GET /users/:username`.
 - [x] Zapisać lekką politykę avatarów / przyszłego reportowania profilu.
 - [x] Dodać posty tekstowe: model `Post`, `POST /posts`, `GET /posts/:id`.
-- [ ] Dodać listę postów użytkownika albo prosty feed.
+- [x] Dodać listę postów użytkownika `GET /users/:username/posts`.
+- [ ] Dodać prosty globalny feed albo paginację list postów.
 
 ## Decyzje techniczne
 
@@ -198,11 +212,11 @@ Data: 2026-06-22
 | 2026-06-22 | Wprowadzamy `plan.md` + `project_state.md` + `AGENTS.md` | Jeden wspólny stan dla Hermesa, VSCode/Cline/Codex i człowieka |
 | 2026-06-22 | Devlog zostaje w głównym repo jako `devlog/` | Proces nauki powinien być widoczny obok kodu i decyzji |
 | 2026-06-27 | Resetujemy eksperymentalny auth/users i odbudowujemy na PostgreSQL + Prisma | Czysty start jest tańszy i bardziej edukacyjny niż naprawianie niespójnego kodu |
-| 2026-06-27 | Dodajemy fundament postów tekstowych | Minimalne `POST /posts` + `GET /posts/:id` daje pierwszy realny element social MVP bez feedu/lajków/komentarzy |
+| 2026-06-27 | Dodajemy listę postów użytkownika | Domykamy flow publiczny profil → posty użytkownika przed globalnym feedem |
 
 ## Otwarte pytania
 
-- Czy następny krok dla postów to `GET /users/:username/posts`, czy prosty globalny `GET /posts`?
+- Czy następny krok to prosty globalny feed `GET /posts`, czy najpierw paginacja dla `GET /users/:username/posts`?
 
 ## Instrukcja dla agenta
 
