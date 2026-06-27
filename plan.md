@@ -71,6 +71,10 @@ Przygotować repo pod spokojną sesję kodowania w VSCode/Cline i ustabilizować
   - [x] Dodać publiczny odczyt profilu, np. `GET /users/:username`
   - [x] Zapisać lekką politykę avatarów / przyszłego reportowania profilu
 - [ ] Posty tekstowe
+  - [x] Dodać model `Post` i migrację PostgreSQL
+  - [x] Dodać protected `POST /posts`
+  - [x] Dodać publiczne `GET /posts/:id`
+  - [ ] Dodać listę postów użytkownika albo prosty feed
 - [ ] Relacje/friends/follows
 - [ ] Podstawowy frontend — odłożony na później
 

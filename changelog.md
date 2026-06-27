@@ -2,6 +2,16 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-06-27 — Text posts foundation
+
+- Dodano model Prisma `Post` i migrację `20260627160203_add_posts`.
+- Dodano `PostsModule`, `PostsService`, `PostsController` i `CreatePostDto`.
+- Dodano chronione `POST /posts` i publiczne `GET /posts/:id`.
+- Dodano testy jednostkowe i e2e dla tworzenia, walidacji, braku tokena, publicznego odczytu i `404`.
+- Dodano devlog `devlog/10_text-posts-foundation.md`.
+- Zweryfikowano realny flow `register → login → POST /posts → GET /posts/:id` lokalnie na porcie `3001`; testowy użytkownik został usunięty z bazy.
+- Zweryfikowano `backend`: `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test`, `npm run test:e2e` przechodzą.
+
 ## 2026-06-27 — Lightweight profile content policy
 
 - Dodano `docs/profile-content-policy.md`.

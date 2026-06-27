@@ -4,11 +4,11 @@
 
 ## Status
 
-- Etap: Faza 2 — Core Social MVP / Profil użytkownika
+- Etap: Faza 2 — Core Social MVP / Posty tekstowe
 - Ostatnia sesja: 2026-06-27
 - Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
-- Główne ryzyko: avatary są na razie publicznym URL-em bez automatycznej moderacji, ale jest lekka polityka i backlog reportowania
-- Następny krok: przejść do postów tekstowych albo dodać minimalne profile reports później
+- Główne ryzyko: posty mają tylko pojedynczy odczyt; brakuje list/feedu i zasad prywatności wokół prywatnych profili
+- Następny krok: dodać listę postów użytkownika `GET /users/:username/posts` albo minimalny feed `GET /posts`
 
 ## Organizacja projektu
 
@@ -23,8 +23,8 @@
 - `db/docker-compose.yml` definiuje PostgreSQL 16 i MongoDB 7.
 - Backend jest czystym szkieletem NestJS po resecie auth/users.
 - Prisma 6 jest skonfigurowana jako warstwa dostępu do PostgreSQL.
-- Istnieje pierwszy model `User` w `backend/prisma/schema.prisma`.
-- Istnieje i została zastosowana migracja `init_user` tworząca tabelę `users`.
+- Istnieje pierwszy model `User` i model `Post` w `backend/prisma/schema.prisma`.
+- Istnieją i zostały zastosowane migracje `init_user` oraz `add_posts`.
 - `PrismaModule` i `PrismaService` są dodane do backendu.
 - Minimalny `UsersModule` i `UsersService` obsługują tworzenie użytkownika oraz wyszukiwanie po email/id.
 - `AuthModule` obsługuje `POST /auth/register`, hashuje hasło i nie zwraca `passwordHash` w odpowiedzi.
@@ -37,9 +37,10 @@
 - `UsersModule` obsługuje chronione `PATCH /users/me` dla aktualizacji profilu.
 - `UsersModule` obsługuje publiczne `GET /users/:username` bez ujawniania email/passwordHash/isActive.
 - Avatar URL jest publiczny na razie; automatyczna moderacja jest odłożona, a przyszłe reportowanie profilu/avatarów opisuje `docs/profile-content-policy.md`.
+- `PostsModule` obsługuje chronione `POST /posts` i publiczne `GET /posts/:id`.
 - PostgreSQL z Docker Compose działa lokalnie na porcie hosta `5433`.
 - `npm run build` w `backend/` przechodzi.
-- `npm test` i `npm run test:e2e` w `backend/` przechodzą: 6 test suites, 28 testów łącznie.
+- `npm test` i `npm run test:e2e` w `backend/` przechodzą: 8 test suites, 35 testów łącznie.
 - Istnieje devlog opisujący plan PostgreSQL + MongoDB: `devlog/01_db-choice.md`.
 - Repo ma standardowe pliki workflow dla pracy Hermes ↔ VSCode/Cline/Codex.
 
@@ -47,11 +48,22 @@
 
 Zweryfikowane przez `npm run build && npm test && npm run test:e2e` w `backend/` na 2026-06-27:
 
-- Brakuje postów tekstowych.
+- Brakuje listy postów użytkownika albo globalnego feedu.
+- Brakuje edycji/usuwania postów.
 - Brakuje relacji/friends/follows.
 - Reportowanie profilu/avatarów jest świadomie w backlogu, nie w bieżącym zakresie.
 
 ## Ostatnio wykonane
+
+Data: 2026-06-27 — Text posts foundation
+
+- Dodano model Prisma `Post` i migrację `20260627160203_add_posts`.
+- Dodano `PostsModule`, `PostsService`, `PostsController` i `CreatePostDto`.
+- Dodano chronione `POST /posts` i publiczne `GET /posts/:id`.
+- Dodano testy jednostkowe i e2e dla tworzenia, walidacji, braku tokena, publicznego odczytu i `404`.
+- Dodano devlog `devlog/10_text-posts-foundation.md`.
+- Zweryfikowano lokalnie flow `register → login → POST /posts → GET /posts/:id` na porcie `3001`; testowy użytkownik został usunięty z bazy.
+- Uruchomiono `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test` i `npm run test:e2e` w `backend/` — wszystko przechodzi.
 
 Data: 2026-06-27 — Lightweight profile content policy
 
@@ -175,7 +187,8 @@ Data: 2026-06-22
 - [x] Dodać protected `PATCH /users/me` dla profilu.
 - [x] Dodać publiczny odczyt profilu, np. `GET /users/:username`.
 - [x] Zapisać lekką politykę avatarów / przyszłego reportowania profilu.
-- [ ] Dodać posty tekstowe.
+- [x] Dodać posty tekstowe: model `Post`, `POST /posts`, `GET /posts/:id`.
+- [ ] Dodać listę postów użytkownika albo prosty feed.
 
 ## Decyzje techniczne
 
@@ -185,11 +198,11 @@ Data: 2026-06-22
 | 2026-06-22 | Wprowadzamy `plan.md` + `project_state.md` + `AGENTS.md` | Jeden wspólny stan dla Hermesa, VSCode/Cline/Codex i człowieka |
 | 2026-06-22 | Devlog zostaje w głównym repo jako `devlog/` | Proces nauki powinien być widoczny obok kodu i decyzji |
 | 2026-06-27 | Resetujemy eksperymentalny auth/users i odbudowujemy na PostgreSQL + Prisma | Czysty start jest tańszy i bardziej edukacyjny niż naprawianie niespójnego kodu |
-| 2026-06-27 | Lekką politykę avatarów odkładamy do backlogu reportowania | Nie blokujemy MVP automatyczną moderacją; publiczny `avatarUrl` zostaje, a nadużycia obsłużymy później przez report/review/placeholder |
+| 2026-06-27 | Dodajemy fundament postów tekstowych | Minimalne `POST /posts` + `GET /posts/:id` daje pierwszy realny element social MVP bez feedu/lajków/komentarzy |
 
 ## Otwarte pytania
 
-- Czy posty tekstowe zaczynamy od `POST /posts` + `GET /posts/:id`, czy od listy postów użytkownika?
+- Czy następny krok dla postów to `GET /users/:username/posts`, czy prosty globalny `GET /posts`?
 
 ## Instrukcja dla agenta
 

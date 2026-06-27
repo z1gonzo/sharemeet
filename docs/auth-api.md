@@ -149,6 +149,66 @@ Authorization: Bearer <accessToken>
 | `400` | Niepoprawne dane wejściowe albo nieznane pole |
 | `401` | Brak tokena albo token niepoprawny |
 
+## `POST /posts`
+
+Tworzy post tekstowy aktualnego użytkownika. Endpoint wymaga JWT access tokena.
+
+### Header
+
+```http
+Authorization: Bearer <accessToken>
+```
+
+### Request
+
+```json
+{
+  "content": "Hello ShareMeet"
+}
+```
+
+### Walidacja
+
+- `content`: tekst 1–1000 znaków,
+- nieznane pola są odrzucane.
+
+### Response `201`
+
+```json
+{
+  "id": "uuid",
+  "content": "Hello ShareMeet",
+  "createdAt": "2026-06-27T00:00:00.000Z",
+  "updatedAt": "2026-06-27T00:00:00.000Z",
+  "author": {
+    "id": "uuid",
+    "username": "z1gonzo",
+    "displayName": "Łukasz",
+    "avatarUrl": "https://example.com/avatar.png",
+    "isPrivate": false
+  }
+}
+```
+
+### Responses
+
+| Status | Znaczenie |
+|---|---|
+| `201` | Post utworzony |
+| `400` | Niepoprawne dane wejściowe albo nieznane pole |
+| `401` | Brak tokena albo token niepoprawny |
+
+## `GET /posts/:id`
+
+Zwraca publiczny post po id. Endpoint nie wymaga tokena.
+
+### Responses
+
+| Status | Znaczenie |
+|---|---|
+| `200` | Zwrócono publiczny post |
+| `404` | Post nie istnieje |
+
 ## Decyzja: refresh token
 
 Na tym etapie refresh token jest w backlogu. Powód: najpierw utrwalamy prosty, testowalny fundament `register → login → me`, potem przechodzimy do profilu użytkownika. Refresh token wróci, gdy pojawi się realna potrzeba sesji długotrwałych po stronie frontendu.

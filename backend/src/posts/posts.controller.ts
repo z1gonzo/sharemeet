@@ -1,0 +1,52 @@
+import {
+  Body,
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import type { AuthenticatedRequest } from '../common/guards/jwt-auth.guard';
+import { CreatePostDto } from './dto/create-post.dto';
+import { PostsService } from './posts.service';
+
+type PostRecord = Awaited<ReturnType<PostsService['createPost']>>;
+
+@Controller('posts')
+export class PostsController {
+  constructor(private readonly postsService: PostsService) {}
+
+  @UseGuards(JwtAuthGuard)
+  @Post()
+  async createPost(
+    @Req() request: AuthenticatedRequest,
+    @Body() body: CreatePostDto,
+  ) {
+    const post = await this.postsService.createPost(request.user.sub, body);
+    return this.toPublicPost(post);
+  }
+
+  @Get(':id')
+  async getPost(@Param('id') id: string) {
+    const post = await this.postsService.findById(id);
+
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+
+    return this.toPublicPost(post);
+  }
+
+  private toPublicPost(post: PostRecord) {
+    return {
+      id: post.id,
+      content: post.content,
+      createdAt: post.createdAt,
+      updatedAt: post.updatedAt,
+      author: post.author,
+    };
+  }
+}
