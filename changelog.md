@@ -2,6 +2,15 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-06-27 — UsersService foundation
+
+- Dodano minimalny `UsersModule` i `UsersService` korzystający z `PrismaService`.
+- Dodano `CreateUserDto`.
+- Dodano testy `UsersService` dla `createUser`, `findByEmail` i `findById`.
+- Podłączono `UsersModule` do `AppModule`.
+- Dodano devlog `devlog/03_users-service.md`.
+- Zweryfikowano `backend`: `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test`, `npm run test:e2e` przechodzą.
+
 ## 2026-06-27 — Prisma/User foundation
 
 - Dodano Prisma 6 (`prisma`, `@prisma/client`) jako data access layer dla PostgreSQL.

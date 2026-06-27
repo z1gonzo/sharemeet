@@ -10,7 +10,7 @@ Projekt ma być edukacyjny: architektura powinna być jasna, opisana i rozwijana
 
 | Moduł | Odpowiedzialność | Status |
 |---|---|---|
-| `backend/` | API, auth, users, logika biznesowa | czysty szkielet NestJS + Prisma 6 + pierwszy model `User` |
+| `backend/` | API, auth, users, logika biznesowa | czysty szkielet NestJS + Prisma 6 + `UsersService` |
 | `frontend/` | UI użytkownika | TODO |
 | `db/` | Docker Compose dla PostgreSQL i MongoDB | PostgreSQL działa lokalnie na porcie hosta `5433`; MongoDB na później |
 | `docs/` | architektura i decyzje techniczne | gotowe jako szkielet |
@@ -23,7 +23,7 @@ W devlogu przyjęto architekturę hybrydową:
 - PostgreSQL: users, friends, posts, comments
 - MongoDB: media uploads, activity logs, notifications
 
-Kod auth/users oparty o Mongoose został usunięty 2026-06-27 jako eksperyment niespójny z planem. Fundament PostgreSQL + Prisma został rozpoczęty: `backend/prisma/schema.prisma`, migracja `init_user`, globalny `PrismaModule` i `PrismaService`.
+Kod auth/users oparty o Mongoose został usunięty 2026-06-27 jako eksperyment niespójny z planem. Fundament PostgreSQL + Prisma został rozpoczęty: `backend/prisma/schema.prisma`, migracja `init_user`, globalny `PrismaModule`, `PrismaService` i minimalny `UsersService`.
 
 ## Rekomendowany kierunek MVP
 

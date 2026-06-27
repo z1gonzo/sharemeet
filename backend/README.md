@@ -13,6 +13,7 @@ Current foundation:
 - Prisma 6 configured as the data access layer,
 - first `User` model and migration exist,
 - auth/users endpoints are not rebuilt yet.
+- `UsersService` currently provides `createUser`, `findByEmail` and `findById`.
 
 Before adding new features, read:
 
@@ -68,6 +69,7 @@ postgresql://sharemeet:<local-password>@localhost:5433/sharemeet_db?schema=publi
 
 ## Next coding task
 
-1. Rebuild a minimal `UsersModule` using `PrismaService`.
-2. Add one public behavior test for user creation or lookup.
-3. Then add `AuthModule` with email/password register/login and JWT access token.
+1. Add `AuthModule` with a small register flow.
+2. Hash passwords in `AuthService`, not in `UsersService`.
+3. Add `POST /auth/register` and a behavior test for registration.
+4. Add JWT login as the next separate step.

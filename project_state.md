@@ -7,8 +7,8 @@
 - Etap: Milestone 1 — Auth Foundation
 - Ostatnia sesja: 2026-06-27
 - Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
-- Główne ryzyko: auth/users jest dopiero odbudowywane; aktualnie mamy fundament Prisma + model `User`, ale bez endpointów register/login
-- Następny krok: odbudować minimalny `UsersModule` na `PrismaService`, potem `AuthModule` z email/password + JWT
+- Główne ryzyko: auth/users jest dopiero odbudowywane; aktualnie mamy fundament Prisma + `UsersService`, ale bez endpointów register/login
+- Następny krok: dodać `AuthModule` z email/password register, a JWT login zostawić jako kolejny mały krok
 
 ## Organizacja projektu
 
@@ -26,9 +26,10 @@
 - Istnieje pierwszy model `User` w `backend/prisma/schema.prisma`.
 - Istnieje i została zastosowana migracja `init_user` tworząca tabelę `users`.
 - `PrismaModule` i `PrismaService` są dodane do backendu.
+- Minimalny `UsersModule` i `UsersService` obsługują tworzenie użytkownika oraz wyszukiwanie po email/id.
 - PostgreSQL z Docker Compose działa lokalnie na porcie hosta `5433`.
 - `npm run build` w `backend/` przechodzi.
-- `npm test` i `npm run test:e2e` w `backend/` przechodzą: 2 test suites, 2 testy łącznie.
+- `npm test` i `npm run test:e2e` w `backend/` przechodzą: 3 test suites, 5 testów łącznie.
 - Istnieje devlog opisujący plan PostgreSQL + MongoDB: `devlog/01_db-choice.md`.
 - Repo ma standardowe pliki workflow dla pracy Hermes ↔ VSCode/Cline/Codex.
 
@@ -36,12 +37,20 @@
 
 Zweryfikowane przez `npm run build && npm test && npm run test:e2e` w `backend/` na 2026-06-27:
 
-- Auth/users endpointy nie są obecnie zaimplementowane — poprzedni eksperymentalny kod został usunięty zamiast naprawiany.
-- Brakuje minimalnego `UsersModule` korzystającego z `PrismaService`.
-- Brakuje register/login/JWT.
+- Auth endpointy nie są obecnie zaimplementowane — poprzedni eksperymentalny kod został usunięty zamiast naprawiany.
+- Brakuje `AuthModule`, register/login/JWT.
 - Brakuje smoke testu dla auth/users.
 
 ## Ostatnio wykonane
+
+Data: 2026-06-27 — UsersService foundation
+
+- Dodano minimalny `UsersModule` i `UsersService` korzystający z `PrismaService`.
+- Dodano `CreateUserDto` jako pierwszy kontrakt wejściowy dla tworzenia użytkownika.
+- Dodano testy `UsersService` dla `createUser`, `findByEmail` i `findById`.
+- Podłączono `UsersModule` do `AppModule`.
+- Dodano devlog `devlog/03_users-service.md` opisujący granice odpowiedzialności Users vs Auth.
+- Uruchomiono `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test` i `npm run test:e2e` w `backend/` — wszystko przechodzi.
 
 Data: 2026-06-27 — Prisma/User foundation
 
@@ -77,8 +86,8 @@ Data: 2026-06-22
 - [x] Usunąć stare `AuthModule`, `AuthController`, `AuthService`, `UsersModule`, `UsersService`, Mongoose schema, Google strategy i zdublowane JWT guardy.
 - [x] Dodać Prisma i skonfigurować połączenie z PostgreSQL.
 - [x] Dodać model `User` i pierwszą migrację.
-- [ ] Odbudować minimalne `UsersModule` i `AuthModule`.
-- [ ] Dodać register/login + JWT access token.
+- [x] Odbudować minimalne `UsersModule` i `UsersService`.
+- [ ] Dodać `AuthModule` z register/login + JWT access token.
 - [ ] Dodać minimalny smoke test auth/users.
 
 ## Decyzje techniczne
@@ -89,7 +98,7 @@ Data: 2026-06-22
 | 2026-06-22 | Wprowadzamy `plan.md` + `project_state.md` + `AGENTS.md` | Jeden wspólny stan dla Hermesa, VSCode/Cline/Codex i człowieka |
 | 2026-06-22 | Devlog zostaje w głównym repo jako `devlog/` | Proces nauki powinien być widoczny obok kodu i decyzji |
 | 2026-06-27 | Resetujemy eksperymentalny auth/users i odbudowujemy na PostgreSQL + Prisma | Czysty start jest tańszy i bardziej edukacyjny niż naprawianie niespójnego kodu |
-| 2026-06-27 | Dodajemy Prisma 6 i pierwszy model `User` | Popularny, typowany workflow PostgreSQL dla Node.js/TypeScript/NestJS |
+| 2026-06-27 | Dodajemy minimalny `UsersService` na Prisma | Rozdzielamy odpowiedzialność: users zapis/odczyt, auth rejestracja/logowanie/tokeny |
 
 ## Otwarte pytania
 

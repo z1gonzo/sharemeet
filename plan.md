@@ -21,6 +21,7 @@ Przygotować repo pod spokojną sesję kodowania w VSCode/Cline i ustabilizować
 - [x] Naprawić build backendu przez powrót do czystego szkieletu NestJS
 - [x] Dodać Prisma i model `User`
 - [x] Utworzyć pierwszą migrację PostgreSQL dla tabeli `users`
+- [x] Odbudować minimalne `UsersModule` na `PrismaService`
 - [ ] Odbudować minimalne email/password JWT auth
 - [ ] Dodać minimalne testy lub e2e smoke test dla auth/users
 
@@ -40,7 +41,7 @@ Przygotować repo pod spokojną sesję kodowania w VSCode/Cline i ustabilizować
 - [x] Konfiguracja env przez `@nestjs/config`
 - [x] Prisma podłączona do PostgreSQL
 - [x] Moduł users ma pierwszy model danych w PostgreSQL + Prisma
-- [ ] Minimalny `UsersModule` korzysta z `PrismaService`
+- [x] Minimalny `UsersModule` korzysta z `PrismaService`
 - [ ] Register/login zwracają access token
 - [ ] Refresh token ma jasną implementację albo jest odłożony do backlogu
 - [ ] Google OAuth jest poprawnie zaimplementowany albo wyłączony do czasu podstawowego JWT

@@ -1,0 +1,102 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { PrismaService } from '../prisma/prisma.service';
+import { UsersService } from './users.service';
+
+describe('UsersService', () => {
+  let service: UsersService;
+  let prisma: {
+    user: {
+      create: jest.Mock;
+      findUnique: jest.Mock;
+    };
+  };
+
+  beforeEach(async () => {
+    prisma = {
+      user: {
+        create: jest.fn(),
+        findUnique: jest.fn(),
+      },
+    };
+
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        UsersService,
+        {
+          provide: PrismaService,
+          useValue: prisma,
+        },
+      ],
+    }).compile();
+
+    service = module.get<UsersService>(UsersService);
+  });
+
+  it('creates a user with auth and profile fields', async () => {
+    const createdUser = {
+      id: '8b2777e0-0f29-4c73-8708-9c27f98d34aa',
+      email: 'lukasz@example.com',
+      username: 'z1gonzo',
+      passwordHash: 'hashed-password',
+      displayName: 'Łukasz',
+      bio: null,
+      avatarUrl: null,
+      isPrivate: false,
+      isActive: true,
+      createdAt: new Date('2026-06-27T00:00:00.000Z'),
+      updatedAt: new Date('2026-06-27T00:00:00.000Z'),
+    };
+    prisma.user.create.mockResolvedValue(createdUser);
+
+    await expect(
+      service.createUser({
+        email: 'lukasz@example.com',
+        username: 'z1gonzo',
+        passwordHash: 'hashed-password',
+        displayName: 'Łukasz',
+      }),
+    ).resolves.toEqual(createdUser);
+  });
+
+  it('finds a user by email', async () => {
+    const user = {
+      id: '8b2777e0-0f29-4c73-8708-9c27f98d34aa',
+      email: 'lukasz@example.com',
+      username: 'z1gonzo',
+      passwordHash: 'hashed-password',
+      displayName: null,
+      bio: null,
+      avatarUrl: null,
+      isPrivate: false,
+      isActive: true,
+      createdAt: new Date('2026-06-27T00:00:00.000Z'),
+      updatedAt: new Date('2026-06-27T00:00:00.000Z'),
+    };
+    prisma.user.findUnique.mockResolvedValue(user);
+
+    await expect(service.findByEmail('lukasz@example.com')).resolves.toEqual(
+      user,
+    );
+  });
+
+  it('finds a user by id', async () => {
+    const user = {
+      id: '8b2777e0-0f29-4c73-8708-9c27f98d34aa',
+      email: 'lukasz@example.com',
+      username: 'z1gonzo',
+      passwordHash: 'hashed-password',
+      displayName: null,
+      bio: null,
+      avatarUrl: null,
+      isPrivate: false,
+      isActive: true,
+      createdAt: new Date('2026-06-27T00:00:00.000Z'),
+      updatedAt: new Date('2026-06-27T00:00:00.000Z'),
+    };
+    prisma.user.findUnique.mockResolvedValue(user);
+
+    await expect(
+      service.findById('8b2777e0-0f29-4c73-8708-9c27f98d34aa'),
+    ).resolves.toEqual(user);
+  });
+});
