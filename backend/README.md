@@ -13,8 +13,9 @@ Current foundation:
 - Prisma 6 configured as the data access layer,
 - first `User` model and migration exist,
 - `UsersService` currently provides `createUser`, `findByEmail` and `findById`.
-- `AuthModule` currently provides `POST /auth/register`.
-- Login/JWT are not implemented yet.
+- `AuthModule` currently provides `POST /auth/register` and `POST /auth/login`.
+- Login returns a JWT access token.
+- Protected routes/JWT guard are not implemented yet.
 
 Before adding new features, read:
 
@@ -70,7 +71,7 @@ postgresql://sharemeet:<local-password>@localhost:5433/sharemeet_db?schema=publi
 
 ## Next coding task
 
-1. Add `AuthService.login`.
-2. Add `@nestjs/jwt` and JWT access-token signing.
-3. Add `POST /auth/login`.
-4. Add tests proving valid credentials return an access token and invalid credentials fail safely.
+1. Add JWT strategy/guard or a simple token verification guard.
+2. Add `GET /auth/me`.
+3. Add tests proving missing/invalid token returns 401.
+4. Add tests proving valid token returns the public user.

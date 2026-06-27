@@ -2,6 +2,15 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-06-27 — Auth login/JWT foundation
+
+- Dodano `@nestjs/jwt`.
+- Dodano `LoginDto`, `AuthService.login` i `POST /auth/login`.
+- Login porównuje hasło z `passwordHash` i zwraca JWT access token oraz publicznego użytkownika bez `passwordHash`.
+- Dodano testy jednostkowe i e2e dla poprawnego i błędnego loginu.
+- Zweryfikowano realny endpoint lokalnie na porcie `3001`; testowy użytkownik został usunięty z bazy po sprawdzeniu.
+- Zweryfikowano `backend`: `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test`, `npm run test:e2e` przechodzą.
+
 ## 2026-06-27 — Auth register foundation
 
 - Dodano `AuthModule`, `AuthService`, `AuthController` i `RegisterDto`.

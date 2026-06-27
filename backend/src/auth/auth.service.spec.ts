@@ -1,20 +1,43 @@
+import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
-import { compare } from 'bcryptjs';
+import { compare, hash } from 'bcryptjs';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 
 type CreatedUser = Awaited<ReturnType<UsersService['createUser']>>;
 
+const existingUser: CreatedUser = {
+  id: '8b2777e0-0f29-4c73-8708-9c27f98d34aa',
+  email: 'lukasz@example.com',
+  username: 'z1gonzo',
+  passwordHash: 'hashed-password',
+  displayName: 'Łukasz',
+  bio: null,
+  avatarUrl: null,
+  isPrivate: false,
+  isActive: true,
+  createdAt: new Date('2026-06-27T00:00:00.000Z'),
+  updatedAt: new Date('2026-06-27T00:00:00.000Z'),
+};
+
 describe('AuthService', () => {
   let service: AuthService;
   let usersService: {
     createUser: jest.Mock<Promise<CreatedUser>, [CreateUserDto]>;
+    findByEmail: jest.Mock<Promise<CreatedUser | null>, [string]>;
+  };
+  let jwtService: {
+    signAsync: jest.Mock<Promise<string>, [Record<string, string>]>;
   };
 
   beforeEach(async () => {
     usersService = {
       createUser: jest.fn<Promise<CreatedUser>, [CreateUserDto]>(),
+      findByEmail: jest.fn<Promise<CreatedUser | null>, [string]>(),
+    };
+    jwtService = {
+      signAsync: jest.fn<Promise<string>, [Record<string, string>]>(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -23,6 +46,10 @@ describe('AuthService', () => {
         {
           provide: UsersService,
           useValue: usersService,
+        },
+        {
+          provide: JwtService,
+          useValue: jwtService,
         },
       ],
     }).compile();
@@ -33,17 +60,11 @@ describe('AuthService', () => {
   it('registers a user with a hashed password and returns a public user', async () => {
     usersService.createUser.mockImplementation((data: CreateUserDto) =>
       Promise.resolve({
-        id: '8b2777e0-0f29-4c73-8708-9c27f98d34aa',
+        ...existingUser,
         email: data.email,
         username: data.username,
         passwordHash: data.passwordHash,
         displayName: data.displayName ?? null,
-        bio: null,
-        avatarUrl: null,
-        isPrivate: false,
-        isActive: true,
-        createdAt: new Date('2026-06-27T00:00:00.000Z'),
-        updatedAt: new Date('2026-06-27T00:00:00.000Z'),
       }),
     );
 
@@ -72,5 +93,50 @@ describe('AuthService', () => {
       username: 'z1gonzo',
       displayName: 'Łukasz',
     });
+  });
+
+  it('returns an access token for valid login credentials', async () => {
+    const passwordHash = await hash('plain-password', 12);
+    usersService.findByEmail.mockResolvedValue({
+      ...existingUser,
+      passwordHash,
+    });
+    jwtService.signAsync.mockResolvedValue('signed-access-token');
+
+    await expect(
+      service.login({
+        email: 'lukasz@example.com',
+        password: 'plain-password',
+      }),
+    ).resolves.toMatchObject({
+      accessToken: 'signed-access-token',
+      user: {
+        id: '8b2777e0-0f29-4c73-8708-9c27f98d34aa',
+        email: 'lukasz@example.com',
+        username: 'z1gonzo',
+      },
+    });
+
+    expect(jwtService.signAsync).toHaveBeenCalledWith({
+      sub: '8b2777e0-0f29-4c73-8708-9c27f98d34aa',
+      email: 'lukasz@example.com',
+      username: 'z1gonzo',
+    });
+  });
+
+  it('rejects invalid login credentials', async () => {
+    const passwordHash = await hash('plain-password', 12);
+    usersService.findByEmail.mockResolvedValue({
+      ...existingUser,
+      passwordHash,
+    });
+
+    await expect(
+      service.login({
+        email: 'lukasz@example.com',
+        password: 'wrong-password',
+      }),
+    ).rejects.toThrow('Invalid email or password');
+    expect(jwtService.signAsync).not.toHaveBeenCalled();
   });
 });

@@ -7,8 +7,8 @@
 - Etap: Milestone 1 — Auth Foundation
 - Ostatnia sesja: 2026-06-27
 - Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
-- Główne ryzyko: auth/users jest dopiero odbudowywane; rejestracja działa, ale login/JWT jeszcze nie
-- Następny krok: dodać `AuthService.login`, `POST /auth/login` i JWT access token
+- Główne ryzyko: auth/users jest dopiero odbudowywane; register/login działają, ale protected route/JWT guard jeszcze nie
+- Następny krok: dodać protected route / JWT guard, np. `GET /auth/me`
 
 ## Organizacja projektu
 
@@ -28,6 +28,7 @@
 - `PrismaModule` i `PrismaService` są dodane do backendu.
 - Minimalny `UsersModule` i `UsersService` obsługują tworzenie użytkownika oraz wyszukiwanie po email/id.
 - `AuthModule` obsługuje `POST /auth/register`, hashuje hasło i nie zwraca `passwordHash` w odpowiedzi.
+- `AuthModule` obsługuje `POST /auth/login`, porównuje hasło i zwraca JWT access token.
 - PostgreSQL z Docker Compose działa lokalnie na porcie hosta `5433`.
 - `npm run build` w `backend/` przechodzi.
 - `npm test` i `npm run test:e2e` w `backend/` przechodzą: 5 test suites, 7 testów łącznie.
@@ -38,11 +39,21 @@
 
 Zweryfikowane przez `npm run build && npm test && npm run test:e2e` w `backend/` na 2026-06-27:
 
-- Login/JWT nie jest jeszcze zaimplementowany.
-- Brakuje protected route / JWT guard.
+- Protected route / JWT guard nie jest jeszcze zaimplementowany.
+- Brakuje `GET /auth/me`.
 - Brakuje smoke testu dla login/JWT.
 
 ## Ostatnio wykonane
+
+Data: 2026-06-27 — Auth login/JWT foundation
+
+- Dodano `@nestjs/jwt`.
+- Dodano `LoginDto`.
+- Dodano `AuthService.login` i `POST /auth/login`.
+- Login porównuje hasło z `passwordHash` i zwraca JWT access token + publicznego użytkownika bez `passwordHash`.
+- Dodano testy jednostkowe i e2e dla poprawnego oraz błędnego loginu.
+- Zweryfikowano lokalnie przez uruchomienie aplikacji na porcie `3001`, wykonanie register/login, sprawdzenie że błędne hasło daje `401`, a potem usunięcie testowego użytkownika.
+- Uruchomiono `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test` i `npm run test:e2e` w `backend/` — wszystko przechodzi.
 
 Data: 2026-06-27 — Auth register foundation
 
@@ -98,7 +109,8 @@ Data: 2026-06-22
 - [x] Dodać model `User` i pierwszą migrację.
 - [x] Odbudować minimalne `UsersModule` i `UsersService`.
 - [x] Dodać `AuthModule` z register.
-- [ ] Dodać login + JWT access token.
+- [x] Dodać login + JWT access token.
+- [ ] Dodać protected route / JWT guard.
 - [ ] Dodać minimalny smoke test auth/users.
 
 ## Decyzje techniczne
@@ -109,7 +121,7 @@ Data: 2026-06-22
 | 2026-06-22 | Wprowadzamy `plan.md` + `project_state.md` + `AGENTS.md` | Jeden wspólny stan dla Hermesa, VSCode/Cline/Codex i człowieka |
 | 2026-06-22 | Devlog zostaje w głównym repo jako `devlog/` | Proces nauki powinien być widoczny obok kodu i decyzji |
 | 2026-06-27 | Resetujemy eksperymentalny auth/users i odbudowujemy na PostgreSQL + Prisma | Czysty start jest tańszy i bardziej edukacyjny niż naprawianie niespójnego kodu |
-| 2026-06-27 | Dodajemy `POST /auth/register` z hashowaniem hasła | Auth odpowiada za hashowanie i publiczną rejestrację; UsersService tylko zapisuje/odczytuje użytkowników |
+| 2026-06-27 | Dodajemy login z JWT access token | Po działającej rejestracji potwierdzamy podstawowy flow email/password przed refresh tokenem i guardami |
 
 ## Otwarte pytania
 

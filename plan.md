@@ -24,7 +24,8 @@ Przygotować repo pod spokojną sesję kodowania w VSCode/Cline i ustabilizować
 - [x] Odbudować minimalne `UsersModule` na `PrismaService`
 - [x] Dodać `AuthModule` z email/password registration
 - [x] Dodać minimalne testy i e2e smoke test dla auth/register
-- [ ] Dodać login z JWT access token
+- [x] Dodać login z JWT access token
+- [ ] Dodać protected route / JWT guard
 
 ## Faza 0 — Organizacja repo i workflow
 
@@ -44,7 +45,7 @@ Przygotować repo pod spokojną sesję kodowania w VSCode/Cline i ustabilizować
 - [x] Moduł users ma pierwszy model danych w PostgreSQL + Prisma
 - [x] Minimalny `UsersModule` korzysta z `PrismaService`
 - [x] Register tworzy użytkownika i nie zwraca `passwordHash`
-- [ ] Login zwraca access token
+- [x] Login zwraca access token
 - [ ] Refresh token ma jasną implementację albo jest odłożony do backlogu
 - [ ] Google OAuth jest poprawnie zaimplementowany albo wyłączony do czasu podstawowego JWT
 

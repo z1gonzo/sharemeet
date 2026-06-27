@@ -1,15 +1,25 @@
-import { Injectable } from '@nestjs/common';
-import { hash } from 'bcryptjs';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { compare, hash } from 'bcryptjs';
 import { UsersService } from '../users/users.service';
+import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 
 type UserRecord = Awaited<ReturnType<UsersService['createUser']>>;
 
 export type PublicUser = Omit<UserRecord, 'passwordHash'>;
 
+export interface AuthTokenResponse {
+  accessToken: string;
+  user: PublicUser;
+}
+
 @Injectable()
 export class AuthService {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
+  ) {}
 
   async register(data: RegisterDto): Promise<PublicUser> {
     const passwordHash = await hash(data.password, 12);
@@ -21,6 +31,28 @@ export class AuthService {
     });
 
     return this.toPublicUser(user);
+  }
+
+  async login(data: LoginDto): Promise<AuthTokenResponse> {
+    const user = await this.usersService.findByEmail(data.email);
+
+    if (!user || !(await compare(data.password, user.passwordHash))) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    const publicUser = this.toPublicUser(user);
+    return {
+      accessToken: await this.signAccessToken(user),
+      user: publicUser,
+    };
+  }
+
+  private async signAccessToken(user: UserRecord): Promise<string> {
+    return this.jwtService.signAsync({
+      sub: user.id,
+      email: user.email,
+      username: user.username,
+    });
   }
 
   private toPublicUser(user: UserRecord): PublicUser {
