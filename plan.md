@@ -27,7 +27,8 @@ Przygotować repo pod spokojną sesję kodowania w VSCode/Cline i ustabilizować
 - [x] Dodać login z JWT access token
 - [x] Dodać protected route / JWT guard
 - [x] Dodać DTO validation i obsługę konfliktów email/username
-- [ ] Rozstrzygnąć refresh token: backlog albo prosty flow
+- [x] Rozstrzygnąć refresh token: backlog na razie
+- [x] Dodać krótką dokumentację endpointów auth
 
 ## Faza 0 — Organizacja repo i workflow
 
@@ -50,8 +51,8 @@ Przygotować repo pod spokojną sesję kodowania w VSCode/Cline i ustabilizować
 - [x] Login zwraca access token
 - [x] Register/login mają walidację DTO
 - [x] Duplicate email/username zwraca czytelne `409 Conflict`
-- [ ] Refresh token ma jasną implementację albo jest odłożony do backlogu
-- [ ] Google OAuth jest poprawnie zaimplementowany albo wyłączony do czasu podstawowego JWT
+- [x] Refresh token jest odłożony do backlogu
+- [x] Google OAuth jest wyłączony do czasu stabilnego podstawowego JWT/profile flow
 
 ### Kryteria ukończenia
 
@@ -64,9 +65,13 @@ Przygotować repo pod spokojną sesję kodowania w VSCode/Cline i ustabilizować
 ## Faza 2 — Core Social MVP
 
 - [ ] Profil użytkownika
+  - [x] Dodać protected `PATCH /users/me` dla pól profilu
+  - [x] Dodać walidację DTO profilu
+  - [x] Dodać testy e2e profilu
+  - [ ] Dodać publiczny odczyt profilu, np. `GET /users/:username`
 - [ ] Posty tekstowe
 - [ ] Relacje/friends/follows
-- [ ] Podstawowy frontend
+- [ ] Podstawowy frontend — odłożony na później
 
 ## Faza 3 — Media i aktywność
 

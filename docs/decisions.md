@@ -116,6 +116,29 @@ Po dodaniu register/login/me backend potrzebuje jawnej walidacji wejścia HTTP. 
 
 ---
 
+## 2026-06-27 — Refresh token i Google OAuth w backlogu na czas profilu
+
+Status: accepted
+
+### Kontekst
+
+Minimalny flow auth działa: register, login, access token, `GET /auth/me`, walidacja DTO i konflikty `409`. Użytkownik chce na razie zostawić frontend i przejść do profilu użytkownika.
+
+### Decyzja
+
+- Nie implementujemy teraz refresh tokena.
+- Nie wracamy teraz do Google OAuth.
+- Auth foundation traktujemy jako wystarczający do rozpoczęcia profilu użytkownika.
+- Sesje długotrwałe i social login wrócą, gdy frontend albo wymagania produktu stworzą realną potrzebę.
+
+### Konsekwencje
+
+- Obecny auth jest prostszy i łatwiejszy do testowania.
+- Access token pozostaje krótkotrwały.
+- Kolejny kierunek backendu to profil użytkownika, zaczynając od `PATCH /users/me` i publicznego odczytu profilu.
+
+---
+
 ## 2026-06-27 — Reset eksperymentalnego auth/users i PostgreSQL + Prisma dla MVP
 
 Status: accepted

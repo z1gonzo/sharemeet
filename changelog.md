@@ -2,6 +2,16 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-06-27 — User profile foundation
+
+- Refresh token i Google OAuth przesunięto do backlogu.
+- Dodano `docs/auth-api.md`.
+- Wydzielono `JwtAccessModule` i przeniesiono `JwtAuthGuard` do `common/guards`.
+- Dodano `UpdateProfileDto`, `UsersController`, `UsersService.updateProfile` i chronione `PATCH /users/me`.
+- Dodano testy jednostkowe i e2e profilu.
+- Zweryfikowano realny flow `register → login → PATCH /users/me → GET /auth/me` lokalnie na porcie `3001`; testowy użytkownik został usunięty z bazy.
+- Zweryfikowano `backend`: `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test`, `npm run test:e2e` przechodzą.
+
 ## 2026-06-27 — Auth validation/conflicts foundation
 
 - Dodano `class-validator` i `class-transformer`.

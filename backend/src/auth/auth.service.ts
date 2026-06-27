@@ -4,7 +4,7 @@ import { compare, hash } from 'bcryptjs';
 import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
-import { JwtPayload } from './jwt-auth.guard';
+import { JwtPayload } from '../common/guards/jwt-auth.guard';
 
 type UserRecord = Awaited<ReturnType<UsersService['createUser']>>;
 

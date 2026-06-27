@@ -69,7 +69,7 @@ npm run build
 npm run start:dev
 ```
 
-> Current state: backend is build-green with Prisma 6, PostgreSQL on local port `5433`, `UsersService`, `POST /auth/register`, `POST /auth/login`, protected `GET /auth/me`, DTO validation, and friendly duplicate-user conflicts. `npm run build`, `npm test` and `npm run test:e2e` pass. Next step: decide refresh token vs backlog, then document auth endpoints. See `project_state.md`.
+> Current state: backend is build-green with Prisma 6, PostgreSQL on local port `5433`, email/password JWT auth, DTO validation, protected `GET /auth/me`, and protected `PATCH /users/me` for profile updates. Refresh token and Google OAuth are backlog for now. `npm run build`, `npm test` and `npm run test:e2e` pass. Next step: public profile read, e.g. `GET /users/:username`. See `project_state.md`.
 
 ## AI-assisted workflow
 

@@ -10,10 +10,10 @@ Projekt ma być edukacyjny: architektura powinna być jasna, opisana i rozwijana
 
 | Moduł | Odpowiedzialność | Status |
 |---|---|---|
-| `backend/` | API, auth, users, logika biznesowa | NestJS + Prisma 6 + register/login/me + DTO validation |
+| `backend/` | API, auth, users, logika biznesowa | NestJS + Prisma 6 + auth + profile update |
 | `frontend/` | UI użytkownika | TODO |
 | `db/` | Docker Compose dla PostgreSQL i MongoDB | PostgreSQL działa lokalnie na porcie hosta `5433`; MongoDB na później |
-| `docs/` | architektura i decyzje techniczne | gotowe jako szkielet |
+| `docs/` | architektura, decyzje techniczne i krótkie referencje API | auth API opisane w `docs/auth-api.md` |
 | `devlog/` | dokumentacja nauki i uzasadnień | część głównego repo |
 
 ## Plan baz danych
@@ -23,7 +23,7 @@ W devlogu przyjęto architekturę hybrydową:
 - PostgreSQL: users, friends, posts, comments
 - MongoDB: media uploads, activity logs, notifications
 
-Kod auth/users oparty o Mongoose został usunięty 2026-06-27 jako eksperyment niespójny z planem. Fundament PostgreSQL + Prisma został rozpoczęty: `backend/prisma/schema.prisma`, migracja `init_user`, globalny `PrismaModule`, `PrismaService`, minimalny `UsersService`, `POST /auth/register`, `POST /auth/login` z JWT access token, chronione `GET /auth/me`, DTO validation i przyjazne konflikty `409`.
+Kod auth/users oparty o Mongoose został usunięty 2026-06-27 jako eksperyment niespójny z planem. Fundament PostgreSQL + Prisma został rozpoczęty: `backend/prisma/schema.prisma`, migracja `init_user`, globalny `PrismaModule`, `PrismaService`, minimalny `UsersService`, `POST /auth/register`, `POST /auth/login` z JWT access token, chronione `GET /auth/me`, DTO validation, przyjazne konflikty `409` i protected `PATCH /users/me` do aktualizacji profilu.
 
 ## Rekomendowany kierunek MVP
 

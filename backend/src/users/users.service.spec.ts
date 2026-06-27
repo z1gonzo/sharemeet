@@ -4,12 +4,27 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from './users.service';
 
+const user = {
+  id: '8b2777e0-0f29-4c73-8708-9c27f98d34aa',
+  email: 'lukasz@example.com',
+  username: 'z1gonzo',
+  passwordHash: 'hashed-password',
+  displayName: 'Łukasz',
+  bio: null,
+  avatarUrl: null,
+  isPrivate: false,
+  isActive: true,
+  createdAt: new Date('2026-06-27T00:00:00.000Z'),
+  updatedAt: new Date('2026-06-27T00:00:00.000Z'),
+};
+
 describe('UsersService', () => {
   let service: UsersService;
   let prisma: {
     user: {
       create: jest.Mock;
       findUnique: jest.Mock;
+      update: jest.Mock;
     };
   };
 
@@ -18,6 +33,7 @@ describe('UsersService', () => {
       user: {
         create: jest.fn(),
         findUnique: jest.fn(),
+        update: jest.fn(),
       },
     };
 
@@ -35,20 +51,7 @@ describe('UsersService', () => {
   });
 
   it('creates a user with auth and profile fields', async () => {
-    const createdUser = {
-      id: '8b2777e0-0f29-4c73-8708-9c27f98d34aa',
-      email: 'lukasz@example.com',
-      username: 'z1gonzo',
-      passwordHash: 'hashed-password',
-      displayName: 'Łukasz',
-      bio: null,
-      avatarUrl: null,
-      isPrivate: false,
-      isActive: true,
-      createdAt: new Date('2026-06-27T00:00:00.000Z'),
-      updatedAt: new Date('2026-06-27T00:00:00.000Z'),
-    };
-    prisma.user.create.mockResolvedValue(createdUser);
+    prisma.user.create.mockResolvedValue(user);
 
     await expect(
       service.createUser({
@@ -57,23 +60,10 @@ describe('UsersService', () => {
         passwordHash: 'hashed-password',
         displayName: 'Łukasz',
       }),
-    ).resolves.toEqual(createdUser);
+    ).resolves.toEqual(user);
   });
 
   it('finds a user by email', async () => {
-    const user = {
-      id: '8b2777e0-0f29-4c73-8708-9c27f98d34aa',
-      email: 'lukasz@example.com',
-      username: 'z1gonzo',
-      passwordHash: 'hashed-password',
-      displayName: null,
-      bio: null,
-      avatarUrl: null,
-      isPrivate: false,
-      isActive: true,
-      createdAt: new Date('2026-06-27T00:00:00.000Z'),
-      updatedAt: new Date('2026-06-27T00:00:00.000Z'),
-    };
     prisma.user.findUnique.mockResolvedValue(user);
 
     await expect(service.findByEmail('lukasz@example.com')).resolves.toEqual(
@@ -82,24 +72,41 @@ describe('UsersService', () => {
   });
 
   it('finds a user by id', async () => {
-    const user = {
-      id: '8b2777e0-0f29-4c73-8708-9c27f98d34aa',
-      email: 'lukasz@example.com',
-      username: 'z1gonzo',
-      passwordHash: 'hashed-password',
-      displayName: null,
-      bio: null,
-      avatarUrl: null,
-      isPrivate: false,
-      isActive: true,
-      createdAt: new Date('2026-06-27T00:00:00.000Z'),
-      updatedAt: new Date('2026-06-27T00:00:00.000Z'),
-    };
     prisma.user.findUnique.mockResolvedValue(user);
 
     await expect(
       service.findById('8b2777e0-0f29-4c73-8708-9c27f98d34aa'),
     ).resolves.toEqual(user);
+  });
+
+  it('updates profile fields', async () => {
+    const updatedUser = {
+      ...user,
+      displayName: 'Łukasz G.',
+      bio: 'Building ShareMeet',
+      avatarUrl: 'https://example.com/avatar.png',
+      isPrivate: true,
+    };
+    prisma.user.update.mockResolvedValue(updatedUser);
+
+    await expect(
+      service.updateProfile('8b2777e0-0f29-4c73-8708-9c27f98d34aa', {
+        displayName: 'Łukasz G.',
+        bio: 'Building ShareMeet',
+        avatarUrl: 'https://example.com/avatar.png',
+        isPrivate: true,
+      }),
+    ).resolves.toEqual(updatedUser);
+
+    expect(prisma.user.update).toHaveBeenCalledWith({
+      where: { id: '8b2777e0-0f29-4c73-8708-9c27f98d34aa' },
+      data: {
+        displayName: 'Łukasz G.',
+        bio: 'Building ShareMeet',
+        avatarUrl: 'https://example.com/avatar.png',
+        isPrivate: true,
+      },
+    });
   });
 
   it('returns a friendly conflict when email is already registered', async () => {
