@@ -4,12 +4,15 @@ NestJS backend for the ShareMeet educational social-platform project.
 
 ## Current status
 
-The backend exists, but it is not yet build-green. The current blocker is the auth/users foundation:
+The backend is build-green after resetting the experimental auth/users code.
 
-- auth code imports JWT/Passport/Config/Mongoose-related packages inconsistently,
-- users/auth storage decision is not finalized,
-- controller/service method contracts do not match,
-- duplicate JWT guards exist.
+Current foundation:
+
+- clean NestJS skeleton,
+- PostgreSQL configured through Docker Compose on host port `5433`,
+- Prisma 6 configured as the data access layer,
+- first `User` model and migration exist,
+- auth/users endpoints are not rebuilt yet.
 
 Before adding new features, read:
 
@@ -30,7 +33,7 @@ npm install
 npm run build
 ```
 
-Expected current result: fails until the auth/users blocker is fixed. Do not treat the backend as working until this command passes.
+Expected current result: passes.
 
 ## Development server
 
@@ -47,14 +50,24 @@ npm test
 npm run test:e2e
 ```
 
-Tests should be added/updated as part of the auth foundation work.
+Current smoke tests pass.
+
+## Prisma
+
+```bash
+npm run prisma:validate
+npm run prisma:generate
+npm run prisma:migrate -- --name <migration-name>
+```
+
+Local `DATABASE_URL` should point at PostgreSQL from `../db/docker-compose.yml`:
+
+```text
+postgresql://sharemeet:<local-password>@localhost:5433/sharemeet_db?schema=public
+```
 
 ## Next coding task
 
-Recommended first VSCode/Cline task:
-
-1. Confirm storage decision for users/auth in `../docs/decisions.md`.
-2. Align `package.json` dependencies with that decision.
-3. Simplify auth to email/password + JWT first.
-4. Disable or defer Google OAuth until basic JWT works.
-5. Make `npm run build` pass.
+1. Rebuild a minimal `UsersModule` using `PrismaService`.
+2. Add one public behavior test for user creation or lookup.
+3. Then add `AuthModule` with email/password register/login and JWT access token.

@@ -2,7 +2,17 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
-## 2026-06-27
+## 2026-06-27 — Prisma/User foundation
+
+- Dodano Prisma 6 (`prisma`, `@prisma/client`) jako data access layer dla PostgreSQL.
+- Dodano `backend/prisma/schema.prisma` z modelem `User`.
+- Utworzono i zastosowano migrację `init_user` dla tabeli `users`.
+- Dodano `PrismaModule` i `PrismaService`.
+- Zmieniono port hosta PostgreSQL na `5433`, żeby uniknąć konfliktu z istniejącą lokalną bazą na `5432`.
+- Dodano devlog `devlog/02_prisma-user-foundation.md`.
+- Zweryfikowano `backend`: `npm run prisma:validate`, `npm run build`, `npm test`, `npm run test:e2e` przechodzą.
+
+## 2026-06-27 — reset auth/users
 
 - Usunięto eksperymentalną implementację `backend/src/auth/` i `backend/src/users/`.
 - Uproszczono `backend/src/app.module.ts` do czystego szkieletu NestJS.

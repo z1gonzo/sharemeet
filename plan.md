@@ -19,7 +19,8 @@ Przygotować repo pod spokojną sesję kodowania w VSCode/Cline i ustabilizować
 - [x] Podjąć decyzję: PostgreSQL/Prisma dla users/auth
 - [x] Usunąć eksperymentalny, niespójny kod auth/users
 - [x] Naprawić build backendu przez powrót do czystego szkieletu NestJS
-- [ ] Dodać Prisma i model `User`
+- [x] Dodać Prisma i model `User`
+- [x] Utworzyć pierwszą migrację PostgreSQL dla tabeli `users`
 - [ ] Odbudować minimalne email/password JWT auth
 - [ ] Dodać minimalne testy lub e2e smoke test dla auth/users
 
@@ -36,9 +37,10 @@ Przygotować repo pod spokojną sesję kodowania w VSCode/Cline i ustabilizować
 ### Zakres
 
 - [x] Backend NestJS buduje się bez błędów jako czysty szkielet po resecie eksperymentalnego auth/users
-- [ ] Konfiguracja env przez `@nestjs/config`
-- [ ] Prisma podłączona do PostgreSQL
-- [ ] Moduł users działa z PostgreSQL + Prisma
+- [x] Konfiguracja env przez `@nestjs/config`
+- [x] Prisma podłączona do PostgreSQL
+- [x] Moduł users ma pierwszy model danych w PostgreSQL + Prisma
+- [ ] Minimalny `UsersModule` korzysta z `PrismaService`
 - [ ] Register/login zwracają access token
 - [ ] Refresh token ma jasną implementację albo jest odłożony do backlogu
 - [ ] Google OAuth jest poprawnie zaimplementowany albo wyłączony do czasu podstawowego JWT
@@ -47,8 +49,8 @@ Przygotować repo pod spokojną sesję kodowania w VSCode/Cline i ustabilizować
 
 - [x] `npm run build` w `backend/` przechodzi dla czystego szkieletu NestJS
 - [x] `npm test` i `npm run test:e2e` przechodzą dla istniejących smoke testów aplikacji
-- [ ] README opisuje aktualny start backendu i baz
-- [ ] `project_state.md` zawiera aktualny stan bez sprzeczności
+- [x] README opisuje aktualny start backendu, baz i Prisma
+- [x] `project_state.md` zawiera aktualny stan bez sprzeczności
 - [x] `docs/decisions.md` zapisuje decyzję storage/reset dla users/auth
 
 ## Faza 2 — Core Social MVP

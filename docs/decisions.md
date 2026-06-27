@@ -70,6 +70,30 @@ Devlog zostaje w głównym repo jako `devlog/`. Osobny projekt `sharemeet-devlog
 
 ---
 
+## 2026-06-27 — Prisma 6 jako data access layer dla PostgreSQL
+
+Status: accepted
+
+### Kontekst
+
+Po resecie auth/users potrzebny jest pierwszy stabilny fundament danych. Users/auth są relacyjne i będą później łączyć się z friends, posts i comments.
+
+### Decyzja
+
+- Używamy Prisma 6 z PostgreSQL dla danych relacyjnych.
+- Pierwszy model to `User` w `backend/prisma/schema.prisma`.
+- Prisma Client jest udostępniany w NestJS przez globalny `PrismaModule` i `PrismaService`.
+- PostgreSQL w lokalnym Docker Compose działa na porcie hosta `5433`, ponieważ `5432` jest już zajęty przez inną lokalną bazę.
+
+### Konsekwencje
+
+- Migracje Prisma stają się częścią historii projektu.
+- Kolejne moduły users/auth korzystają z `PrismaService`, nie z Mongoose.
+- MongoDB pozostaje na późniejsze dokumentowe przypadki użycia.
+- Prisma 7 odkładamy na później, bo wymaga nowszej konfiguracji datasource/client; Prisma 6 daje stabilniejszy, popularny workflow edukacyjny.
+
+---
+
 ## 2026-06-27 — Reset eksperymentalnego auth/users i PostgreSQL + Prisma dla MVP
 
 Status: accepted

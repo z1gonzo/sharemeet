@@ -69,7 +69,7 @@ npm run build
 npm run start:dev
 ```
 
-> Current state: backend is a clean NestJS skeleton after resetting the experimental auth/users code. `npm run build`, `npm test` and `npm run test:e2e` pass. Next step: rebuild users/auth on PostgreSQL + Prisma. See `project_state.md`.
+> Current state: backend is build-green with a clean NestJS skeleton, Prisma 6, PostgreSQL on local port `5433`, and the first `User` model/migration. `npm run build`, `npm test` and `npm run test:e2e` pass. Next step: rebuild `UsersModule` and `AuthModule` on top of Prisma. See `project_state.md`.
 
 ## AI-assisted workflow
 
