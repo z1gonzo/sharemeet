@@ -54,7 +54,10 @@ describe('UsersController (e2e)', () => {
     findByUsername: jest.Mock<Promise<UserRecord | null>, [string]>;
   };
   let postsService: {
-    findByAuthorId: jest.Mock<Promise<PostRecord[]>, [string]>;
+    findByAuthorId: jest.Mock<
+      Promise<PostRecord[]>,
+      [{ authorId: string; limit: number; offset: number }]
+    >;
   };
   let jwtService: {
     verifyAsync: jest.Mock<Promise<JwtPayload>, [string]>;
@@ -66,7 +69,10 @@ describe('UsersController (e2e)', () => {
       findByUsername: jest.fn<Promise<UserRecord | null>, [string]>(),
     };
     postsService = {
-      findByAuthorId: jest.fn<Promise<PostRecord[]>, [string]>(),
+      findByAuthorId: jest.fn<
+        Promise<PostRecord[]>,
+        [{ authorId: string; limit: number; offset: number }]
+      >(),
     };
     jwtService = {
       verifyAsync: jest.fn<Promise<JwtPayload>, [string]>(),
@@ -129,7 +135,11 @@ describe('UsersController (e2e)', () => {
       .expect(200);
 
     expect(usersService.findByUsername).toHaveBeenCalledWith('z1gonzo');
-    expect(postsService.findByAuthorId).toHaveBeenCalledWith(existingUser.id);
+    expect(postsService.findByAuthorId).toHaveBeenCalledWith({
+      authorId: existingUser.id,
+      limit: 20,
+      offset: 0,
+    });
     expect(response.body).toHaveLength(1);
     expect(response.body).toMatchObject([
       {
@@ -154,6 +164,33 @@ describe('UsersController (e2e)', () => {
       .expect(200);
 
     expect(response.body).toEqual([]);
+  });
+
+  it('GET /users/:username/posts passes limit and offset to the service', async () => {
+    usersService.findByUsername.mockResolvedValue(existingUser);
+    postsService.findByAuthorId.mockResolvedValue([existingPost]);
+
+    await request(app.getHttpServer())
+      .get('/users/z1gonzo/posts?limit=1&offset=1')
+      .expect(200);
+
+    expect(postsService.findByAuthorId).toHaveBeenCalledWith({
+      authorId: existingUser.id,
+      limit: 1,
+      offset: 1,
+    });
+  });
+
+  it('GET /users/:username/posts rejects invalid pagination query params', async () => {
+    await request(app.getHttpServer())
+      .get('/users/z1gonzo/posts?limit=51')
+      .expect(400);
+    await request(app.getHttpServer())
+      .get('/users/z1gonzo/posts?offset=-1')
+      .expect(400);
+
+    expect(usersService.findByUsername).not.toHaveBeenCalled();
+    expect(postsService.findByAuthorId).not.toHaveBeenCalled();
   });
 
   it('GET /users/:username/posts returns 404 for missing profiles', async () => {

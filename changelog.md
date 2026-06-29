@@ -2,6 +2,15 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-06-29 — User post list pagination
+
+- Ujednolicono `GET /users/:username/posts` z globalnym feedem przez query params `limit` i `offset`.
+- `limit` ma zakres `1..50`, `offset` musi być `>= 0`; błędne query params zwracają `400`.
+- `PostsService.findByAuthorId` przyjmuje teraz `{ authorId, limit, offset }`.
+- Lista postów użytkownika sortuje po `createdAt desc`, `id desc`.
+- Dodano devlog `devlog/13_user-post-list-pagination.md`.
+- Zweryfikowano `backend`: `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test`, `npm run test:e2e` przechodzą.
+
 ## 2026-06-29 — Global posts feed
 
 - Dodano `ListPostsQueryDto` dla query params `limit` i `offset`.

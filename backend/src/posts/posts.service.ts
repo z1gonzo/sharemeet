@@ -21,6 +21,10 @@ interface FindFeedOptions {
   offset: number;
 }
 
+interface FindByAuthorOptions extends FindFeedOptions {
+  authorId: string;
+}
+
 @Injectable()
 export class PostsService {
   constructor(private readonly prisma: PrismaService) {}
@@ -51,11 +55,13 @@ export class PostsService {
     });
   }
 
-  findByAuthorId(authorId: string) {
+  findByAuthorId({ authorId, limit, offset }: FindByAuthorOptions) {
     return this.prisma.post.findMany({
       where: { authorId },
       include: postInclude,
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      take: limit,
+      skip: offset,
     });
   }
 }

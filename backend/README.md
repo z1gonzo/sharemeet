@@ -14,7 +14,7 @@ Current foundation:
 - first `User` model and migration exist,
 - `UsersService` currently provides `createUser`, `findByEmail`, `findById`, `findByUsername` and `updateProfile`.
 - `AuthModule` currently provides `POST /auth/register`, `POST /auth/login` and `GET /auth/me`.
-- `UsersModule` currently provides public `GET /users/:username`, public `GET /users/:username/posts` and protected `PATCH /users/me`.
+- `UsersModule` currently provides public `GET /users/:username`, public paginated `GET /users/:username/posts?limit=20&offset=0` and protected `PATCH /users/me`.
 - `PostsModule` currently provides protected `POST /posts`, public global feed `GET /posts?limit=20&offset=0` and public `GET /posts/:id`.
 - Register/login/profile/post DTOs are validated through a global `ValidationPipe`.
 - Duplicate email/username returns friendly `409 Conflict` responses.
@@ -75,6 +75,6 @@ postgresql://sharemeet:<local-password>@localhost:5433/sharemeet_db?schema=publi
 
 ## Next coding task
 
-1. Add pagination for `GET /users/:username/posts` or add edit/delete for own posts.
+1. Add edit/delete for own posts (`PATCH /posts/:id`, `DELETE /posts/:id`) or start relationships/follows.
 2. Keep profile/avatar reporting as backlog unless abuse becomes a real concern.
 3. Keep `npm run lint && npm run build && npm test && npm run test:e2e` green.

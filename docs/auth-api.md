@@ -117,13 +117,21 @@ Publiczny profil nie zwraca `email`, `passwordHash`, `isActive` ani `updatedAt`.
 
 Zwraca publiczną listę postów konkretnego użytkownika. Endpoint nie wymaga tokena.
 
-Posty są sortowane od najnowszych: `createdAt desc`.
+Posty są sortowane od najnowszych: `createdAt desc`, `id desc`.
+
+### Query params
+
+| Param | Default | Walidacja | Znaczenie |
+|---|---:|---|---|
+| `limit` | `20` | integer `1..50` | Maksymalna liczba postów użytkownika |
+| `offset` | `0` | integer `>= 0` | Liczba najnowszych postów użytkownika do pominięcia |
 
 ### Responses
 
 | Status | Znaczenie |
 |---|---|
 | `200` | Zwrócono listę postów; może być pusta `[]` |
+| `400` | Niepoprawne query params |
 | `404` | Profil nie istnieje |
 
 ## `PATCH /users/me`

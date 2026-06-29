@@ -4,11 +4,11 @@
 
 ## Status
 
-- Etap: Faza 2 — Core Social MVP / Globalny feed postów
+- Etap: Faza 2 — Core Social MVP / Spójna paginacja postów
 - Ostatnia sesja: 2026-06-29
 - Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
-- Główne ryzyko: tylko globalny feed ma paginację; lista postów użytkownika nadal zwraca całość
-- Następny krok: dodać paginację dla `GET /users/:username/posts` albo edycję/usuwanie własnych postów
+- Główne ryzyko: posty nie mają jeszcze edycji/usuwania ani reguł własności dla modyfikacji
+- Następny krok: dodać edycję/usuwanie własnych postów (`PATCH /posts/:id`, `DELETE /posts/:id`)
 
 ## Organizacja projektu
 
@@ -37,10 +37,10 @@
 - `UsersModule` obsługuje chronione `PATCH /users/me` dla aktualizacji profilu.
 - `UsersModule` obsługuje publiczne `GET /users/:username` bez ujawniania email/passwordHash/isActive.
 - Avatar URL jest publiczny na razie; automatyczna moderacja jest odłożona, a przyszłe reportowanie profilu/avatarów opisuje `docs/profile-content-policy.md`.
-- `PostsModule` obsługuje chronione `POST /posts`, publiczne `GET /posts/:id`, publiczny globalny feed `GET /posts?limit=20&offset=0` i listę postów użytkownika `GET /users/:username/posts` przez `UsersModule`.
+- `PostsModule` obsługuje chronione `POST /posts`, publiczne `GET /posts/:id`, publiczny globalny feed `GET /posts?limit=20&offset=0` i paginowaną listę postów użytkownika `GET /users/:username/posts?limit=20&offset=0` przez `UsersModule`.
 - PostgreSQL z Docker Compose działa lokalnie na porcie hosta `5433`.
 - `npm run build` w `backend/` przechodzi.
-- `npm test` i `npm run test:e2e` w `backend/` przechodzą: 8 test suites, 43 testy łącznie.
+- `npm test` i `npm run test:e2e` w `backend/` przechodzą: 8 test suites, 45 testów łącznie.
 - Istnieje devlog opisujący plan PostgreSQL + MongoDB: `devlog/01_db-choice.md`.
 - Repo ma standardowe pliki workflow dla pracy Hermes ↔ VSCode/Cline/Codex.
 
@@ -48,12 +48,20 @@
 
 Zweryfikowane przez `npm run lint && npm run prisma:validate && npm run build && npm test && npm run test:e2e` w `backend/` na 2026-06-29:
 
-- `GET /users/:username/posts` nie ma jeszcze paginacji.
 - Brakuje edycji/usuwania postów.
 - Brakuje relacji/friends/follows.
 - Reportowanie profilu/avatarów jest świadomie w backlogu, nie w bieżącym zakresie.
 
 ## Ostatnio wykonane
+
+Data: 2026-06-29 — User post list pagination
+
+- Ujednolicono `GET /users/:username/posts` z globalnym feedem przez query params `limit` i `offset`.
+- `limit` ma zakres `1..50`, `offset` musi być `>= 0`.
+- `PostsService.findByAuthorId` przyjmuje teraz `{ authorId, limit, offset }`.
+- Lista postów użytkownika sortuje po `createdAt desc`, `id desc`.
+- Dodano devlog `devlog/13_user-post-list-pagination.md`.
+- Uruchomiono `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test` i `npm run test:e2e` w `backend/` — wszystko przechodzi.
 
 Data: 2026-06-29 — Global posts feed
 
@@ -212,7 +220,7 @@ Data: 2026-06-22
 - [x] Dodać posty tekstowe: model `Post`, `POST /posts`, `GET /posts/:id`.
 - [x] Dodać listę postów użytkownika `GET /users/:username/posts`.
 - [x] Dodać prosty globalny feed `GET /posts` z paginacją `limit/offset`.
-- [ ] Dodać paginację dla `GET /users/:username/posts`.
+- [x] Dodać paginację dla `GET /users/:username/posts`.
 - [ ] Dodać edycję/usuwanie własnych postów.
 
 ## Decyzje techniczne
@@ -225,10 +233,11 @@ Data: 2026-06-22
 | 2026-06-27 | Resetujemy eksperymentalny auth/users i odbudowujemy na PostgreSQL + Prisma | Czysty start jest tańszy i bardziej edukacyjny niż naprawianie niespójnego kodu |
 | 2026-06-27 | Dodajemy listę postów użytkownika | Domykamy flow publiczny profil → posty użytkownika przed globalnym feedem |
 | 2026-06-29 | Dodajemy prosty globalny feed `GET /posts` z `limit/offset` | MVP potrzebuje publicznej listy najnowszych postów; offset pagination jest najprostsza edukacyjnie |
+| 2026-06-29 | Ujednolicamy paginację list postów | `GET /posts` i `GET /users/:username/posts` powinny mieć ten sam kontrakt `limit/offset` |
 
 ## Otwarte pytania
 
-- Czy przed relacjami/follows najpierw ujednolicamy paginację `GET /users/:username/posts`, czy dodajemy edycję/usuwanie własnych postów?
+- Czy przed relacjami/follows dodajemy edycję/usuwanie własnych postów, czy od razu przechodzimy do relacji/follows?
 
 ## Instrukcja dla agenta
 

@@ -23,7 +23,7 @@ W devlogu przyjęto architekturę hybrydową:
 - PostgreSQL: users, friends, posts, comments
 - MongoDB: media uploads, activity logs, notifications
 
-Kod auth/users oparty o Mongoose został usunięty 2026-06-27 jako eksperyment niespójny z planem. Fundament PostgreSQL + Prisma został rozpoczęty: `backend/prisma/schema.prisma`, migracja `init_user`, globalny `PrismaModule`, `PrismaService`, minimalny `UsersService`, `POST /auth/register`, `POST /auth/login` z JWT access token, chronione `GET /auth/me`, DTO validation, przyjazne konflikty `409`, protected `PATCH /users/me`, publiczne `GET /users/:username`, pierwsze posty tekstowe przez `POST /posts`, `GET /posts/:id`, globalny feed `GET /posts?limit=20&offset=0` oraz lista postów użytkownika `GET /users/:username/posts`.
+Kod auth/users oparty o Mongoose został usunięty 2026-06-27 jako eksperyment niespójny z planem. Fundament PostgreSQL + Prisma został rozpoczęty: `backend/prisma/schema.prisma`, migracja `init_user`, globalny `PrismaModule`, `PrismaService`, minimalny `UsersService`, `POST /auth/register`, `POST /auth/login` z JWT access token, chronione `GET /auth/me`, DTO validation, przyjazne konflikty `409`, protected `PATCH /users/me`, publiczne `GET /users/:username`, pierwsze posty tekstowe przez `POST /posts`, `GET /posts/:id`, globalny feed `GET /posts?limit=20&offset=0` oraz paginowana lista postów użytkownika `GET /users/:username/posts?limit=20&offset=0`.
 
 ## Rekomendowany kierunek MVP
 

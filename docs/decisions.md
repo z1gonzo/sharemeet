@@ -191,3 +191,26 @@ Po dodaniu postów tekstowych i listy postów użytkownika potrzebny jest public
 - Endpoint jest łatwy do testowania i użycia w przyszłym frontendzie.
 - Przy większych danych offset pagination może być mniej wydajna i mniej stabilna niż cursor pagination.
 - Cursor-based feed i ranking zostają na późniejszy etap, kiedy pojawi się realna potrzeba.
+
+---
+
+## 2026-06-29 — Wspólny kontrakt paginacji dla list postów
+
+Status: accepted
+
+### Kontekst
+
+Po dodaniu `GET /posts?limit=20&offset=0` endpoint `GET /users/:username/posts` nadal zwracał całą listę postów użytkownika. To tworzyło niespójność API i przyszły dług techniczny.
+
+### Decyzja
+
+- `GET /users/:username/posts` używa tych samych query params co globalny feed: `limit` i `offset`.
+- Wspólna walidacja żyje w `ListPostsQueryDto`.
+- Domyślne wartości: `limit=20`, `offset=0`.
+- Sortowanie: `createdAt desc`, `id desc`.
+
+### Konsekwencje
+
+- Oba list endpoints są łatwiejsze do użycia przez przyszły frontend.
+- Nadal nie zwracamy `totalCount` ani metadanych paginacji.
+- Cursor-based pagination pozostaje późniejszą optymalizacją.
