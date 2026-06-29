@@ -2,6 +2,15 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-06-29 — Comments
+
+- Dodano model Prisma `Comment` i migrację `20260629162741_add_comments`.
+- Dodano `POST /posts/:postId/comments` i `GET /posts/:postId/comments?limit=20&offset=0`.
+- Dodano `PATCH /comments/:id` i `DELETE /comments/:id` dla autora komentarza.
+- Lista komentarzy jest publiczna tylko dla publicznych postów i sortuje `createdAt asc, id asc`.
+- Dodano devlog `devlog/19_comments.md`.
+- Zweryfikowano `backend`: `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test`, `npm run test:e2e` przechodzą.
+
 ## 2026-06-29 — Post visibility
 
 - Dodano `PostVisibility`: `PUBLIC`, `FOLLOWERS`, `PRIVATE`.

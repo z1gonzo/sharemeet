@@ -328,3 +328,22 @@ Status: accepted
 - Niepubliczne posty są ukrywane w publicznym `GET /posts/:id` jako `404`.
 - Nie dodajemy jeszcze endpointu „moje posty” do podglądu własnych prywatnych postów.
 - Cursor pagination, ranking i konto prywatne jako approval workflow zostają odłożone.
+
+---
+
+## 2026-06-29 — Komentarze jako osobny model relacyjny
+
+Status: accepted
+
+### Decyzja
+
+- Dodajemy model Prisma `Comment` powiązany z `Post` i `User`.
+- Komentarze mają własne `content`, `createdAt`, `updatedAt` i są usuwane kaskadowo razem z postem albo autorem.
+- Pierwszy zakres obsługuje komentarze tylko do postów publicznych (`visibility = PUBLIC`).
+- Lista komentarzy jest publiczna dla publicznych postów i sortuje `createdAt asc, id asc`.
+- Tylko autor komentarza może go edytować albo usunąć.
+
+### Konsekwencje
+
+- Nie dodajemy jeszcze komentarzy do `FOLLOWERS`/`PRIVATE` postów, żeby nie mieszać polityki widoczności z pierwszym modelem komentarzy.
+- Nie dodajemy jeszcze nested replies, soft delete, moderacji ani liczników komentarzy.

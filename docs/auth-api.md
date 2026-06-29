@@ -433,6 +433,119 @@ createdAt desc, id desc
 | `400` | Niepoprawne query params |
 | `401` | Brak tokena albo token niepoprawny |
 
+## `POST /posts/:postId/comments`
+
+Tworzy komentarz do publicznego posta. Endpoint wymaga JWT access tokena.
+
+Komentarze na tym etapie są dostępne tylko dla postów z `visibility = PUBLIC`. Dla brakującego albo niepublicznego posta endpoint zwraca `404 Post not found`.
+
+### Header
+
+```http
+Authorization: Bearer ***
+```
+
+### Request
+
+```json
+{
+  "content": "Great post"
+}
+```
+
+### Walidacja
+
+- `content`: tekst 1–500 znaków,
+- nieznane pola są odrzucane.
+
+### Response `201`
+
+```json
+{
+  "id": "uuid",
+  "postId": "uuid",
+  "content": "Great post",
+  "createdAt": "2026-06-29T16:00:00.000Z",
+  "updatedAt": "2026-06-29T16:00:00.000Z",
+  "author": {
+    "id": "uuid",
+    "username": "z1gonzo",
+    "displayName": "Łukasz",
+    "avatarUrl": "https://example.com/avatar.png",
+    "isPrivate": false
+  }
+}
+```
+
+### Responses
+
+| Status | Znaczenie |
+|---|---|
+| `201` | Komentarz utworzony |
+| `400` | Niepoprawne dane wejściowe albo nieznane pole |
+| `401` | Brak tokena albo token niepoprawny |
+| `404` | Post nie istnieje albo nie jest publiczny |
+
+## `GET /posts/:postId/comments`
+
+Zwraca publiczną listę komentarzy do publicznego posta. Endpoint nie wymaga tokena.
+
+### Query params
+
+| Param | Default | Walidacja | Znaczenie |
+|---|---:|---|---|
+| `limit` | `20` | integer `1..50` | Maksymalna liczba komentarzy |
+| `offset` | `0` | integer `>= 0` | Liczba komentarzy do pominięcia |
+
+### Sortowanie
+
+```text
+createdAt asc, id asc
+```
+
+### Responses
+
+| Status | Znaczenie |
+|---|---|
+| `200` | Lista komentarzy; jeśli brak komentarzy, `[]` |
+| `400` | Niepoprawne query params |
+| `404` | Post nie istnieje albo nie jest publiczny |
+
+## `PATCH /comments/:id`
+
+Aktualizuje własny komentarz. Endpoint wymaga JWT access tokena.
+
+### Request
+
+```json
+{
+  "content": "Edited comment"
+}
+```
+
+### Responses
+
+| Status | Znaczenie |
+|---|---|
+| `200` | Komentarz zaktualizowany |
+| `400` | Niepoprawne dane wejściowe albo nieznane pole |
+| `401` | Brak tokena albo token niepoprawny |
+| `403` | Próba edycji cudzego komentarza |
+| `404` | Komentarz nie istnieje |
+
+## `DELETE /comments/:id`
+
+Usuwa własny komentarz. Endpoint wymaga JWT access tokena.
+
+### Responses
+
+| Status | Znaczenie |
+|---|---|
+| `204` | Komentarz usunięty; brak body |
+| `401` | Brak tokena albo token niepoprawny |
+| `403` | Próba usunięcia cudzego komentarza |
+| `404` | Komentarz nie istnieje |
+
 ## Decyzja: refresh token
 
 Na tym etapie refresh token jest w backlogu. Powód: najpierw utrwalamy prosty, testowalny fundament `register → login → me`, potem przechodzimy do profilu użytkownika. Refresh token wróci, gdy pojawi się realna potrzeba sesji długotrwałych po stronie frontendu.
