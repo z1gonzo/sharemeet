@@ -85,6 +85,7 @@ Przygotować repo pod spokojną sesję kodowania w VSCode/Cline i ustabilizować
   - [x] Dodać feed obserwowanych
   - [x] Dodać liczniki followers/following na profilu
 - [ ] Komentarze
+- [x] Widoczność/prywatność postów
 - [ ] Podstawowy frontend — odłożony na później
 
 ## Faza 3 — Media i aktywność

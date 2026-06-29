@@ -252,13 +252,15 @@ Authorization: Bearer <accessToken>
 
 ```json
 {
-  "content": "Hello ShareMeet"
+  "content": "Hello ShareMeet",
+  "visibility": "PUBLIC"
 }
 ```
 
 ### Walidacja
 
 - `content`: tekst 1–1000 znaków,
+- `visibility`: opcjonalnie `PUBLIC`, `FOLLOWERS` albo `PRIVATE`; domyślnie `PUBLIC`,
 - nieznane pola są odrzucane.
 
 ### Response `201`
@@ -267,6 +269,7 @@ Authorization: Bearer <accessToken>
 {
   "id": "uuid",
   "content": "Hello ShareMeet",
+  "visibility": "PUBLIC",
   "createdAt": "2026-06-27T00:00:00.000Z",
   "updatedAt": "2026-06-27T00:00:00.000Z",
   "author": {
@@ -301,13 +304,15 @@ Authorization: Bearer ***
 
 ```json
 {
-  "content": "Edited ShareMeet post"
+  "content": "Edited ShareMeet post",
+  "visibility": "FOLLOWERS"
 }
 ```
 
 ### Walidacja
 
 - `content`: tekst 1–1000 znaków,
+- `visibility`: opcjonalnie `PUBLIC`, `FOLLOWERS` albo `PRIVATE`,
 - nieznane pola są odrzucane.
 
 ### Responses
@@ -343,6 +348,8 @@ Authorization: Bearer ***
 
 Zwraca publiczny post po id. Endpoint nie wymaga tokena.
 
+Zwraca tylko posty z `visibility = PUBLIC`. Posty `FOLLOWERS` i `PRIVATE` są ukryte jako `404` w tym publicznym endpointcie.
+
 ### Responses
 
 | Status | Znaczenie |
@@ -352,7 +359,7 @@ Zwraca publiczny post po id. Endpoint nie wymaga tokena.
 
 ## `GET /posts`
 
-Zwraca publiczny globalny feed najnowszych postów. Endpoint nie wymaga tokena.
+Zwraca publiczny globalny feed najnowszych postów. Endpoint nie wymaga tokena. Feed zawiera tylko posty `PUBLIC`.
 
 ### Query params
 
@@ -374,6 +381,7 @@ createdAt desc, id desc
   {
     "id": "uuid",
     "content": "Hello ShareMeet",
+    "visibility": "PUBLIC",
     "createdAt": "2026-06-29T00:00:00.000Z",
     "updatedAt": "2026-06-29T00:00:00.000Z",
     "author": {
@@ -396,7 +404,7 @@ createdAt desc, id desc
 
 ## `GET /posts/following`
 
-Zwraca chroniony feed postów od użytkowników obserwowanych przez aktualnego użytkownika. Endpoint wymaga JWT access tokena.
+Zwraca chroniony feed postów od użytkowników obserwowanych przez aktualnego użytkownika. Endpoint wymaga JWT access tokena. Feed zawiera posty `PUBLIC` i `FOLLOWERS` od obserwowanych autorów; `PRIVATE` jest pomijane.
 
 ### Header
 

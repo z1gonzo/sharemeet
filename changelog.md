@@ -2,6 +2,16 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-06-29 — Post visibility
+
+- Dodano `PostVisibility`: `PUBLIC`, `FOLLOWERS`, `PRIVATE`.
+- Dodano migrację `20260629160111_add_post_visibility`.
+- `POST /posts` i `PATCH /posts/:id` obsługują opcjonalne `visibility`.
+- Publiczne feedy/listy pokazują tylko `PUBLIC`; following feed pokazuje `PUBLIC` i `FOLLOWERS` od obserwowanych autorów.
+- Publiczne `GET /posts/:id` ukrywa niepubliczne posty jako `404`.
+- Dodano devlog `devlog/18_post-visibility.md`.
+- Zweryfikowano `backend`: `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test`, `npm run test:e2e` przechodzą.
+
 ## 2026-06-29 — Profile follow counts
 
 - `GET /users/:username` zwraca teraz `followersCount` i `followingCount`.

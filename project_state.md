@@ -4,11 +4,11 @@
 
 ## Status
 
-- Etap: Faza 2 — Core Social MVP / Profile social metrics
+- Etap: Faza 2 — Core Social MVP / Post visibility
 - Ostatnia sesja: 2026-06-29
 - Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
-- Główne ryzyko: komentarze i widoczność/prywatność postów nie istnieją
-- Następny krok: zacząć comments albo doprecyzować post visibility/privacy
+- Główne ryzyko: komentarze nie istnieją
+- Następny krok: zacząć comments
 
 ## Organizacja projektu
 
@@ -37,12 +37,12 @@
 - `UsersModule` obsługuje chronione `PATCH /users/me` dla aktualizacji profilu.
 - `UsersModule` obsługuje publiczne `GET /users/:username` bez ujawniania email/passwordHash/isActive.
 - Avatar URL jest publiczny na razie; automatyczna moderacja jest odłożona, a przyszłe reportowanie profilu/avatarów opisuje `docs/profile-content-policy.md`.
-- `PostsModule` obsługuje chronione `POST /posts`, `PATCH /posts/:id`, `DELETE /posts/:id`, chroniony feed obserwowanych `GET /posts/following?limit=20&offset=0`, publiczne `GET /posts/:id`, publiczny globalny feed `GET /posts?limit=20&offset=0` i paginowaną listę postów użytkownika `GET /users/:username/posts?limit=20&offset=0` przez `UsersModule`.
+- `PostsModule` obsługuje chronione `POST /posts`, `PATCH /posts/:id`, `DELETE /posts/:id`, `PostVisibility` (`PUBLIC`, `FOLLOWERS`, `PRIVATE`), chroniony feed obserwowanych `GET /posts/following?limit=20&offset=0`, publiczne `GET /posts/:id`, publiczny globalny feed `GET /posts?limit=20&offset=0` i paginowaną listę postów użytkownika `GET /users/:username/posts?limit=20&offset=0` przez `UsersModule`.
 - `UsersModule` obsługuje relacje: `POST /users/:username/follow`, `DELETE /users/:username/follow`, `GET /users/:username/followers?limit=20&offset=0`, `GET /users/:username/following?limit=20&offset=0`.
 - Publiczne profile `GET /users/:username` zwracają `followersCount` i `followingCount`.
 - PostgreSQL z Docker Compose działa lokalnie na porcie hosta `5433`.
 - `npm run build` w `backend/` przechodzi.
-- `npm test` i `npm run test:e2e` w `backend/` przechodzą: 8 test suites, 82 testy łącznie.
+- `npm test` i `npm run test:e2e` w `backend/` przechodzą: 8 test suites, 85 testów łącznie.
 - Istnieje devlog opisujący plan PostgreSQL + MongoDB: `devlog/01_db-choice.md`.
 - Repo ma standardowe pliki workflow dla pracy Hermes ↔ VSCode/Cline/Codex.
 
@@ -54,6 +54,16 @@ Zweryfikowane przez `npm run lint && npm run prisma:validate && npm run build &&
 - Reportowanie profilu/avatarów jest świadomie w backlogu, nie w bieżącym zakresie.
 
 ## Ostatnio wykonane
+
+Data: 2026-06-29 — Post visibility
+
+- Dodano Prisma enum `PostVisibility`: `PUBLIC`, `FOLLOWERS`, `PRIVATE`.
+- Dodano migrację `20260629160111_add_post_visibility`.
+- `POST /posts` i `PATCH /posts/:id` obsługują opcjonalne `visibility`.
+- Publiczne feedy/listy zwracają tylko `PUBLIC`; following feed zwraca `PUBLIC` i `FOLLOWERS` od obserwowanych autorów.
+- Publiczne `GET /posts/:id` zwraca tylko `PUBLIC`; pozostałe widoczności są ukryte jako `404`.
+- Dodano devlog `devlog/18_post-visibility.md`.
+- Uruchomiono `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test` i `npm run test:e2e` w `backend/` — wszystko przechodzi.
 
 Data: 2026-06-29 — Profile follow counts
 
@@ -264,6 +274,7 @@ Data: 2026-06-22
 - [x] Dodać relacje/friends/follows.
 - [x] Dodać feed obserwowanych `GET /posts/following`.
 - [x] Dodać liczniki followers/following do profilu publicznego.
+- [x] Dodać widoczność/prywatność postów.
 - [ ] Dodać komentarze.
 
 ## Decyzje techniczne

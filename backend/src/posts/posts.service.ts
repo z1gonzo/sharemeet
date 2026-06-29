@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { PostVisibility } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
@@ -43,7 +44,15 @@ export class PostsService {
       data: {
         authorId,
         content: data.content,
+        visibility: data.visibility ?? PostVisibility.PUBLIC,
       },
+      include: postInclude,
+    });
+  }
+
+  findPublicById(id: string) {
+    return this.prisma.post.findFirst({
+      where: { id, visibility: PostVisibility.PUBLIC },
       include: postInclude,
     });
   }
@@ -57,6 +66,7 @@ export class PostsService {
 
   findFeed({ limit, offset }: FindFeedOptions) {
     return this.prisma.post.findMany({
+      where: { visibility: PostVisibility.PUBLIC },
       include: postInclude,
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       take: limit,
@@ -67,6 +77,7 @@ export class PostsService {
   findFollowingFeed({ followerId, limit, offset }: FindFollowingFeedOptions) {
     return this.prisma.post.findMany({
       where: {
+        visibility: { in: [PostVisibility.PUBLIC, PostVisibility.FOLLOWERS] },
         author: {
           followers: {
             some: { followerId },
@@ -82,7 +93,7 @@ export class PostsService {
 
   findByAuthorId({ authorId, limit, offset }: FindByAuthorOptions) {
     return this.prisma.post.findMany({
-      where: { authorId },
+      where: { authorId, visibility: PostVisibility.PUBLIC },
       include: postInclude,
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       take: limit,
@@ -97,7 +108,10 @@ export class PostsService {
 
     return this.prisma.post.update({
       where: { id },
-      data: { content: data.content },
+      data: {
+        content: data.content,
+        ...(data.visibility ? { visibility: data.visibility } : {}),
+      },
       include: postInclude,
     });
   }

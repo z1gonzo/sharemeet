@@ -62,7 +62,7 @@ export class PostsController {
 
   @Get(':id')
   async getPost(@Param('id') id: string) {
-    const post = await this.postsService.findById(id);
+    const post = await this.postsService.findPublicById(id);
 
     if (!post) {
       throw new NotFoundException('Post not found');
@@ -100,6 +100,7 @@ export class PostsController {
     return {
       id: post.id,
       content: post.content,
+      visibility: post.visibility,
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
       author: post.author,

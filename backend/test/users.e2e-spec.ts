@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { PostVisibility } from '@prisma/client';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { App } from 'supertest/types';
@@ -69,6 +70,7 @@ const existingPost: PostRecord = {
   id: '1f2557e7-96d8-46a6-95c7-b6790f595c85',
   authorId: existingUser.id,
   content: 'Hello ShareMeet',
+  visibility: PostVisibility.PUBLIC,
   createdAt: new Date('2026-06-27T01:00:00.000Z'),
   updatedAt: new Date('2026-06-27T01:00:00.000Z'),
   author: {

@@ -7,6 +7,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum PostVisibility {
+  PUBLIC
+  FOLLOWERS
+  PRIVATE
+}
+
 model User {
   id           String   @id @default(uuid()) @db.Uuid
   email        String   @unique
@@ -30,6 +36,7 @@ model Post {
   id        String   @id @default(uuid()) @db.Uuid
   authorId  String   @map("author_id") @db.Uuid
   content   String
+  visibility PostVisibility @default(PUBLIC)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 

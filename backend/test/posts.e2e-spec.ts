@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { PostVisibility } from '@prisma/client';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { App } from 'supertest/types';
@@ -33,6 +34,7 @@ const existingPost: PostRecord = {
   id: '1f2557e7-96d8-46a6-95c7-b6790f595c85',
   authorId: author.id,
   content: 'Hello ShareMeet',
+  visibility: PostVisibility.PUBLIC,
   createdAt: new Date('2026-06-27T00:00:00.000Z'),
   updatedAt: new Date('2026-06-27T00:00:00.000Z'),
   author,
@@ -42,6 +44,7 @@ const newerPost: PostRecord = {
   id: '50cc42ac-ef8c-4e0b-9fe6-b3562f9262de',
   authorId: author.id,
   content: 'Newest ShareMeet update',
+  visibility: PostVisibility.PUBLIC,
   createdAt: new Date('2026-06-27T00:01:00.000Z'),
   updatedAt: new Date('2026-06-27T00:01:00.000Z'),
   author,
@@ -50,6 +53,7 @@ const newerPost: PostRecord = {
 const updatedPost: PostRecord = {
   ...existingPost,
   content: 'Edited ShareMeet post',
+  visibility: PostVisibility.FOLLOWERS,
   updatedAt: new Date('2026-06-27T00:02:00.000Z'),
 };
 
@@ -57,7 +61,7 @@ describe('PostsController (e2e)', () => {
   let app: INestApplication<App>;
   let postsService: {
     createPost: jest.Mock<Promise<PostRecord>, [string, CreatePostDto]>;
-    findById: jest.Mock<Promise<PostRecord | null>, [string]>;
+    findPublicById: jest.Mock<Promise<PostRecord | null>, [string]>;
     findFeed: jest.Mock<
       Promise<PostRecord[]>,
       [{ limit: number; offset: number }]
@@ -79,7 +83,7 @@ describe('PostsController (e2e)', () => {
   beforeEach(async () => {
     postsService = {
       createPost: jest.fn<Promise<PostRecord>, [string, CreatePostDto]>(),
-      findById: jest.fn<Promise<PostRecord | null>, [string]>(),
+      findPublicById: jest.fn<Promise<PostRecord | null>, [string]>(),
       findFeed: jest.fn<
         Promise<PostRecord[]>,
         [{ limit: number; offset: number }]
@@ -136,6 +140,7 @@ describe('PostsController (e2e)', () => {
     expect(response.body).toMatchObject({
       id: existingPost.id,
       content: 'Hello ShareMeet',
+      visibility: PostVisibility.PUBLIC,
       author: {
         id: author.id,
         username: 'z1gonzo',
@@ -146,6 +151,37 @@ describe('PostsController (e2e)', () => {
     });
     expect(response.body).not.toHaveProperty('author.email');
     expect(response.body).not.toHaveProperty('author.passwordHash');
+  });
+
+  it('POST /posts accepts explicit visibility', async () => {
+    jwtService.verifyAsync.mockResolvedValue({
+      sub: author.id,
+      email: 'lukasz@example.com',
+      username: 'z1gonzo',
+    });
+    const followersPost = {
+      ...existingPost,
+      visibility: PostVisibility.FOLLOWERS,
+    };
+    postsService.createPost.mockResolvedValue(followersPost);
+
+    const response = await request(app.getHttpServer())
+      .post('/posts')
+      .set('authorization', 'Bearer signed-access-token')
+      .send({
+        content: 'Hello ShareMeet',
+        visibility: PostVisibility.FOLLOWERS,
+      })
+      .expect(201);
+
+    expect(postsService.createPost).toHaveBeenCalledWith(author.id, {
+      content: 'Hello ShareMeet',
+      visibility: PostVisibility.FOLLOWERS,
+    });
+    expect(response.body).toMatchObject({
+      id: existingPost.id,
+      visibility: PostVisibility.FOLLOWERS,
+    });
   });
 
   it('POST /posts rejects requests without a bearer token', async () => {
@@ -172,16 +208,17 @@ describe('PostsController (e2e)', () => {
   });
 
   it('GET /posts/:id returns a public post', async () => {
-    postsService.findById.mockResolvedValue(existingPost);
+    postsService.findPublicById.mockResolvedValue(existingPost);
 
     const response = await request(app.getHttpServer())
       .get(`/posts/${existingPost.id}`)
       .expect(200);
 
-    expect(postsService.findById).toHaveBeenCalledWith(existingPost.id);
+    expect(postsService.findPublicById).toHaveBeenCalledWith(existingPost.id);
     expect(response.body).toMatchObject({
       id: existingPost.id,
       content: 'Hello ShareMeet',
+      visibility: PostVisibility.PUBLIC,
       author: {
         id: author.id,
         username: 'z1gonzo',
@@ -323,17 +360,24 @@ describe('PostsController (e2e)', () => {
     const response = await request(app.getHttpServer())
       .patch(`/posts/${existingPost.id}`)
       .set('authorization', 'Bearer signed-access-token')
-      .send({ content: 'Edited ShareMeet post' })
+      .send({
+        content: 'Edited ShareMeet post',
+        visibility: PostVisibility.FOLLOWERS,
+      })
       .expect(200);
 
     expect(postsService.updateOwnPost).toHaveBeenCalledWith(
       existingPost.id,
       author.id,
-      { content: 'Edited ShareMeet post' },
+      {
+        content: 'Edited ShareMeet post',
+        visibility: PostVisibility.FOLLOWERS,
+      },
     );
     expect(response.body).toMatchObject({
       id: existingPost.id,
       content: 'Edited ShareMeet post',
+      visibility: PostVisibility.FOLLOWERS,
       author: { id: author.id, username: 'z1gonzo' },
     });
     expect(response.body).not.toHaveProperty('author.email');
@@ -460,7 +504,7 @@ describe('PostsController (e2e)', () => {
   });
 
   it('GET /posts/:id returns 404 for a missing post', async () => {
-    postsService.findById.mockResolvedValue(null);
+    postsService.findPublicById.mockResolvedValue(null);
 
     await request(app.getHttpServer())
       .get('/posts/00000000-0000-0000-0000-000000000000')

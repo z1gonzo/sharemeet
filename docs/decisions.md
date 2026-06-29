@@ -307,3 +307,24 @@ Status: accepted
 
 - Brak nowej migracji i brak ryzyka niespójnych liczników.
 - Przy dużej skali można wrócić do denormalizacji lub cache.
+
+---
+
+## 2026-06-29 — `PostVisibility` dla public/followers/private
+
+Status: accepted
+
+### Decyzja
+
+- Dodajemy Prisma enum `PostVisibility`: `PUBLIC`, `FOLLOWERS`, `PRIVATE`.
+- Nowe posty domyślnie są `PUBLIC`.
+- `POST /posts` i `PATCH /posts/:id` przyjmują opcjonalne `visibility`.
+- Publiczne endpointy `GET /posts`, `GET /posts/:id` i `GET /users/:username/posts` zwracają tylko `PUBLIC`.
+- `GET /posts/following` zwraca `PUBLIC` i `FOLLOWERS` od obserwowanych autorów.
+- `PRIVATE` nie trafia do feedów publicznych ani following feedu.
+
+### Konsekwencje
+
+- Niepubliczne posty są ukrywane w publicznym `GET /posts/:id` jako `404`.
+- Nie dodajemy jeszcze endpointu „moje posty” do podglądu własnych prywatnych postów.
+- Cursor pagination, ranking i konto prywatne jako approval workflow zostają odłożone.
