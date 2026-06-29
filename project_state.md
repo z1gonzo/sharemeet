@@ -4,11 +4,11 @@
 
 ## Status
 
-- Etap: Faza 2 — Core Social MVP / Comments
+- Etap: Faza 2 — Core Social MVP / Post comment counts
 - Ostatnia sesja: 2026-06-29
 - Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
-- Główne ryzyko: brak liczników komentarzy i brak podglądu własnych prywatnych postów
-- Następny krok: dodać commentsCount na postach albo endpoint „moje posty”
+- Główne ryzyko: brak podglądu własnych prywatnych postów i brak frontendu
+- Następny krok: dodać endpoint „moje posty” albo zacząć podstawowy frontend
 
 ## Organizacja projektu
 
@@ -38,6 +38,7 @@
 - `UsersModule` obsługuje publiczne `GET /users/:username` bez ujawniania email/passwordHash/isActive.
 - Avatar URL jest publiczny na razie; automatyczna moderacja jest odłożona, a przyszłe reportowanie profilu/avatarów opisuje `docs/profile-content-policy.md`.
 - `PostsModule` obsługuje chronione `POST /posts`, `PATCH /posts/:id`, `DELETE /posts/:id`, `PostVisibility` (`PUBLIC`, `FOLLOWERS`, `PRIVATE`), chroniony feed obserwowanych `GET /posts/following?limit=20&offset=0`, publiczne `GET /posts/:id`, publiczny globalny feed `GET /posts?limit=20&offset=0` i paginowaną listę postów użytkownika `GET /users/:username/posts?limit=20&offset=0` przez `UsersModule`.
+- Publiczne odpowiedzi z postami zwracają `commentsCount` wyliczany przez Prisma `_count`.
 - `CommentsModule` obsługuje `POST /posts/:postId/comments`, `GET /posts/:postId/comments?limit=20&offset=0`, `PATCH /comments/:id` i `DELETE /comments/:id` dla publicznych postów.
 - `UsersModule` obsługuje relacje: `POST /users/:username/follow`, `DELETE /users/:username/follow`, `GET /users/:username/followers?limit=20&offset=0`, `GET /users/:username/following?limit=20&offset=0`.
 - Publiczne profile `GET /users/:username` zwracają `followersCount` i `followingCount`.
@@ -51,10 +52,17 @@
 
 Zweryfikowane przez `npm run lint && npm run prisma:validate && npm run build && npm test && npm run test:e2e` w `backend/` na 2026-06-29:
 
-- Brakuje liczników komentarzy na postach.
+- Brakuje endpointu do podglądu własnych prywatnych postów.
 - Reportowanie profilu/avatarów jest świadomie w backlogu, nie w bieżącym zakresie.
 
 ## Ostatnio wykonane
+
+Data: 2026-06-29 — Post comments count
+
+- Dodano `commentsCount` do publicznych odpowiedzi z postami przez Prisma `_count.comments`.
+- `commentsCount` jest zwracany w `POST /posts`, `GET /posts/:id`, `GET /posts`, `GET /posts/following`, `PATCH /posts/:id` i `GET /users/:username/posts`.
+- Nie dodano migracji — licznik nie jest denormalizowany.
+- Dodano devlog `devlog/20_post-comments-count.md`.
 
 Data: 2026-06-29 — Comments
 
@@ -287,7 +295,8 @@ Data: 2026-06-22
 - [x] Dodać liczniki followers/following do profilu publicznego.
 - [x] Dodać widoczność/prywatność postów.
 - [x] Dodać komentarze.
-- [ ] Dodać liczniki komentarzy na postach.
+- [x] Dodać liczniki komentarzy na postach.
+- [ ] Dodać endpoint „moje posty” dla własnych prywatnych treści.
 
 ## Decyzje techniczne
 

@@ -20,6 +20,7 @@ const post = {
   createdAt: new Date('2026-06-27T00:00:00.000Z'),
   updatedAt: new Date('2026-06-27T00:00:00.000Z'),
   author,
+  _count: { comments: 4 },
 };
 
 describe('PostsService', () => {

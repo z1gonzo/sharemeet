@@ -2,6 +2,14 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-06-29 — Post comments count
+
+- Dodano `commentsCount` do publicznych odpowiedzi z postami.
+- Licznik jest wyliczany przez Prisma `_count.comments`, bez nowej migracji i bez denormalizacji.
+- Dotyczy feedów, publicznego odczytu posta, tworzenia/edycji posta oraz `GET /users/:username/posts`.
+- Dodano devlog `devlog/20_post-comments-count.md`.
+- Zweryfikowano `backend`: `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test`, `npm run test:e2e` przechodzą.
+
 ## 2026-06-29 — Comments
 
 - Dodano model Prisma `Comment` i migrację `20260629162741_add_comments`.

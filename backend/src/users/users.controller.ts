@@ -177,6 +177,8 @@ export class UsersController {
     return {
       id: post.id,
       content: post.content,
+      visibility: post.visibility,
+      commentsCount: post._count.comments,
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
       author: post.author,

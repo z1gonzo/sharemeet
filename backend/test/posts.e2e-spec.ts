@@ -38,6 +38,7 @@ const existingPost: PostRecord = {
   createdAt: new Date('2026-06-27T00:00:00.000Z'),
   updatedAt: new Date('2026-06-27T00:00:00.000Z'),
   author,
+  _count: { comments: 4 },
 };
 
 const newerPost: PostRecord = {
@@ -48,6 +49,7 @@ const newerPost: PostRecord = {
   createdAt: new Date('2026-06-27T00:01:00.000Z'),
   updatedAt: new Date('2026-06-27T00:01:00.000Z'),
   author,
+  _count: { comments: 2 },
 };
 
 const updatedPost: PostRecord = {
@@ -141,6 +143,7 @@ describe('PostsController (e2e)', () => {
       id: existingPost.id,
       content: 'Hello ShareMeet',
       visibility: PostVisibility.PUBLIC,
+      commentsCount: 4,
       author: {
         id: author.id,
         username: 'z1gonzo',
@@ -219,6 +222,7 @@ describe('PostsController (e2e)', () => {
       id: existingPost.id,
       content: 'Hello ShareMeet',
       visibility: PostVisibility.PUBLIC,
+      commentsCount: 4,
       author: {
         id: author.id,
         username: 'z1gonzo',
@@ -243,11 +247,13 @@ describe('PostsController (e2e)', () => {
       {
         id: newerPost.id,
         content: 'Newest ShareMeet update',
+        commentsCount: 2,
         author: { id: author.id, username: 'z1gonzo' },
       },
       {
         id: existingPost.id,
         content: 'Hello ShareMeet',
+        commentsCount: 4,
         author: { id: author.id, username: 'z1gonzo' },
       },
     ]);
@@ -291,11 +297,13 @@ describe('PostsController (e2e)', () => {
       {
         id: newerPost.id,
         content: 'Newest ShareMeet update',
+        commentsCount: 2,
         author: { id: author.id, username: 'z1gonzo' },
       },
       {
         id: existingPost.id,
         content: 'Hello ShareMeet',
+        commentsCount: 4,
         author: { id: author.id, username: 'z1gonzo' },
       },
     ]);
@@ -378,6 +386,7 @@ describe('PostsController (e2e)', () => {
       id: existingPost.id,
       content: 'Edited ShareMeet post',
       visibility: PostVisibility.FOLLOWERS,
+      commentsCount: 4,
       author: { id: author.id, username: 'z1gonzo' },
     });
     expect(response.body).not.toHaveProperty('author.email');

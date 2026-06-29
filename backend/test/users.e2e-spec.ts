@@ -80,6 +80,7 @@ const existingPost: PostRecord = {
     avatarUrl: existingUser.avatarUrl,
     isPrivate: existingUser.isPrivate,
   },
+  _count: { comments: 4 },
 };
 
 describe('UsersController (e2e)', () => {
@@ -209,6 +210,8 @@ describe('UsersController (e2e)', () => {
       {
         id: existingPost.id,
         content: 'Hello ShareMeet',
+        visibility: PostVisibility.PUBLIC,
+        commentsCount: 4,
         author: {
           id: existingUser.id,
           username: 'z1gonzo',

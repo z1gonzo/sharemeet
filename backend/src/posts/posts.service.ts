@@ -20,6 +20,11 @@ export const postInclude = {
   author: {
     select: postAuthorSelect,
   },
+  _count: {
+    select: {
+      comments: true,
+    },
+  },
 } as const;
 
 interface FindFeedOptions {

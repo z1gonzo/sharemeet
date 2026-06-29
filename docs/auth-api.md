@@ -270,6 +270,7 @@ Authorization: Bearer <accessToken>
   "id": "uuid",
   "content": "Hello ShareMeet",
   "visibility": "PUBLIC",
+  "commentsCount": 0,
   "createdAt": "2026-06-27T00:00:00.000Z",
   "updatedAt": "2026-06-27T00:00:00.000Z",
   "author": {
@@ -382,6 +383,7 @@ createdAt desc, id desc
     "id": "uuid",
     "content": "Hello ShareMeet",
     "visibility": "PUBLIC",
+    "commentsCount": 4,
     "createdAt": "2026-06-29T00:00:00.000Z",
     "updatedAt": "2026-06-29T00:00:00.000Z",
     "author": {
