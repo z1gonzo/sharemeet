@@ -1,8 +1,12 @@
-import { ConflictException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../prisma/prisma.service';
-import { UsersService } from './users.service';
+import { publicUserSelect, UsersService } from './users.service';
 
 const user = {
   id: '8b2777e0-0f29-4c73-8708-9c27f98d34aa',
@@ -18,6 +22,23 @@ const user = {
   updatedAt: new Date('2026-06-27T00:00:00.000Z'),
 };
 
+const otherUser = {
+  ...user,
+  id: '16e79b18-96a3-4a14-b4f7-923044cd9f0b',
+  email: 'other@example.com',
+  username: 'otheruser',
+  displayName: 'Other User',
+};
+
+const follow = {
+  id: '60f5e8fd-4fe4-4d66-a09c-d4838ac3a2ac',
+  followerId: user.id,
+  followingId: otherUser.id,
+  createdAt: new Date('2026-06-29T12:00:00.000Z'),
+  follower: user,
+  following: otherUser,
+};
+
 describe('UsersService', () => {
   let service: UsersService;
   let prisma: {
@@ -25,6 +46,11 @@ describe('UsersService', () => {
       create: jest.Mock;
       findUnique: jest.Mock;
       update: jest.Mock;
+    };
+    follow: {
+      create: jest.Mock;
+      deleteMany: jest.Mock;
+      findMany: jest.Mock;
     };
   };
 
@@ -34,6 +60,11 @@ describe('UsersService', () => {
         create: jest.fn(),
         findUnique: jest.fn(),
         update: jest.fn(),
+      },
+      follow: {
+        create: jest.fn(),
+        deleteMany: jest.fn(),
+        findMany: jest.fn(),
       },
     };
 
@@ -116,6 +147,107 @@ describe('UsersService', () => {
         avatarUrl: 'https://example.com/avatar.png',
         isPrivate: true,
       },
+    });
+  });
+
+  it('follows another user', async () => {
+    prisma.user.findUnique.mockResolvedValue(otherUser);
+    prisma.follow.create.mockResolvedValue(follow);
+
+    await expect(service.followUser(user.id, 'otheruser')).resolves.toEqual(
+      otherUser,
+    );
+
+    expect(prisma.follow.create).toHaveBeenCalledWith({
+      data: {
+        followerId: user.id,
+        followingId: otherUser.id,
+      },
+    });
+  });
+
+  it('rejects following self', async () => {
+    prisma.user.findUnique.mockResolvedValue(user);
+
+    await expect(service.followUser(user.id, 'z1gonzo')).rejects.toThrow(
+      new BadRequestException('You cannot follow yourself'),
+    );
+
+    expect(prisma.follow.create).not.toHaveBeenCalled();
+  });
+
+  it('returns 404 when following missing user', async () => {
+    prisma.user.findUnique.mockResolvedValue(null);
+
+    await expect(service.followUser(user.id, 'missinguser')).rejects.toThrow(
+      new NotFoundException('User profile not found'),
+    );
+
+    expect(prisma.follow.create).not.toHaveBeenCalled();
+  });
+
+  it('returns conflict when already following user', async () => {
+    prisma.user.findUnique.mockResolvedValue(otherUser);
+    prisma.follow.create.mockRejectedValue(
+      new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+        code: 'P2002',
+        clientVersion: '6.19.3',
+        meta: { target: ['followerId', 'followingId'] },
+      }),
+    );
+
+    await expect(service.followUser(user.id, 'otheruser')).rejects.toThrow(
+      new ConflictException('Already following user'),
+    );
+  });
+
+  it('unfollows another user idempotently', async () => {
+    prisma.user.findUnique.mockResolvedValue(otherUser);
+    prisma.follow.deleteMany.mockResolvedValue({ count: 1 });
+
+    await expect(
+      service.unfollowUser(user.id, 'otheruser'),
+    ).resolves.toBeUndefined();
+
+    expect(prisma.follow.deleteMany).toHaveBeenCalledWith({
+      where: {
+        followerId: user.id,
+        followingId: otherUser.id,
+      },
+    });
+  });
+
+  it('lists followers newest first with pagination', async () => {
+    prisma.user.findUnique.mockResolvedValue(otherUser);
+    prisma.follow.findMany.mockResolvedValue([follow]);
+
+    await expect(
+      service.listFollowers('otheruser', { limit: 20, offset: 0 }),
+    ).resolves.toEqual([follow]);
+
+    expect(prisma.follow.findMany).toHaveBeenCalledWith({
+      where: { followingId: otherUser.id },
+      include: { follower: { select: publicUserSelect } },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      take: 20,
+      skip: 0,
+    });
+  });
+
+  it('lists following newest first with pagination', async () => {
+    prisma.user.findUnique.mockResolvedValue(user);
+    prisma.follow.findMany.mockResolvedValue([follow]);
+
+    await expect(
+      service.listFollowing('z1gonzo', { limit: 10, offset: 5 }),
+    ).resolves.toEqual([follow]);
+
+    expect(prisma.follow.findMany).toHaveBeenCalledWith({
+      where: { followerId: user.id },
+      include: { following: { select: publicUserSelect } },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      take: 10,
+      skip: 5,
     });
   });
 

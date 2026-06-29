@@ -1,4 +1,9 @@
-import { INestApplication } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  INestApplication,
+  NotFoundException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
@@ -32,6 +37,23 @@ const existingUser: UserRecord = {
   updatedAt: new Date('2026-06-27T00:00:00.000Z'),
 };
 
+const otherUser: UserRecord = {
+  ...existingUser,
+  id: '16e79b18-96a3-4a14-b4f7-923044cd9f0b',
+  email: 'other@example.com',
+  username: 'otheruser',
+  displayName: 'Other User',
+};
+
+const follow = {
+  id: '60f5e8fd-4fe4-4d66-a09c-d4838ac3a2ac',
+  followerId: existingUser.id,
+  followingId: otherUser.id,
+  createdAt: new Date('2026-06-29T12:00:00.000Z'),
+  follower: existingUser,
+  following: otherUser,
+};
+
 const existingPost: PostRecord = {
   id: '1f2557e7-96d8-46a6-95c7-b6790f595c85',
   authorId: existingUser.id,
@@ -52,6 +74,16 @@ describe('UsersController (e2e)', () => {
   let usersService: {
     updateProfile: jest.Mock<Promise<UserRecord>, [string, UpdateProfileDto]>;
     findByUsername: jest.Mock<Promise<UserRecord | null>, [string]>;
+    followUser: jest.Mock<Promise<UserRecord>, [string, string]>;
+    unfollowUser: jest.Mock<Promise<void>, [string, string]>;
+    listFollowers: jest.Mock<
+      Promise<Array<typeof follow>>,
+      [string, { limit: number; offset: number }]
+    >;
+    listFollowing: jest.Mock<
+      Promise<Array<typeof follow>>,
+      [string, { limit: number; offset: number }]
+    >;
   };
   let postsService: {
     findByAuthorId: jest.Mock<
@@ -67,6 +99,16 @@ describe('UsersController (e2e)', () => {
     usersService = {
       updateProfile: jest.fn<Promise<UserRecord>, [string, UpdateProfileDto]>(),
       findByUsername: jest.fn<Promise<UserRecord | null>, [string]>(),
+      followUser: jest.fn<Promise<UserRecord>, [string, string]>(),
+      unfollowUser: jest.fn<Promise<void>, [string, string]>(),
+      listFollowers: jest.fn<
+        Promise<Array<typeof follow>>,
+        [string, { limit: number; offset: number }]
+      >(),
+      listFollowing: jest.fn<
+        Promise<Array<typeof follow>>,
+        [string, { limit: number; offset: number }]
+      >(),
     };
     postsService = {
       findByAuthorId: jest.fn<
@@ -207,6 +249,178 @@ describe('UsersController (e2e)', () => {
     usersService.findByUsername.mockResolvedValue(null);
 
     await request(app.getHttpServer()).get('/users/missinguser').expect(404);
+  });
+
+  it('POST /users/:username/follow follows a user', async () => {
+    jwtService.verifyAsync.mockResolvedValue({
+      sub: existingUser.id,
+      email: 'lukasz@example.com',
+      username: 'z1gonzo',
+    });
+    usersService.followUser.mockResolvedValue(otherUser);
+
+    const response = await request(app.getHttpServer())
+      .post('/users/otheruser/follow')
+      .set('authorization', 'Bearer signed-access-token')
+      .expect(201);
+
+    expect(usersService.followUser).toHaveBeenCalledWith(
+      existingUser.id,
+      'otheruser',
+    );
+    expect(response.body).toMatchObject({
+      id: otherUser.id,
+      username: 'otheruser',
+      displayName: 'Other User',
+    });
+    expect(response.body).not.toHaveProperty('email');
+    expect(response.body).not.toHaveProperty('passwordHash');
+  });
+
+  it('POST /users/:username/follow rejects requests without a bearer token', async () => {
+    await request(app.getHttpServer())
+      .post('/users/otheruser/follow')
+      .expect(401);
+
+    expect(usersService.followUser).not.toHaveBeenCalled();
+  });
+
+  it('POST /users/:username/follow returns 400 for self-follow', async () => {
+    jwtService.verifyAsync.mockResolvedValue({
+      sub: existingUser.id,
+      email: 'lukasz@example.com',
+      username: 'z1gonzo',
+    });
+    usersService.followUser.mockRejectedValue(
+      new BadRequestException('You cannot follow yourself'),
+    );
+
+    await request(app.getHttpServer())
+      .post('/users/z1gonzo/follow')
+      .set('authorization', 'Bearer signed-access-token')
+      .expect(400);
+  });
+
+  it('POST /users/:username/follow returns 404 for missing profile', async () => {
+    jwtService.verifyAsync.mockResolvedValue({
+      sub: existingUser.id,
+      email: 'lukasz@example.com',
+      username: 'z1gonzo',
+    });
+    usersService.followUser.mockRejectedValue(
+      new NotFoundException('User profile not found'),
+    );
+
+    await request(app.getHttpServer())
+      .post('/users/missinguser/follow')
+      .set('authorization', 'Bearer signed-access-token')
+      .expect(404);
+  });
+
+  it('POST /users/:username/follow returns 409 when already following', async () => {
+    jwtService.verifyAsync.mockResolvedValue({
+      sub: existingUser.id,
+      email: 'lukasz@example.com',
+      username: 'z1gonzo',
+    });
+    usersService.followUser.mockRejectedValue(
+      new ConflictException('Already following user'),
+    );
+
+    await request(app.getHttpServer())
+      .post('/users/otheruser/follow')
+      .set('authorization', 'Bearer signed-access-token')
+      .expect(409);
+  });
+
+  it('DELETE /users/:username/follow unfollows a user idempotently', async () => {
+    jwtService.verifyAsync.mockResolvedValue({
+      sub: existingUser.id,
+      email: 'lukasz@example.com',
+      username: 'z1gonzo',
+    });
+    usersService.unfollowUser.mockResolvedValue(undefined);
+
+    await request(app.getHttpServer())
+      .delete('/users/otheruser/follow')
+      .set('authorization', 'Bearer signed-access-token')
+      .expect(204)
+      .expect('');
+
+    expect(usersService.unfollowUser).toHaveBeenCalledWith(
+      existingUser.id,
+      'otheruser',
+    );
+  });
+
+  it('DELETE /users/:username/follow rejects requests without a bearer token', async () => {
+    await request(app.getHttpServer())
+      .delete('/users/otheruser/follow')
+      .expect(401);
+
+    expect(usersService.unfollowUser).not.toHaveBeenCalled();
+  });
+
+  it('GET /users/:username/followers returns paginated followers', async () => {
+    usersService.listFollowers.mockResolvedValue([follow]);
+
+    const response = await request(app.getHttpServer())
+      .get('/users/otheruser/followers?limit=1&offset=0')
+      .expect(200);
+
+    expect(usersService.listFollowers).toHaveBeenCalledWith('otheruser', {
+      limit: 1,
+      offset: 0,
+    });
+    expect(response.body).toMatchObject([
+      {
+        id: existingUser.id,
+        username: 'z1gonzo',
+      },
+    ]);
+    expect(JSON.stringify(response.body)).not.toContain('email');
+    expect(JSON.stringify(response.body)).not.toContain('passwordHash');
+  });
+
+  it('GET /users/:username/following returns paginated followed users', async () => {
+    usersService.listFollowing.mockResolvedValue([follow]);
+
+    const response = await request(app.getHttpServer())
+      .get('/users/z1gonzo/following?limit=1&offset=0')
+      .expect(200);
+
+    expect(usersService.listFollowing).toHaveBeenCalledWith('z1gonzo', {
+      limit: 1,
+      offset: 0,
+    });
+    expect(response.body).toMatchObject([
+      {
+        id: otherUser.id,
+        username: 'otheruser',
+      },
+    ]);
+  });
+
+  it('GET /users/:username/followers rejects invalid pagination query params', async () => {
+    await request(app.getHttpServer())
+      .get('/users/z1gonzo/followers?limit=51')
+      .expect(400);
+    await request(app.getHttpServer())
+      .get('/users/z1gonzo/following?offset=-1')
+      .expect(400);
+
+    expect(usersService.listFollowers).not.toHaveBeenCalled();
+    expect(usersService.listFollowing).not.toHaveBeenCalled();
+  });
+
+  it('GET /users/:username/followers returns 404 for missing profile', async () => {
+    usersService.listFollowers.mockRejectedValue(
+      new NotFoundException('User profile not found'),
+    );
+
+    await request(app.getHttpServer())
+      .get('/users/missinguser/followers')
+      .expect(404);
   });
 
   it('PATCH /users/me updates current user profile', async () => {

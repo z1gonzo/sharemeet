@@ -2,6 +2,17 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-06-29 — Relationships/follows
+
+- Dodano model Prisma `Follow` i migrację `20260629123023_add_follows`.
+- Dodano `ListUsersQueryDto` dla paginacji list followers/following.
+- Dodano chronione `POST /users/:username/follow` i `DELETE /users/:username/follow`.
+- Dodano publiczne `GET /users/:username/followers?limit=20&offset=0` i `GET /users/:username/following?limit=20&offset=0`.
+- Self-follow/self-unfollow zwraca `400`, brak profilu `404`, duplikat follow `409`.
+- `DELETE /users/:username/follow` zwraca `204` i jest idempotentny względem braku istniejącej relacji.
+- Dodano devlog `devlog/15_relationships-follows.md`.
+- Zweryfikowano `backend`: `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test`, `npm run test:e2e` przechodzą.
+
 ## 2026-06-29 — Post edit/delete
 
 - Dodano `UpdatePostDto` dla edycji treści posta.

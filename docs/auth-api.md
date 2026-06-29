@@ -134,6 +134,72 @@ Posty są sortowane od najnowszych: `createdAt desc`, `id desc`.
 | `400` | Niepoprawne query params |
 | `404` | Profil nie istnieje |
 
+## `POST /users/:username/follow`
+
+Tworzy relację obserwowania aktualny użytkownik → użytkownik `:username`. Endpoint wymaga JWT access tokena.
+
+### Header
+
+```http
+Authorization: Bearer ***
+```
+
+### Responses
+
+| Status | Znaczenie |
+|---|---|
+| `201` | Follow utworzony; zwrócono publiczny profil obserwowanego użytkownika |
+| `400` | Próba follow samego siebie |
+| `401` | Brak tokena albo token niepoprawny |
+| `404` | Profil nie istnieje |
+| `409` | Relacja już istnieje |
+
+## `DELETE /users/:username/follow`
+
+Usuwa relację obserwowania aktualny użytkownik → użytkownik `:username`. Endpoint wymaga JWT access tokena.
+
+Operacja jest idempotentna względem braku istniejącej relacji: jeśli użytkownik nie obserwował profilu, endpoint nadal zwraca `204`.
+
+### Header
+
+```http
+Authorization: Bearer ***
+```
+
+### Responses
+
+| Status | Znaczenie |
+|---|---|
+| `204` | Relacja usunięta albo już jej nie było; brak body |
+| `400` | Próba unfollow samego siebie |
+| `401` | Brak tokena albo token niepoprawny |
+| `404` | Profil nie istnieje |
+
+## `GET /users/:username/followers`
+
+Zwraca publiczną listę profili obserwujących użytkownika. Endpoint nie wymaga tokena.
+
+### Query params
+
+| Param | Default | Walidacja | Znaczenie |
+|---|---:|---|---|
+| `limit` | `20` | integer `1..50` | Maksymalna liczba profili |
+| `offset` | `0` | integer `>= 0` | Liczba najnowszych relacji do pominięcia |
+
+### Responses
+
+| Status | Znaczenie |
+|---|---|
+| `200` | Zwrócono listę profili; może być pusta `[]` |
+| `400` | Niepoprawne query params |
+| `404` | Profil nie istnieje |
+
+## `GET /users/:username/following`
+
+Zwraca publiczną listę profili obserwowanych przez użytkownika. Endpoint nie wymaga tokena.
+
+Query params i responses są takie same jak dla `GET /users/:username/followers`.
+
 ## `PATCH /users/me`
 
 Aktualizuje profil aktualnego użytkownika. Endpoint wymaga JWT access tokena.

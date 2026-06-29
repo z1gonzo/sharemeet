@@ -1,8 +1,28 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+
+export const publicUserSelect = {
+  id: true,
+  username: true,
+  displayName: true,
+  bio: true,
+  avatarUrl: true,
+  isPrivate: true,
+  createdAt: true,
+} as const;
+
+interface ListUsersOptions {
+  limit: number;
+  offset: number;
+}
 
 @Injectable()
 export class UsersService {
@@ -36,6 +56,86 @@ export class UsersService {
     return this.prisma.user.update({
       where: { id },
       data,
+    });
+  }
+
+  async followUser(followerId: string, followingUsername: string) {
+    const following = await this.findByUsername(followingUsername);
+
+    if (!following) {
+      throw new NotFoundException('User profile not found');
+    }
+
+    if (following.id === followerId) {
+      throw new BadRequestException('You cannot follow yourself');
+    }
+
+    try {
+      await this.prisma.follow.create({
+        data: {
+          followerId,
+          followingId: following.id,
+        },
+      });
+    } catch (error) {
+      if (this.isUniqueConstraintError(error)) {
+        throw new ConflictException('Already following user');
+      }
+
+      throw error;
+    }
+
+    return following;
+  }
+
+  async unfollowUser(followerId: string, followingUsername: string) {
+    const following = await this.findByUsername(followingUsername);
+
+    if (!following) {
+      throw new NotFoundException('User profile not found');
+    }
+
+    if (following.id === followerId) {
+      throw new BadRequestException('You cannot unfollow yourself');
+    }
+
+    await this.prisma.follow.deleteMany({
+      where: {
+        followerId,
+        followingId: following.id,
+      },
+    });
+  }
+
+  async listFollowers(username: string, { limit, offset }: ListUsersOptions) {
+    const user = await this.findByUsername(username);
+
+    if (!user) {
+      throw new NotFoundException('User profile not found');
+    }
+
+    return this.prisma.follow.findMany({
+      where: { followingId: user.id },
+      include: { follower: { select: publicUserSelect } },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      take: limit,
+      skip: offset,
+    });
+  }
+
+  async listFollowing(username: string, { limit, offset }: ListUsersOptions) {
+    const user = await this.findByUsername(username);
+
+    if (!user) {
+      throw new NotFoundException('User profile not found');
+    }
+
+    return this.prisma.follow.findMany({
+      where: { followerId: user.id },
+      include: { following: { select: publicUserSelect } },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      take: limit,
+      skip: offset,
     });
   }
 

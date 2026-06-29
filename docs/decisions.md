@@ -239,3 +239,29 @@ Po dodaniu tworzenia i listowania postów potrzebne są podstawowe operacje zarz
 - Posty tekstowe mają podstawowy CRUD dla autora.
 - Nie dodajemy jeszcze soft delete, historii edycji ani uprawnień moderatora.
 - Przed relacjami/follows mamy zamknięty podstawowy zakres zarządzania własnymi postami.
+
+---
+
+## 2026-06-29 — `Follow` jako kierunkowa relacja użytkownik → użytkownik
+
+Status: accepted
+
+### Kontekst
+
+Po dodaniu profili i postów globalny feed nadal nie ma social graphu. Najprostszy fundament pod feed obserwowanych to relacja kierunkowa: jeden użytkownik obserwuje drugiego.
+
+### Decyzja
+
+- Dodajemy model Prisma `Follow` mapowany na tabelę `follows`.
+- Relacja ma `followerId` i `followingId`.
+- Para `(followerId, followingId)` jest unikalna.
+- Kasowanie użytkownika kaskadowo usuwa powiązane follows.
+- Dodajemy chronione `POST /users/:username/follow` i `DELETE /users/:username/follow`.
+- Dodajemy publiczne listy `GET /users/:username/followers` i `GET /users/:username/following` z `limit/offset`.
+- `DELETE /users/:username/follow` jest idempotentne, gdy relacja nie istnieje.
+
+### Konsekwencje
+
+- Można zbudować feed obserwowanych przez filtr po `followingId` aktualnego użytkownika.
+- Nie obsługujemy jeszcze kont prywatnych jako request/approval workflow.
+- Nie dodajemy jeszcze liczników followers/following ani pola `isFollowing` na profilu.

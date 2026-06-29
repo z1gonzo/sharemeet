@@ -1,10 +1,13 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
   NotFoundException,
   Param,
   Patch,
+  Post,
   Query,
   Req,
   UseGuards,
@@ -13,11 +16,22 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import type { AuthenticatedRequest } from '../common/guards/jwt-auth.guard';
 import { ListPostsQueryDto } from '../posts/dto/list-posts-query.dto';
 import { PostsService } from '../posts/posts.service';
+import { ListUsersQueryDto } from './dto/list-users-query.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UsersService } from './users.service';
 
 type UserRecord = Awaited<ReturnType<UsersService['updateProfile']>>;
 type PostRecord = Awaited<ReturnType<PostsService['createPost']>>;
+type PublicUserRecord = Pick<
+  UserRecord,
+  | 'id'
+  | 'username'
+  | 'displayName'
+  | 'bio'
+  | 'avatarUrl'
+  | 'isPrivate'
+  | 'createdAt'
+>;
 
 @Controller('users')
 export class UsersController {
@@ -25,6 +39,56 @@ export class UsersController {
     private readonly usersService: UsersService,
     private readonly postsService: PostsService,
   ) {}
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':username/follow')
+  async followUser(
+    @Param('username') username: string,
+    @Req() request: AuthenticatedRequest,
+  ) {
+    const following = await this.usersService.followUser(
+      request.user.sub,
+      username,
+    );
+
+    return this.toPublicProfile(following);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':username/follow')
+  @HttpCode(204)
+  async unfollowUser(
+    @Param('username') username: string,
+    @Req() request: AuthenticatedRequest,
+  ) {
+    await this.usersService.unfollowUser(request.user.sub, username);
+  }
+
+  @Get(':username/followers')
+  async getFollowers(
+    @Param('username') username: string,
+    @Query() query: ListUsersQueryDto,
+  ) {
+    const follows = await this.usersService.listFollowers(username, {
+      limit: query.limit ?? 20,
+      offset: query.offset ?? 0,
+    });
+
+    return follows.map((follow) => this.toPublicProfile(follow.follower));
+  }
+
+  @Get(':username/following')
+  async getFollowing(
+    @Param('username') username: string,
+    @Query() query: ListUsersQueryDto,
+  ) {
+    const follows = await this.usersService.listFollowing(username, {
+      limit: query.limit ?? 20,
+      offset: query.offset ?? 0,
+    });
+
+    return follows.map((follow) => this.toPublicProfile(follow.following));
+  }
 
   @Get(':username/posts')
   async getPublicProfilePosts(
@@ -81,7 +145,7 @@ export class UsersController {
     };
   }
 
-  private toPublicProfile(user: UserRecord) {
+  private toPublicProfile(user: PublicUserRecord) {
     return {
       id: user.id,
       username: user.username,
