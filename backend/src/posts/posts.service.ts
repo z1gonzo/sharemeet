@@ -16,6 +16,11 @@ export const postInclude = {
   },
 } as const;
 
+interface FindFeedOptions {
+  limit: number;
+  offset: number;
+}
+
 @Injectable()
 export class PostsService {
   constructor(private readonly prisma: PrismaService) {}
@@ -34,6 +39,15 @@ export class PostsService {
     return this.prisma.post.findUnique({
       where: { id },
       include: postInclude,
+    });
+  }
+
+  findFeed({ limit, offset }: FindFeedOptions) {
+    return this.prisma.post.findMany({
+      include: postInclude,
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      take: limit,
+      skip: offset,
     });
   }
 

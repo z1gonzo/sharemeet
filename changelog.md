@@ -2,6 +2,16 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-06-29 — Global posts feed
+
+- Dodano `ListPostsQueryDto` dla query params `limit` i `offset`.
+- Dodano publiczne `GET /posts?limit=20&offset=0`.
+- Feed zwraca posty od najnowszych (`createdAt desc`, `id desc`).
+- `limit` ma zakres `1..50`, `offset` musi być `>= 0`; błędne query params zwracają `400`.
+- Dodano devlog `devlog/12_global-post-feed.md`.
+- Nie wykonano pełnego real smoke testu z zapisem do bazy, bo komenda z cleanupem testowego użytkownika została zablokowana przez guard narzędzia; pokrycie zapewniają unit/e2e testy.
+- Zweryfikowano `backend`: `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test`, `npm run test:e2e` przechodzą.
+
 ## 2026-06-27 — User post list
 
 - Dodano `PostsService.findByAuthorId`.

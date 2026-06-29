@@ -1,6 +1,6 @@
 # Auth API
 
-Stan na: 2026-06-27
+Stan na: 2026-06-29
 
 Auth foundation jest obecnie celowo proste: email/password + JWT access token. Refresh token i Google OAuth są odłożone do backlogu, dopóki podstawowy backend i profil użytkownika nie są stabilne.
 
@@ -221,6 +221,50 @@ Zwraca publiczny post po id. Endpoint nie wymaga tokena.
 |---|---|
 | `200` | Zwrócono publiczny post |
 | `404` | Post nie istnieje |
+
+## `GET /posts`
+
+Zwraca publiczny globalny feed najnowszych postów. Endpoint nie wymaga tokena.
+
+### Query params
+
+| Param | Default | Walidacja | Znaczenie |
+|---|---:|---|---|
+| `limit` | `20` | integer `1..50` | Maksymalna liczba postów |
+| `offset` | `0` | integer `>= 0` | Liczba najnowszych postów do pominięcia |
+
+### Sortowanie
+
+```text
+createdAt desc, id desc
+```
+
+### Response `200`
+
+```json
+[
+  {
+    "id": "uuid",
+    "content": "Hello ShareMeet",
+    "createdAt": "2026-06-29T00:00:00.000Z",
+    "updatedAt": "2026-06-29T00:00:00.000Z",
+    "author": {
+      "id": "uuid",
+      "username": "z1gonzo",
+      "displayName": "Łukasz",
+      "avatarUrl": "https://example.com/avatar.png",
+      "isPrivate": false
+    }
+  }
+]
+```
+
+### Responses
+
+| Status | Znaczenie |
+|---|---|
+| `200` | Zwrócono listę postów; jeśli brak postów, `[]` |
+| `400` | Niepoprawne query params |
 
 ## Decyzja: refresh token
 

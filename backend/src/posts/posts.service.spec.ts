@@ -78,6 +78,21 @@ describe('PostsService', () => {
     });
   });
 
+  it('finds global feed posts newest first with pagination', async () => {
+    prisma.post.findMany.mockResolvedValue([post]);
+
+    await expect(service.findFeed({ limit: 20, offset: 0 })).resolves.toEqual([
+      post,
+    ]);
+
+    expect(prisma.post.findMany).toHaveBeenCalledWith({
+      include: postInclude,
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      take: 20,
+      skip: 0,
+    });
+  });
+
   it('finds posts by author id newest first', async () => {
     prisma.post.findMany.mockResolvedValue([post]);
 

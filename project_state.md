@@ -4,11 +4,11 @@
 
 ## Status
 
-- Etap: Faza 2 — Core Social MVP / Posty tekstowe
-- Ostatnia sesja: 2026-06-27
+- Etap: Faza 2 — Core Social MVP / Globalny feed postów
+- Ostatnia sesja: 2026-06-29
 - Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
-- Główne ryzyko: posty nie mają jeszcze globalnego feedu ani paginacji
-- Następny krok: dodać prosty globalny feed `GET /posts` albo paginację listy postów użytkownika
+- Główne ryzyko: tylko globalny feed ma paginację; lista postów użytkownika nadal zwraca całość
+- Następny krok: dodać paginację dla `GET /users/:username/posts` albo edycję/usuwanie własnych postów
 
 ## Organizacja projektu
 
@@ -37,24 +37,33 @@
 - `UsersModule` obsługuje chronione `PATCH /users/me` dla aktualizacji profilu.
 - `UsersModule` obsługuje publiczne `GET /users/:username` bez ujawniania email/passwordHash/isActive.
 - Avatar URL jest publiczny na razie; automatyczna moderacja jest odłożona, a przyszłe reportowanie profilu/avatarów opisuje `docs/profile-content-policy.md`.
-- `PostsModule` obsługuje chronione `POST /posts`, publiczne `GET /posts/:id` i listę postów użytkownika `GET /users/:username/posts` przez `UsersModule`.
+- `PostsModule` obsługuje chronione `POST /posts`, publiczne `GET /posts/:id`, publiczny globalny feed `GET /posts?limit=20&offset=0` i listę postów użytkownika `GET /users/:username/posts` przez `UsersModule`.
 - PostgreSQL z Docker Compose działa lokalnie na porcie hosta `5433`.
 - `npm run build` w `backend/` przechodzi.
-- `npm test` i `npm run test:e2e` w `backend/` przechodzą: 8 test suites, 39 testów łącznie.
+- `npm test` i `npm run test:e2e` w `backend/` przechodzą: 8 test suites, 43 testy łącznie.
 - Istnieje devlog opisujący plan PostgreSQL + MongoDB: `devlog/01_db-choice.md`.
 - Repo ma standardowe pliki workflow dla pracy Hermes ↔ VSCode/Cline/Codex.
 
 ## Co nie działa / wymaga naprawy
 
-Zweryfikowane przez `npm run build && npm test && npm run test:e2e` w `backend/` na 2026-06-27:
+Zweryfikowane przez `npm run lint && npm run prisma:validate && npm run build && npm test && npm run test:e2e` w `backend/` na 2026-06-29:
 
-- Brakuje globalnego feedu `GET /posts`.
-- Brakuje paginacji dla list postów.
+- `GET /users/:username/posts` nie ma jeszcze paginacji.
 - Brakuje edycji/usuwania postów.
 - Brakuje relacji/friends/follows.
 - Reportowanie profilu/avatarów jest świadomie w backlogu, nie w bieżącym zakresie.
 
 ## Ostatnio wykonane
+
+Data: 2026-06-29 — Global posts feed
+
+- Dodano `ListPostsQueryDto` z walidacją `limit` (`1..50`) i `offset` (`>= 0`).
+- Dodano `PostsService.findFeed({ limit, offset })`.
+- Dodano publiczne `GET /posts?limit=20&offset=0`.
+- Feed jest sortowany od najnowszych (`createdAt desc`, `id desc`).
+- Dodano devlog `devlog/12_global-post-feed.md`.
+- Nie wykonano pełnego real smoke testu z zapisem do bazy, bo komenda z cleanupem testowego użytkownika została zablokowana przez guard narzędzia; pokrycie zapewniają unit/e2e testy.
+- Uruchomiono `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test` i `npm run test:e2e` w `backend/` — wszystko przechodzi.
 
 Data: 2026-06-27 — User post list
 
@@ -202,7 +211,9 @@ Data: 2026-06-22
 - [x] Zapisać lekką politykę avatarów / przyszłego reportowania profilu.
 - [x] Dodać posty tekstowe: model `Post`, `POST /posts`, `GET /posts/:id`.
 - [x] Dodać listę postów użytkownika `GET /users/:username/posts`.
-- [ ] Dodać prosty globalny feed albo paginację list postów.
+- [x] Dodać prosty globalny feed `GET /posts` z paginacją `limit/offset`.
+- [ ] Dodać paginację dla `GET /users/:username/posts`.
+- [ ] Dodać edycję/usuwanie własnych postów.
 
 ## Decyzje techniczne
 
@@ -213,10 +224,11 @@ Data: 2026-06-22
 | 2026-06-22 | Devlog zostaje w głównym repo jako `devlog/` | Proces nauki powinien być widoczny obok kodu i decyzji |
 | 2026-06-27 | Resetujemy eksperymentalny auth/users i odbudowujemy na PostgreSQL + Prisma | Czysty start jest tańszy i bardziej edukacyjny niż naprawianie niespójnego kodu |
 | 2026-06-27 | Dodajemy listę postów użytkownika | Domykamy flow publiczny profil → posty użytkownika przed globalnym feedem |
+| 2026-06-29 | Dodajemy prosty globalny feed `GET /posts` z `limit/offset` | MVP potrzebuje publicznej listy najnowszych postów; offset pagination jest najprostsza edukacyjnie |
 
 ## Otwarte pytania
 
-- Czy następny krok to prosty globalny feed `GET /posts`, czy najpierw paginacja dla `GET /users/:username/posts`?
+- Czy przed relacjami/follows najpierw ujednolicamy paginację `GET /users/:username/posts`, czy dodajemy edycję/usuwanie własnych postów?
 
 ## Instrukcja dla agenta
 

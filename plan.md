@@ -75,7 +75,9 @@ Przygotować repo pod spokojną sesję kodowania w VSCode/Cline i ustabilizować
   - [x] Dodać protected `POST /posts`
   - [x] Dodać publiczne `GET /posts/:id`
   - [x] Dodać listę postów użytkownika `GET /users/:username/posts`
-  - [ ] Dodać prosty globalny feed `GET /posts` albo paginację list
+  - [x] Dodać prosty globalny feed `GET /posts` z paginacją `limit/offset`
+  - [ ] Dodać paginację dla `GET /users/:username/posts`
+  - [ ] Dodać edycję/usuwanie własnych postów
 - [ ] Relacje/friends/follows
 - [ ] Podstawowy frontend — odłożony na później
 

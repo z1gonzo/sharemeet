@@ -33,11 +33,24 @@ const existingPost: PostRecord = {
   author,
 };
 
+const newerPost: PostRecord = {
+  id: '50cc42ac-ef8c-4e0b-9fe6-b3562f9262de',
+  authorId: author.id,
+  content: 'Newest ShareMeet update',
+  createdAt: new Date('2026-06-27T00:01:00.000Z'),
+  updatedAt: new Date('2026-06-27T00:01:00.000Z'),
+  author,
+};
+
 describe('PostsController (e2e)', () => {
   let app: INestApplication<App>;
   let postsService: {
     createPost: jest.Mock<Promise<PostRecord>, [string, CreatePostDto]>;
     findById: jest.Mock<Promise<PostRecord | null>, [string]>;
+    findFeed: jest.Mock<
+      Promise<PostRecord[]>,
+      [{ limit: number; offset: number }]
+    >;
   };
   let jwtService: {
     verifyAsync: jest.Mock<Promise<JwtPayload>, [string]>;
@@ -47,6 +60,10 @@ describe('PostsController (e2e)', () => {
     postsService = {
       createPost: jest.fn<Promise<PostRecord>, [string, CreatePostDto]>(),
       findById: jest.fn<Promise<PostRecord | null>, [string]>(),
+      findFeed: jest.fn<
+        Promise<PostRecord[]>,
+        [{ limit: number; offset: number }]
+      >(),
     };
     jwtService = {
       verifyAsync: jest.fn<Promise<JwtPayload>, [string]>(),
@@ -143,6 +160,54 @@ describe('PostsController (e2e)', () => {
     });
     expect(response.body).not.toHaveProperty('author.email');
     expect(response.body).not.toHaveProperty('author.passwordHash');
+  });
+
+  it('GET /posts returns global feed posts with default pagination', async () => {
+    postsService.findFeed.mockResolvedValue([newerPost, existingPost]);
+
+    const response = await request(app.getHttpServer())
+      .get('/posts')
+      .expect(200);
+
+    expect(postsService.findFeed).toHaveBeenCalledWith({
+      limit: 20,
+      offset: 0,
+    });
+    expect(response.body).toMatchObject([
+      {
+        id: newerPost.id,
+        content: 'Newest ShareMeet update',
+        author: { id: author.id, username: 'z1gonzo' },
+      },
+      {
+        id: existingPost.id,
+        content: 'Hello ShareMeet',
+        author: { id: author.id, username: 'z1gonzo' },
+      },
+    ]);
+    const body = response.body as Array<Record<string, unknown>>;
+    expect(body[0]).not.toHaveProperty('author.email');
+    expect(body[0]).not.toHaveProperty('author.passwordHash');
+  });
+
+  it('GET /posts passes limit and offset to the service', async () => {
+    postsService.findFeed.mockResolvedValue([existingPost]);
+
+    await request(app.getHttpServer())
+      .get('/posts?limit=1&offset=1')
+      .expect(200);
+
+    expect(postsService.findFeed).toHaveBeenCalledWith({
+      limit: 1,
+      offset: 1,
+    });
+  });
+
+  it('GET /posts rejects invalid pagination query params', async () => {
+    await request(app.getHttpServer()).get('/posts?limit=51').expect(400);
+    await request(app.getHttpServer()).get('/posts?offset=-1').expect(400);
+
+    expect(postsService.findFeed).not.toHaveBeenCalled();
   });
 
   it('GET /posts/:id returns 404 for a missing post', async () => {

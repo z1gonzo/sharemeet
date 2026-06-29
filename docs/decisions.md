@@ -167,3 +167,27 @@ Kod nie budował się i był gorszą bazą do nauki niż czysty start.
 - Obecny backend wraca do czystego szkieletu NestJS, który ma przechodzić `npm run build` i `npm test`.
 - Kolejne zadanie to dodanie Prisma, modelu `User`, migracji i minimalnego auth.
 - Nie próbujemy ratować starego kodu Mongoose/Passport/Google OAuth.
+
+---
+
+## 2026-06-29 — Offset pagination dla pierwszego globalnego feedu
+
+Status: accepted
+
+### Kontekst
+
+Po dodaniu postów tekstowych i listy postów użytkownika potrzebny jest publiczny globalny feed. To nadal edukacyjny MVP, więc prostota i czytelność są ważniejsze niż docelowa skalowalność feedu.
+
+### Decyzja
+
+- Dodajemy publiczne `GET /posts`.
+- Używamy query params `limit` i `offset`.
+- Domyślne wartości: `limit=20`, `offset=0`.
+- `limit` ograniczamy do `1..50`.
+- Sortujemy po `createdAt desc` i `id desc` jako stabilny tie-breaker.
+
+### Konsekwencje
+
+- Endpoint jest łatwy do testowania i użycia w przyszłym frontendzie.
+- Przy większych danych offset pagination może być mniej wydajna i mniej stabilna niż cursor pagination.
+- Cursor-based feed i ranking zostają na późniejszy etap, kiedy pojawi się realna potrzeba.
