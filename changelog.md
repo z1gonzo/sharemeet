@@ -2,6 +2,13 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-06-29 — Profile follow counts
+
+- `GET /users/:username` zwraca teraz `followersCount` i `followingCount`.
+- Dodano `UsersService.findPublicProfileByUsername` z Prisma `_count`.
+- Dodano devlog `devlog/17_profile-follow-counts.md`.
+- Zweryfikowano `backend`: `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test`, `npm run test:e2e` przechodzą.
+
 ## 2026-06-29 — Following feed
 
 - Dodano `PostsService.findFollowingFeed`.

@@ -100,6 +100,8 @@ Zwraca publiczny profil użytkownika. Endpoint nie wymaga tokena.
   "bio": "Building ShareMeet",
   "avatarUrl": "https://example.com/avatar.png",
   "isPrivate": true,
+  "followersCount": 12,
+  "followingCount": 8,
   "createdAt": "2026-06-27T00:00:00.000Z"
 }
 ```

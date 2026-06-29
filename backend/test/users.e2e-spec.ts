@@ -54,6 +54,17 @@ const follow = {
   following: otherUser,
 };
 
+const publicProfileWithCounts = {
+  id: existingUser.id,
+  username: existingUser.username,
+  displayName: existingUser.displayName,
+  bio: 'Building ShareMeet',
+  avatarUrl: 'https://example.com/avatar.png',
+  isPrivate: true,
+  createdAt: existingUser.createdAt,
+  _count: { followers: 12, following: 8 },
+};
+
 const existingPost: PostRecord = {
   id: '1f2557e7-96d8-46a6-95c7-b6790f595c85',
   authorId: existingUser.id,
@@ -74,6 +85,10 @@ describe('UsersController (e2e)', () => {
   let usersService: {
     updateProfile: jest.Mock<Promise<UserRecord>, [string, UpdateProfileDto]>;
     findByUsername: jest.Mock<Promise<UserRecord | null>, [string]>;
+    findPublicProfileByUsername: jest.Mock<
+      Promise<typeof publicProfileWithCounts | null>,
+      [string]
+    >;
     followUser: jest.Mock<Promise<UserRecord>, [string, string]>;
     unfollowUser: jest.Mock<Promise<void>, [string, string]>;
     listFollowers: jest.Mock<
@@ -99,6 +114,10 @@ describe('UsersController (e2e)', () => {
     usersService = {
       updateProfile: jest.fn<Promise<UserRecord>, [string, UpdateProfileDto]>(),
       findByUsername: jest.fn<Promise<UserRecord | null>, [string]>(),
+      findPublicProfileByUsername: jest.fn<
+        Promise<typeof publicProfileWithCounts | null>,
+        [string]
+      >(),
       followUser: jest.fn<Promise<UserRecord>, [string, string]>(),
       unfollowUser: jest.fn<Promise<void>, [string, string]>(),
       listFollowers: jest.fn<
@@ -141,18 +160,17 @@ describe('UsersController (e2e)', () => {
   });
 
   it('GET /users/:username returns a public profile without private auth fields', async () => {
-    usersService.findByUsername.mockResolvedValue({
-      ...existingUser,
-      bio: 'Building ShareMeet',
-      avatarUrl: 'https://example.com/avatar.png',
-      isPrivate: true,
-    });
+    usersService.findPublicProfileByUsername.mockResolvedValue(
+      publicProfileWithCounts,
+    );
 
     const response = await request(app.getHttpServer())
       .get('/users/z1gonzo')
       .expect(200);
 
-    expect(usersService.findByUsername).toHaveBeenCalledWith('z1gonzo');
+    expect(usersService.findPublicProfileByUsername).toHaveBeenCalledWith(
+      'z1gonzo',
+    );
     expect(response.body).toMatchObject({
       id: '8b2777e0-0f29-4c73-8708-9c27f98d34aa',
       username: 'z1gonzo',
@@ -160,6 +178,8 @@ describe('UsersController (e2e)', () => {
       bio: 'Building ShareMeet',
       avatarUrl: 'https://example.com/avatar.png',
       isPrivate: true,
+      followersCount: 12,
+      followingCount: 8,
     });
     expect(response.body).toHaveProperty('createdAt');
     expect(response.body).not.toHaveProperty('email');
@@ -246,7 +266,7 @@ describe('UsersController (e2e)', () => {
   });
 
   it('GET /users/:username returns 404 for missing profiles', async () => {
-    usersService.findByUsername.mockResolvedValue(null);
+    usersService.findPublicProfileByUsername.mockResolvedValue(null);
 
     await request(app.getHttpServer()).get('/users/missinguser').expect(404);
   });

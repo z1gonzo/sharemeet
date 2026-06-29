@@ -290,3 +290,20 @@ Po dodaniu modelu `Follow` globalny feed nadal pokazuje wszystkich. Pierwszy soc
 - Backend ma teraz publiczny globalny feed i chroniony social feed.
 - Przyszły frontend może rozdzielić widoki „global” i „following”.
 - Przy większej skali trzeba będzie wrócić do cursor pagination i ewentualnie denormalizacji feedu.
+
+---
+
+## 2026-06-29 — Liczniki followers/following przez Prisma `_count`
+
+Status: accepted
+
+### Decyzja
+
+- `GET /users/:username` zwraca `followersCount` i `followingCount`.
+- Liczniki liczymy przez Prisma `_count` na relacjach `followers` i `following`.
+- Nie denormalizujemy liczników w tabeli `users` na tym etapie.
+
+### Konsekwencje
+
+- Brak nowej migracji i brak ryzyka niespójnych liczników.
+- Przy dużej skali można wrócić do denormalizacji lub cache.

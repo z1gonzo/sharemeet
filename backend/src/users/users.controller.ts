@@ -32,6 +32,12 @@ type PublicUserRecord = Pick<
   | 'isPrivate'
   | 'createdAt'
 >;
+type PublicProfileRecord = PublicUserRecord & {
+  _count?: {
+    followers: number;
+    following: number;
+  };
+};
 
 @Controller('users')
 export class UsersController {
@@ -111,7 +117,7 @@ export class UsersController {
 
   @Get(':username')
   async getPublicProfile(@Param('username') username: string) {
-    const user = await this.usersService.findByUsername(username);
+    const user = await this.usersService.findPublicProfileByUsername(username);
 
     if (!user) {
       throw new NotFoundException('User profile not found');
@@ -145,8 +151,8 @@ export class UsersController {
     };
   }
 
-  private toPublicProfile(user: PublicUserRecord) {
-    return {
+  private toPublicProfile(user: PublicProfileRecord) {
+    const profile = {
       id: user.id,
       username: user.username,
       displayName: user.displayName,
@@ -154,6 +160,16 @@ export class UsersController {
       avatarUrl: user.avatarUrl,
       isPrivate: user.isPrivate,
       createdAt: user.createdAt,
+    };
+
+    if (!user._count) {
+      return profile;
+    }
+
+    return {
+      ...profile,
+      followersCount: user._count.followers,
+      followingCount: user._count.following,
     };
   }
 

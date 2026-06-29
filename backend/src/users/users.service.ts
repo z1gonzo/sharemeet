@@ -52,6 +52,21 @@ export class UsersService {
     return this.prisma.user.findUnique({ where: { username } });
   }
 
+  findPublicProfileByUsername(username: string) {
+    return this.prisma.user.findUnique({
+      where: { username },
+      select: {
+        ...publicUserSelect,
+        _count: {
+          select: {
+            followers: true,
+            following: true,
+          },
+        },
+      },
+    });
+  }
+
   updateProfile(id: string, data: UpdateProfileDto) {
     return this.prisma.user.update({
       where: { id },

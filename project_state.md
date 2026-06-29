@@ -4,11 +4,11 @@
 
 ## Status
 
-- Etap: Faza 2 — Core Social MVP / Feed obserwowanych
+- Etap: Faza 2 — Core Social MVP / Profile social metrics
 - Ostatnia sesja: 2026-06-29
 - Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
-- Główne ryzyko: profile nie pokazują jeszcze liczników followers/following, a komentarze nie istnieją
-- Następny krok: dodać liczniki followers/following do publicznego profilu albo zacząć comments
+- Główne ryzyko: komentarze i widoczność/prywatność postów nie istnieją
+- Następny krok: zacząć comments albo doprecyzować post visibility/privacy
 
 ## Organizacja projektu
 
@@ -39,9 +39,10 @@
 - Avatar URL jest publiczny na razie; automatyczna moderacja jest odłożona, a przyszłe reportowanie profilu/avatarów opisuje `docs/profile-content-policy.md`.
 - `PostsModule` obsługuje chronione `POST /posts`, `PATCH /posts/:id`, `DELETE /posts/:id`, chroniony feed obserwowanych `GET /posts/following?limit=20&offset=0`, publiczne `GET /posts/:id`, publiczny globalny feed `GET /posts?limit=20&offset=0` i paginowaną listę postów użytkownika `GET /users/:username/posts?limit=20&offset=0` przez `UsersModule`.
 - `UsersModule` obsługuje relacje: `POST /users/:username/follow`, `DELETE /users/:username/follow`, `GET /users/:username/followers?limit=20&offset=0`, `GET /users/:username/following?limit=20&offset=0`.
+- Publiczne profile `GET /users/:username` zwracają `followersCount` i `followingCount`.
 - PostgreSQL z Docker Compose działa lokalnie na porcie hosta `5433`.
 - `npm run build` w `backend/` przechodzi.
-- `npm test` i `npm run test:e2e` w `backend/` przechodzą: 8 test suites, 81 testów łącznie.
+- `npm test` i `npm run test:e2e` w `backend/` przechodzą: 8 test suites, 82 testy łącznie.
 - Istnieje devlog opisujący plan PostgreSQL + MongoDB: `devlog/01_db-choice.md`.
 - Repo ma standardowe pliki workflow dla pracy Hermes ↔ VSCode/Cline/Codex.
 
@@ -49,11 +50,17 @@
 
 Zweryfikowane przez `npm run lint && npm run prisma:validate && npm run build && npm test && npm run test:e2e` w `backend/` na 2026-06-29:
 
-- Brakuje liczników followers/following na profilu.
 - Brakuje komentarzy.
 - Reportowanie profilu/avatarów jest świadomie w backlogu, nie w bieżącym zakresie.
 
 ## Ostatnio wykonane
+
+Data: 2026-06-29 — Profile follow counts
+
+- Dodano `UsersService.findPublicProfileByUsername` z Prisma `_count` dla relacji `followers` i `following`.
+- `GET /users/:username` zwraca `followersCount` i `followingCount`.
+- Dodano devlog `devlog/17_profile-follow-counts.md`.
+- Uruchomiono `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test` i `npm run test:e2e` w `backend/` — wszystko przechodzi.
 
 Data: 2026-06-29 — Following feed
 
@@ -256,7 +263,7 @@ Data: 2026-06-22
 - [x] Dodać edycję/usuwanie własnych postów.
 - [x] Dodać relacje/friends/follows.
 - [x] Dodać feed obserwowanych `GET /posts/following`.
-- [ ] Dodać liczniki followers/following do profilu publicznego.
+- [x] Dodać liczniki followers/following do profilu publicznego.
 - [ ] Dodać komentarze.
 
 ## Decyzje techniczne

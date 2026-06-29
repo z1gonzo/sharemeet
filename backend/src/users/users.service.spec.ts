@@ -120,6 +120,31 @@ describe('UsersService', () => {
     });
   });
 
+  it('finds a public profile with follower counts', async () => {
+    const profile = {
+      ...user,
+      _count: { followers: 12, following: 8 },
+    };
+    prisma.user.findUnique.mockResolvedValue(profile);
+
+    await expect(
+      service.findPublicProfileByUsername('z1gonzo'),
+    ).resolves.toEqual(profile);
+
+    expect(prisma.user.findUnique).toHaveBeenCalledWith({
+      where: { username: 'z1gonzo' },
+      select: {
+        ...publicUserSelect,
+        _count: {
+          select: {
+            followers: true,
+            following: true,
+          },
+        },
+      },
+    });
+  });
+
   it('updates profile fields', async () => {
     const updatedUser = {
       ...user,

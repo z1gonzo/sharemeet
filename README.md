@@ -69,7 +69,7 @@ npm run build
 npm run start:dev
 ```
 
-> Current state: backend is build-green with Prisma 6, PostgreSQL on local port `5433`, email/password JWT auth, DTO validation, protected `GET /auth/me`, profile endpoints, text posts CRUD/global feed/following feed, and follow relationships (`POST/DELETE /users/:username/follow`, followers/following lists). Avatar/profile reporting is documented as future backlog. `npm run build`, `npm test` and `npm run test:e2e` pass. See `project_state.md`.
+> Current state: backend is build-green with Prisma 6, PostgreSQL on local port `5433`, email/password JWT auth, DTO validation, protected `GET /auth/me`, profile endpoints with follow counts, text posts CRUD/global feed/following feed, and follow relationships (`POST/DELETE /users/:username/follow`, followers/following lists). Avatar/profile reporting is documented as future backlog. `npm run build`, `npm test` and `npm run test:e2e` pass. See `project_state.md`.
 
 ## AI-assisted workflow
 
