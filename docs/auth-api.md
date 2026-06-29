@@ -219,6 +219,58 @@ Authorization: Bearer <accessToken>
 | `400` | Niepoprawne dane wejściowe albo nieznane pole |
 | `401` | Brak tokena albo token niepoprawny |
 
+## `PATCH /posts/:id`
+
+Aktualizuje własny post tekstowy. Endpoint wymaga JWT access tokena.
+
+### Header
+
+```http
+Authorization: Bearer ***
+```
+
+### Request
+
+```json
+{
+  "content": "Edited ShareMeet post"
+}
+```
+
+### Walidacja
+
+- `content`: tekst 1–1000 znaków,
+- nieznane pola są odrzucane.
+
+### Responses
+
+| Status | Znaczenie |
+|---|---|
+| `200` | Post zaktualizowany |
+| `400` | Niepoprawne dane wejściowe albo nieznane pole |
+| `401` | Brak tokena albo token niepoprawny |
+| `403` | Próba edycji cudzego posta |
+| `404` | Post nie istnieje |
+
+## `DELETE /posts/:id`
+
+Usuwa własny post tekstowy. Endpoint wymaga JWT access tokena.
+
+### Header
+
+```http
+Authorization: Bearer ***
+```
+
+### Responses
+
+| Status | Znaczenie |
+|---|---|
+| `204` | Post usunięty; brak body |
+| `401` | Brak tokena albo token niepoprawny |
+| `403` | Próba usunięcia cudzego posta |
+| `404` | Post nie istnieje |
+
 ## `GET /posts/:id`
 
 Zwraca publiczny post po id. Endpoint nie wymaga tokena.

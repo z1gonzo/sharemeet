@@ -4,11 +4,11 @@
 
 ## Status
 
-- Etap: Faza 2 — Core Social MVP / Spójna paginacja postów
+- Etap: Faza 2 — Core Social MVP / Podstawowe zarządzanie postami
 - Ostatnia sesja: 2026-06-29
 - Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
-- Główne ryzyko: posty nie mają jeszcze edycji/usuwania ani reguł własności dla modyfikacji
-- Następny krok: dodać edycję/usuwanie własnych postów (`PATCH /posts/:id`, `DELETE /posts/:id`)
+- Główne ryzyko: brak relacji/follows, więc feed jest jeszcze globalny, a nie społecznościowy
+- Następny krok: rozpocząć relacje/follows albo comments jako kolejny element Social MVP
 
 ## Organizacja projektu
 
@@ -37,10 +37,10 @@
 - `UsersModule` obsługuje chronione `PATCH /users/me` dla aktualizacji profilu.
 - `UsersModule` obsługuje publiczne `GET /users/:username` bez ujawniania email/passwordHash/isActive.
 - Avatar URL jest publiczny na razie; automatyczna moderacja jest odłożona, a przyszłe reportowanie profilu/avatarów opisuje `docs/profile-content-policy.md`.
-- `PostsModule` obsługuje chronione `POST /posts`, publiczne `GET /posts/:id`, publiczny globalny feed `GET /posts?limit=20&offset=0` i paginowaną listę postów użytkownika `GET /users/:username/posts?limit=20&offset=0` przez `UsersModule`.
+- `PostsModule` obsługuje chronione `POST /posts`, `PATCH /posts/:id`, `DELETE /posts/:id`, publiczne `GET /posts/:id`, publiczny globalny feed `GET /posts?limit=20&offset=0` i paginowaną listę postów użytkownika `GET /users/:username/posts?limit=20&offset=0` przez `UsersModule`.
 - PostgreSQL z Docker Compose działa lokalnie na porcie hosta `5433`.
 - `npm run build` w `backend/` przechodzi.
-- `npm test` i `npm run test:e2e` w `backend/` przechodzą: 8 test suites, 45 testów łącznie.
+- `npm test` i `npm run test:e2e` w `backend/` przechodzą: 8 test suites, 58 testów łącznie.
 - Istnieje devlog opisujący plan PostgreSQL + MongoDB: `devlog/01_db-choice.md`.
 - Repo ma standardowe pliki workflow dla pracy Hermes ↔ VSCode/Cline/Codex.
 
@@ -48,11 +48,22 @@
 
 Zweryfikowane przez `npm run lint && npm run prisma:validate && npm run build && npm test && npm run test:e2e` w `backend/` na 2026-06-29:
 
-- Brakuje edycji/usuwania postów.
 - Brakuje relacji/friends/follows.
+- Brakuje komentarzy.
 - Reportowanie profilu/avatarów jest świadomie w backlogu, nie w bieżącym zakresie.
 
 ## Ostatnio wykonane
+
+Data: 2026-06-29 — Post edit/delete
+
+- Dodano `UpdatePostDto` dla edycji treści posta.
+- Dodano `PostsService.updateOwnPost` i `PostsService.deleteOwnPost`.
+- Dodano regułę własności: tylko autor może edytować/usunąć post.
+- Brak posta zwraca `404 Post not found`, próba modyfikacji cudzego posta zwraca `403 You can only modify your own posts`.
+- Dodano chronione `PATCH /posts/:id` i `DELETE /posts/:id`.
+- `DELETE /posts/:id` zwraca `204 No Content`.
+- Dodano devlog `devlog/14_post-edit-delete.md`.
+- Uruchomiono `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test` i `npm run test:e2e` w `backend/` — wszystko przechodzi.
 
 Data: 2026-06-29 — User post list pagination
 
@@ -221,7 +232,9 @@ Data: 2026-06-22
 - [x] Dodać listę postów użytkownika `GET /users/:username/posts`.
 - [x] Dodać prosty globalny feed `GET /posts` z paginacją `limit/offset`.
 - [x] Dodać paginację dla `GET /users/:username/posts`.
-- [ ] Dodać edycję/usuwanie własnych postów.
+- [x] Dodać edycję/usuwanie własnych postów.
+- [ ] Dodać relacje/friends/follows.
+- [ ] Dodać komentarze.
 
 ## Decyzje techniczne
 
@@ -234,10 +247,11 @@ Data: 2026-06-22
 | 2026-06-27 | Dodajemy listę postów użytkownika | Domykamy flow publiczny profil → posty użytkownika przed globalnym feedem |
 | 2026-06-29 | Dodajemy prosty globalny feed `GET /posts` z `limit/offset` | MVP potrzebuje publicznej listy najnowszych postów; offset pagination jest najprostsza edukacyjnie |
 | 2026-06-29 | Ujednolicamy paginację list postów | `GET /posts` i `GET /users/:username/posts` powinny mieć ten sam kontrakt `limit/offset` |
+| 2026-06-29 | Tylko autor może edytować/usunąć własny post | Minimalna reguła własności jest potrzebna przed rozbudową social features |
 
 ## Otwarte pytania
 
-- Czy przed relacjami/follows dodajemy edycję/usuwanie własnych postów, czy od razu przechodzimy do relacji/follows?
+- Czy kolejnym krokiem są relacje/follows, comments, czy doprecyzowanie widoczności/prywatności postów?
 
 ## Instrukcja dla agenta
 

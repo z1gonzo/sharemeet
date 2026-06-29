@@ -1,6 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePostDto } from './dto/create-post.dto';
+import { UpdatePostDto } from './dto/update-post.dto';
 
 const postAuthorSelect = {
   id: true,
@@ -63,5 +68,41 @@ export class PostsService {
       take: limit,
       skip: offset,
     });
+  }
+
+  async updateOwnPost(id: string, authorId: string, data: UpdatePostDto) {
+    const post = await this.findById(id);
+
+    this.assertCanModifyPost(post, authorId);
+
+    return this.prisma.post.update({
+      where: { id },
+      data: { content: data.content },
+      include: postInclude,
+    });
+  }
+
+  async deleteOwnPost(id: string, authorId: string) {
+    const post = await this.findById(id);
+
+    this.assertCanModifyPost(post, authorId);
+
+    return this.prisma.post.delete({
+      where: { id },
+      include: postInclude,
+    });
+  }
+
+  private assertCanModifyPost(
+    post: Awaited<ReturnType<PostsService['findById']>>,
+    authorId: string,
+  ): asserts post is NonNullable<typeof post> {
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+
+    if (post.authorId !== authorId) {
+      throw new ForbiddenException('You can only modify your own posts');
+    }
   }
 }

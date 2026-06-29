@@ -214,3 +214,28 @@ Po dodaniu `GET /posts?limit=20&offset=0` endpoint `GET /users/:username/posts` 
 - Oba list endpoints są łatwiejsze do użycia przez przyszły frontend.
 - Nadal nie zwracamy `totalCount` ani metadanych paginacji.
 - Cursor-based pagination pozostaje późniejszą optymalizacją.
+
+---
+
+## 2026-06-29 — Autor posta jako jedyny właściciel modyfikacji
+
+Status: accepted
+
+### Kontekst
+
+Po dodaniu tworzenia i listowania postów potrzebne są podstawowe operacje zarządzania treścią: edycja i usunięcie. Bez reguły własności dowolny zalogowany użytkownik mógłby modyfikować cudze posty.
+
+### Decyzja
+
+- Dodajemy `PATCH /posts/:id` i `DELETE /posts/:id`.
+- Oba endpointy wymagają JWT access tokena.
+- Tylko autor posta może go edytować albo usunąć.
+- Brak posta zwraca `404 Post not found`.
+- Próba modyfikacji cudzego posta zwraca `403 You can only modify your own posts`.
+- `DELETE /posts/:id` zwraca `204 No Content`.
+
+### Konsekwencje
+
+- Posty tekstowe mają podstawowy CRUD dla autora.
+- Nie dodajemy jeszcze soft delete, historii edycji ani uprawnień moderatora.
+- Przed relacjami/follows mamy zamknięty podstawowy zakres zarządzania własnymi postami.

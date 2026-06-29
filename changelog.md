@@ -2,6 +2,16 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-06-29 — Post edit/delete
+
+- Dodano `UpdatePostDto` dla edycji treści posta.
+- Dodano chronione `PATCH /posts/:id` i `DELETE /posts/:id`.
+- Tylko autor posta może go edytować albo usunąć.
+- Brak posta zwraca `404 Post not found`, a próba modyfikacji cudzego posta zwraca `403 You can only modify your own posts`.
+- `DELETE /posts/:id` zwraca `204 No Content`.
+- Dodano devlog `devlog/14_post-edit-delete.md`.
+- Zweryfikowano `backend`: `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test`, `npm run test:e2e` przechodzą.
+
 ## 2026-06-29 — User post list pagination
 
 - Ujednolicono `GET /users/:username/posts` z globalnym feedem przez query params `limit` i `offset`.

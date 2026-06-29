@@ -1,4 +1,8 @@
-import { INestApplication } from '@nestjs/common';
+import {
+  ForbiddenException,
+  INestApplication,
+  NotFoundException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
@@ -6,6 +10,7 @@ import { App } from 'supertest/types';
 import { configureApp } from './../src/app.config';
 import { AppModule } from './../src/app.module';
 import { CreatePostDto } from './../src/posts/dto/create-post.dto';
+import { UpdatePostDto } from './../src/posts/dto/update-post.dto';
 import { PostsService } from './../src/posts/posts.service';
 
 type PostRecord = Awaited<ReturnType<PostsService['createPost']>>;
@@ -42,6 +47,12 @@ const newerPost: PostRecord = {
   author,
 };
 
+const updatedPost: PostRecord = {
+  ...existingPost,
+  content: 'Edited ShareMeet post',
+  updatedAt: new Date('2026-06-27T00:02:00.000Z'),
+};
+
 describe('PostsController (e2e)', () => {
   let app: INestApplication<App>;
   let postsService: {
@@ -51,6 +62,11 @@ describe('PostsController (e2e)', () => {
       Promise<PostRecord[]>,
       [{ limit: number; offset: number }]
     >;
+    updateOwnPost: jest.Mock<
+      Promise<PostRecord>,
+      [string, string, UpdatePostDto]
+    >;
+    deleteOwnPost: jest.Mock<Promise<PostRecord>, [string, string]>;
   };
   let jwtService: {
     verifyAsync: jest.Mock<Promise<JwtPayload>, [string]>;
@@ -64,6 +80,11 @@ describe('PostsController (e2e)', () => {
         Promise<PostRecord[]>,
         [{ limit: number; offset: number }]
       >(),
+      updateOwnPost: jest.fn<
+        Promise<PostRecord>,
+        [string, string, UpdatePostDto]
+      >(),
+      deleteOwnPost: jest.fn<Promise<PostRecord>, [string, string]>(),
     };
     jwtService = {
       verifyAsync: jest.fn<Promise<JwtPayload>, [string]>(),
@@ -208,6 +229,153 @@ describe('PostsController (e2e)', () => {
     await request(app.getHttpServer()).get('/posts?offset=-1').expect(400);
 
     expect(postsService.findFeed).not.toHaveBeenCalled();
+  });
+
+  it('PATCH /posts/:id updates the current user post', async () => {
+    jwtService.verifyAsync.mockResolvedValue({
+      sub: author.id,
+      email: 'lukasz@example.com',
+      username: 'z1gonzo',
+    });
+    postsService.updateOwnPost.mockResolvedValue(updatedPost);
+
+    const response = await request(app.getHttpServer())
+      .patch(`/posts/${existingPost.id}`)
+      .set('authorization', 'Bearer signed-access-token')
+      .send({ content: 'Edited ShareMeet post' })
+      .expect(200);
+
+    expect(postsService.updateOwnPost).toHaveBeenCalledWith(
+      existingPost.id,
+      author.id,
+      { content: 'Edited ShareMeet post' },
+    );
+    expect(response.body).toMatchObject({
+      id: existingPost.id,
+      content: 'Edited ShareMeet post',
+      author: { id: author.id, username: 'z1gonzo' },
+    });
+    expect(response.body).not.toHaveProperty('author.email');
+    expect(response.body).not.toHaveProperty('author.passwordHash');
+  });
+
+  it('PATCH /posts/:id rejects requests without a bearer token', async () => {
+    await request(app.getHttpServer())
+      .patch(`/posts/${existingPost.id}`)
+      .send({ content: 'Edited ShareMeet post' })
+      .expect(401);
+
+    expect(postsService.updateOwnPost).not.toHaveBeenCalled();
+  });
+
+  it('PATCH /posts/:id rejects invalid content', async () => {
+    jwtService.verifyAsync.mockResolvedValue({
+      sub: author.id,
+      email: 'lukasz@example.com',
+      username: 'z1gonzo',
+    });
+
+    await request(app.getHttpServer())
+      .patch(`/posts/${existingPost.id}`)
+      .set('authorization', 'Bearer signed-access-token')
+      .send({ content: '', unexpectedField: 'rejected' })
+      .expect(400);
+
+    expect(postsService.updateOwnPost).not.toHaveBeenCalled();
+  });
+
+  it('PATCH /posts/:id returns 403 when editing another author post', async () => {
+    jwtService.verifyAsync.mockResolvedValue({
+      sub: '00000000-0000-0000-0000-000000000000',
+      email: 'other@example.com',
+      username: 'otheruser',
+    });
+    postsService.updateOwnPost.mockRejectedValue(
+      new ForbiddenException('You can only modify your own posts'),
+    );
+
+    await request(app.getHttpServer())
+      .patch(`/posts/${existingPost.id}`)
+      .set('authorization', 'Bearer signed-access-token')
+      .send({ content: 'Edited ShareMeet post' })
+      .expect(403);
+  });
+
+  it('PATCH /posts/:id returns 404 for a missing post', async () => {
+    jwtService.verifyAsync.mockResolvedValue({
+      sub: author.id,
+      email: 'lukasz@example.com',
+      username: 'z1gonzo',
+    });
+    postsService.updateOwnPost.mockRejectedValue(
+      new NotFoundException('Post not found'),
+    );
+
+    await request(app.getHttpServer())
+      .patch('/posts/00000000-0000-0000-0000-000000000000')
+      .set('authorization', 'Bearer signed-access-token')
+      .send({ content: 'Edited ShareMeet post' })
+      .expect(404);
+  });
+
+  it('DELETE /posts/:id deletes the current user post', async () => {
+    jwtService.verifyAsync.mockResolvedValue({
+      sub: author.id,
+      email: 'lukasz@example.com',
+      username: 'z1gonzo',
+    });
+    postsService.deleteOwnPost.mockResolvedValue(existingPost);
+
+    await request(app.getHttpServer())
+      .delete(`/posts/${existingPost.id}`)
+      .set('authorization', 'Bearer signed-access-token')
+      .expect(204)
+      .expect('');
+
+    expect(postsService.deleteOwnPost).toHaveBeenCalledWith(
+      existingPost.id,
+      author.id,
+    );
+  });
+
+  it('DELETE /posts/:id rejects requests without a bearer token', async () => {
+    await request(app.getHttpServer())
+      .delete(`/posts/${existingPost.id}`)
+      .expect(401);
+
+    expect(postsService.deleteOwnPost).not.toHaveBeenCalled();
+  });
+
+  it('DELETE /posts/:id returns 403 when deleting another author post', async () => {
+    jwtService.verifyAsync.mockResolvedValue({
+      sub: '00000000-0000-0000-0000-000000000000',
+      email: 'other@example.com',
+      username: 'otheruser',
+    });
+    postsService.deleteOwnPost.mockRejectedValue(
+      new ForbiddenException('You can only modify your own posts'),
+    );
+
+    await request(app.getHttpServer())
+      .delete(`/posts/${existingPost.id}`)
+      .set('authorization', 'Bearer signed-access-token')
+      .expect(403);
+  });
+
+  it('DELETE /posts/:id returns 404 for a missing post', async () => {
+    jwtService.verifyAsync.mockResolvedValue({
+      sub: author.id,
+      email: 'lukasz@example.com',
+      username: 'z1gonzo',
+    });
+    postsService.deleteOwnPost.mockRejectedValue(
+      new NotFoundException('Post not found'),
+    );
+
+    await request(app.getHttpServer())
+      .delete('/posts/00000000-0000-0000-0000-000000000000')
+      .set('authorization', 'Bearer signed-access-token')
+      .expect(404);
   });
 
   it('GET /posts/:id returns 404 for a missing post', async () => {

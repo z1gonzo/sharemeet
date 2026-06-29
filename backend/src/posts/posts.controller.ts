@@ -1,9 +1,12 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
   NotFoundException,
   Param,
+  Patch,
   Post,
   Query,
   Req,
@@ -13,6 +16,7 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import type { AuthenticatedRequest } from '../common/guards/jwt-auth.guard';
 import { CreatePostDto } from './dto/create-post.dto';
 import { ListPostsQueryDto } from './dto/list-posts-query.dto';
+import { UpdatePostDto } from './dto/update-post.dto';
 import { PostsService } from './posts.service';
 
 type PostRecord = Awaited<ReturnType<PostsService['createPost']>>;
@@ -50,6 +54,31 @@ export class PostsController {
     }
 
     return this.toPublicPost(post);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id')
+  async updatePost(
+    @Param('id') id: string,
+    @Req() request: AuthenticatedRequest,
+    @Body() body: UpdatePostDto,
+  ) {
+    const post = await this.postsService.updateOwnPost(
+      id,
+      request.user.sub,
+      body,
+    );
+    return this.toPublicPost(post);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  @HttpCode(204)
+  async deletePost(
+    @Param('id') id: string,
+    @Req() request: AuthenticatedRequest,
+  ) {
+    await this.postsService.deleteOwnPost(id, request.user.sub);
   }
 
   private toPublicPost(post: PostRecord) {

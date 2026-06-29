@@ -1,3 +1,4 @@
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../prisma/prisma.service';
 import { PostsService, postInclude } from './posts.service';
@@ -26,6 +27,8 @@ describe('PostsService', () => {
       create: jest.Mock;
       findUnique: jest.Mock;
       findMany: jest.Mock;
+      update: jest.Mock;
+      delete: jest.Mock;
     };
   };
 
@@ -35,6 +38,8 @@ describe('PostsService', () => {
         create: jest.fn(),
         findUnique: jest.fn(),
         findMany: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
       },
     };
 
@@ -107,5 +112,59 @@ describe('PostsService', () => {
       take: 20,
       skip: 0,
     });
+  });
+
+  it('updates own post', async () => {
+    const updatedPost = { ...post, content: 'Edited ShareMeet post' };
+    prisma.post.findUnique.mockResolvedValue(post);
+    prisma.post.update.mockResolvedValue(updatedPost);
+
+    await expect(
+      service.updateOwnPost(post.id, author.id, {
+        content: 'Edited ShareMeet post',
+      }),
+    ).resolves.toEqual(updatedPost);
+
+    expect(prisma.post.update).toHaveBeenCalledWith({
+      where: { id: post.id },
+      data: { content: 'Edited ShareMeet post' },
+      include: postInclude,
+    });
+  });
+
+  it('deletes own post', async () => {
+    prisma.post.findUnique.mockResolvedValue(post);
+    prisma.post.delete.mockResolvedValue(post);
+
+    await expect(service.deleteOwnPost(post.id, author.id)).resolves.toEqual(
+      post,
+    );
+
+    expect(prisma.post.delete).toHaveBeenCalledWith({
+      where: { id: post.id },
+      include: postInclude,
+    });
+  });
+
+  it('rejects editing a missing post', async () => {
+    prisma.post.findUnique.mockResolvedValue(null);
+
+    await expect(
+      service.updateOwnPost(post.id, author.id, { content: 'Nope' }),
+    ).rejects.toThrow(new NotFoundException('Post not found'));
+
+    expect(prisma.post.update).not.toHaveBeenCalled();
+  });
+
+  it('rejects deleting another author post', async () => {
+    prisma.post.findUnique.mockResolvedValue(post);
+
+    await expect(
+      service.deleteOwnPost(post.id, '00000000-0000-0000-0000-000000000000'),
+    ).rejects.toThrow(
+      new ForbiddenException('You can only modify your own posts'),
+    );
+
+    expect(prisma.post.delete).not.toHaveBeenCalled();
   });
 });
