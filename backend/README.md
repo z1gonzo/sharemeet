@@ -14,7 +14,7 @@ Current foundation:
 - first `User` model and migration exist,
 - `UsersService` currently provides `createUser`, `findByEmail`, `findById`, `findByUsername` and `updateProfile`.
 - `AuthModule` currently provides `POST /auth/register`, `POST /auth/login` and `GET /auth/me`.
-- `UsersModule` currently provides public `GET /users/:username` with follow counts, public paginated `GET /users/:username/posts?limit=20&offset=0`, protected `PATCH /users/me`, protected follow/unfollow, and public followers/following lists.
+- `UsersModule` currently provides public `GET /users/:username` with follow counts and `isFollowing`, public paginated `GET /users/:username/posts?limit=20&offset=0`, protected `PATCH /users/me`, protected follow/unfollow, and public followers/following lists.
 - `PostsModule` currently provides protected `POST /posts`, protected own-post `PATCH /posts/:id` and `DELETE /posts/:id`, protected `GET /posts/me?limit=20&offset=0`, `PUBLIC`/`FOLLOWERS`/`PRIVATE` post visibility, `commentsCount`, protected following feed `GET /posts/following?limit=20&offset=0`, public global feed `GET /posts?limit=20&offset=0` and public `GET /posts/:id`.
 - `CommentsModule` currently provides comments for public posts: `POST /posts/:postId/comments`, `GET /posts/:postId/comments?limit=20&offset=0`, `PATCH /comments/:id`, `DELETE /comments/:id`.
 - Register/login/profile/post DTOs are validated through a global `ValidationPipe`.
@@ -76,6 +76,6 @@ postgresql://sharemeet:<local-password>@localhost:5433/sharemeet_db?schema=publi
 
 ## Next coding task
 
-1. Start the basic frontend or add a small backend field useful for frontend state, e.g. `isFollowing` on public profiles.
+1. Start the basic frontend.
 2. Keep profile/avatar reporting as backlog unless abuse becomes a real concern.
 3. Keep `npm run lint && npm run build && npm test && npm run test:e2e` green.

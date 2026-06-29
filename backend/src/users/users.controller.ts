@@ -12,8 +12,13 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import type { Request } from 'express';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import type { AuthenticatedRequest } from '../common/guards/jwt-auth.guard';
+import type {
+  AuthenticatedRequest,
+  JwtPayload,
+} from '../common/guards/jwt-auth.guard';
 import { ListPostsQueryDto } from '../posts/dto/list-posts-query.dto';
 import { PostsService } from '../posts/posts.service';
 import { ListUsersQueryDto } from './dto/list-users-query.dto';
@@ -44,6 +49,7 @@ export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly postsService: PostsService,
+    private readonly jwtService: JwtService,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -116,14 +122,22 @@ export class UsersController {
   }
 
   @Get(':username')
-  async getPublicProfile(@Param('username') username: string) {
+  async getPublicProfile(
+    @Param('username') username: string,
+    @Req() request: Request,
+  ) {
     const user = await this.usersService.findPublicProfileByUsername(username);
 
     if (!user) {
       throw new NotFoundException('User profile not found');
     }
 
-    return this.toPublicProfile(user);
+    const viewerId = await this.getOptionalViewerId(request);
+    const isFollowing = viewerId
+      ? await this.usersService.isFollowing(viewerId, user.id)
+      : false;
+
+    return this.toPublicProfile(user, { isFollowing });
   }
 
   @UseGuards(JwtAuthGuard)
@@ -151,7 +165,10 @@ export class UsersController {
     };
   }
 
-  private toPublicProfile(user: PublicProfileRecord) {
+  private toPublicProfile(
+    user: PublicProfileRecord,
+    options?: { isFollowing?: boolean },
+  ) {
     const profile = {
       id: user.id,
       username: user.username,
@@ -170,7 +187,30 @@ export class UsersController {
       ...profile,
       followersCount: user._count.followers,
       followingCount: user._count.following,
+      ...(options?.isFollowing === undefined
+        ? {}
+        : { isFollowing: options.isFollowing }),
     };
+  }
+
+  private async getOptionalViewerId(request: Request) {
+    const token = this.extractBearerToken(request);
+
+    if (!token) {
+      return undefined;
+    }
+
+    try {
+      const payload = await this.jwtService.verifyAsync<JwtPayload>(token);
+      return payload.sub;
+    } catch {
+      return undefined;
+    }
+  }
+
+  private extractBearerToken(request: Request) {
+    const [type, token] = request.headers.authorization?.split(' ') ?? [];
+    return type === 'Bearer' ? token : undefined;
   }
 
   private toPublicPost(post: PostRecord) {

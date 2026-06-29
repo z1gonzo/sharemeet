@@ -50,6 +50,7 @@ describe('UsersService', () => {
     follow: {
       create: jest.Mock;
       deleteMany: jest.Mock;
+      findUnique: jest.Mock;
       findMany: jest.Mock;
     };
   };
@@ -64,6 +65,7 @@ describe('UsersService', () => {
       follow: {
         create: jest.fn(),
         deleteMany: jest.fn(),
+        findUnique: jest.fn(),
         findMany: jest.fn(),
       },
     };
@@ -173,6 +175,30 @@ describe('UsersService', () => {
         isPrivate: true,
       },
     });
+  });
+
+  it('checks whether a viewer follows a profile', async () => {
+    prisma.follow.findUnique.mockResolvedValue({ id: follow.id });
+
+    await expect(service.isFollowing(user.id, otherUser.id)).resolves.toBe(
+      true,
+    );
+
+    expect(prisma.follow.findUnique).toHaveBeenCalledWith({
+      where: {
+        followerId_followingId: {
+          followerId: user.id,
+          followingId: otherUser.id,
+        },
+      },
+      select: { id: true },
+    });
+  });
+
+  it('returns false when checking whether a user follows themselves', async () => {
+    await expect(service.isFollowing(user.id, user.id)).resolves.toBe(false);
+
+    expect(prisma.follow.findUnique).not.toHaveBeenCalled();
   });
 
   it('follows another user', async () => {

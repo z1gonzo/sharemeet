@@ -2,6 +2,14 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-06-29 — Profile isFollowing
+
+- Dodano `isFollowing` do `GET /users/:username`.
+- Dla poprawnego opcjonalnego bearer tokena backend sprawdza relację `Follow` aktualnego użytkownika do profilu.
+- Bez tokena albo z niepoprawnym tokenem publiczny profil dalej zwraca `200`, a `isFollowing` wynosi `false`.
+- Dodano devlog `devlog/22_profile-is-following.md`.
+- Zweryfikowano `backend`: `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test`, `npm run test:e2e` przechodzą.
+
 ## 2026-06-29 — My posts endpoint
 
 - Dodano chronione `GET /posts/me?limit=20&offset=0`.

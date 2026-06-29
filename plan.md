@@ -84,11 +84,12 @@ Przygotować repo pod spokojną sesję kodowania w VSCode/Cline i ustabilizować
   - [x] Dodać listy followers/following
   - [x] Dodać feed obserwowanych
   - [x] Dodać liczniki followers/following na profilu
+  - [x] Dodać `isFollowing` na profilu publicznym
 - [x] Komentarze
 - [x] Liczniki komentarzy na postach
 - [x] Endpoint „moje posty” dla własnych prywatnych treści
 - [x] Widoczność/prywatność postów
-- [ ] Podstawowy frontend — odłożony na później
+- [ ] Podstawowy frontend
 
 ## Faza 3 — Media i aktywność
 

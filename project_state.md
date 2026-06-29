@@ -4,11 +4,11 @@
 
 ## Status
 
-- Etap: Faza 2 — Core Social MVP / My posts endpoint
+- Etap: Faza 2 — Core Social MVP / Profile isFollowing
 - Ostatnia sesja: 2026-06-29
 - Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
 - Główne ryzyko: brak frontendu
-- Następny krok: zacząć podstawowy frontend albo dodać małe backendowe pola pod frontend, np. `isFollowing`
+- Następny krok: zacząć podstawowy frontend
 
 ## Organizacja projektu
 
@@ -41,10 +41,10 @@
 - Publiczne odpowiedzi z postami zwracają `commentsCount` wyliczany przez Prisma `_count`.
 - `CommentsModule` obsługuje `POST /posts/:postId/comments`, `GET /posts/:postId/comments?limit=20&offset=0`, `PATCH /comments/:id` i `DELETE /comments/:id` dla publicznych postów.
 - `UsersModule` obsługuje relacje: `POST /users/:username/follow`, `DELETE /users/:username/follow`, `GET /users/:username/followers?limit=20&offset=0`, `GET /users/:username/following?limit=20&offset=0`.
-- Publiczne profile `GET /users/:username` zwracają `followersCount` i `followingCount`.
+- Publiczne profile `GET /users/:username` zwracają `followersCount`, `followingCount` i `isFollowing` dla opcjonalnie zalogowanego widza.
 - PostgreSQL z Docker Compose działa lokalnie na porcie hosta `5433`.
 - `npm run build` w `backend/` przechodzi.
-- `npm test` i `npm run test:e2e` w `backend/` przechodzą: 10 test suites, 113 testów łącznie.
+- `npm test` i `npm run test:e2e` w `backend/` przechodzą: 10 test suites, 117 testów łącznie.
 - Istnieje devlog opisujący plan PostgreSQL + MongoDB: `devlog/01_db-choice.md`.
 - Repo ma standardowe pliki workflow dla pracy Hermes ↔ VSCode/Cline/Codex.
 
@@ -55,6 +55,15 @@ Zweryfikowane przez `npm run lint && npm run prisma:validate && npm run build &&
 - Reportowanie profilu/avatarów jest świadomie w backlogu, nie w bieżącym zakresie.
 
 ## Ostatnio wykonane
+
+Data: 2026-06-29 — Profile isFollowing
+
+- Dodano `UsersService.isFollowing(followerId, followingId)`.
+- `GET /users/:username` zwraca `isFollowing`.
+- Endpoint pozostaje publiczny: bez tokena albo z niepoprawnym opcjonalnym tokenem `isFollowing` wynosi `false`.
+- Nie dodano migracji — używany jest istniejący unikalny indeks `Follow(followerId, followingId)`.
+- Dodano devlog `devlog/22_profile-is-following.md`.
+- Uruchomiono `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test` i `npm run test:e2e` w `backend/` — wszystko przechodzi.
 
 Data: 2026-06-29 — My posts endpoint
 

@@ -92,6 +92,7 @@ describe('UsersController (e2e)', () => {
       Promise<typeof publicProfileWithCounts | null>,
       [string]
     >;
+    isFollowing: jest.Mock<Promise<boolean>, [string, string]>;
     followUser: jest.Mock<Promise<UserRecord>, [string, string]>;
     unfollowUser: jest.Mock<Promise<void>, [string, string]>;
     listFollowers: jest.Mock<
@@ -121,6 +122,7 @@ describe('UsersController (e2e)', () => {
         Promise<typeof publicProfileWithCounts | null>,
         [string]
       >(),
+      isFollowing: jest.fn<Promise<boolean>, [string, string]>(),
       followUser: jest.fn<Promise<UserRecord>, [string, string]>(),
       unfollowUser: jest.fn<Promise<void>, [string, string]>(),
       listFollowers: jest.fn<
@@ -183,12 +185,61 @@ describe('UsersController (e2e)', () => {
       isPrivate: true,
       followersCount: 12,
       followingCount: 8,
+      isFollowing: false,
     });
+    expect(usersService.isFollowing).not.toHaveBeenCalled();
     expect(response.body).toHaveProperty('createdAt');
     expect(response.body).not.toHaveProperty('email');
     expect(response.body).not.toHaveProperty('passwordHash');
     expect(response.body).not.toHaveProperty('isActive');
     expect(response.body).not.toHaveProperty('updatedAt');
+  });
+
+  it('GET /users/:username returns isFollowing for an authenticated viewer', async () => {
+    jwtService.verifyAsync.mockResolvedValue({
+      sub: existingUser.id,
+      email: 'lukasz@example.com',
+      username: 'z1gonzo',
+    });
+    usersService.findPublicProfileByUsername.mockResolvedValue({
+      ...publicProfileWithCounts,
+      id: otherUser.id,
+      username: otherUser.username,
+    });
+    usersService.isFollowing.mockResolvedValue(true);
+
+    const response = await request(app.getHttpServer())
+      .get('/users/otheruser')
+      .set('authorization', 'Bearer signed-access-token')
+      .expect(200);
+
+    expect(jwtService.verifyAsync).toHaveBeenCalledWith('signed-access-token');
+    expect(usersService.isFollowing).toHaveBeenCalledWith(
+      existingUser.id,
+      otherUser.id,
+    );
+    expect(response.body).toMatchObject({
+      id: otherUser.id,
+      username: otherUser.username,
+      followersCount: 12,
+      followingCount: 8,
+      isFollowing: true,
+    });
+  });
+
+  it('GET /users/:username treats invalid optional bearer tokens as anonymous', async () => {
+    jwtService.verifyAsync.mockRejectedValue(new Error('invalid token'));
+    usersService.findPublicProfileByUsername.mockResolvedValue(
+      publicProfileWithCounts,
+    );
+
+    const response = await request(app.getHttpServer())
+      .get('/users/z1gonzo')
+      .set('authorization', 'Bearer invalid-token')
+      .expect(200);
+
+    expect(usersService.isFollowing).not.toHaveBeenCalled();
+    expect(response.body).toMatchObject({ isFollowing: false });
   });
 
   it('GET /users/:username/posts returns public posts for a profile', async () => {

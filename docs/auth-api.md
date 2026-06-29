@@ -90,6 +90,8 @@ Authorization: Bearer <accessToken>
 
 Zwraca publiczny profil użytkownika. Endpoint nie wymaga tokena.
 
+Jeśli request zawiera poprawny opcjonalny header `Authorization: Bearer ...`, pole `isFollowing` mówi, czy aktualny użytkownik obserwuje ten profil. Bez tokena albo z niepoprawnym tokenem `isFollowing` wynosi `false` i endpoint nadal zwraca publiczny profil.
+
 ### Response `200`
 
 ```json
@@ -102,6 +104,7 @@ Zwraca publiczny profil użytkownika. Endpoint nie wymaga tokena.
   "isPrivate": true,
   "followersCount": 12,
   "followingCount": 8,
+  "isFollowing": false,
   "createdAt": "2026-06-27T00:00:00.000Z"
 }
 ```
