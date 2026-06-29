@@ -45,6 +45,21 @@ export class PostsController {
     return posts.map((post) => this.toPublicPost(post));
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('following')
+  async listFollowingPosts(
+    @Req() request: AuthenticatedRequest,
+    @Query() query: ListPostsQueryDto,
+  ) {
+    const posts = await this.postsService.findFollowingFeed({
+      followerId: request.user.sub,
+      limit: query.limit ?? 20,
+      offset: query.offset ?? 0,
+    });
+
+    return posts.map((post) => this.toPublicPost(post));
+  }
+
   @Get(':id')
   async getPost(@Param('id') id: string) {
     const post = await this.postsService.findById(id);

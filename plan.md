@@ -82,7 +82,8 @@ Przygotować repo pod spokojną sesję kodowania w VSCode/Cline i ustabilizować
   - [x] Dodać `Follow` jako relację użytkownik → użytkownik
   - [x] Dodać follow/unfollow
   - [x] Dodać listy followers/following
-  - [ ] Dodać feed obserwowanych
+  - [x] Dodać feed obserwowanych
+  - [ ] Dodać liczniki followers/following na profilu
 - [ ] Komentarze
 - [ ] Podstawowy frontend — odłożony na później
 

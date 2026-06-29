@@ -2,6 +2,15 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-06-29 — Following feed
+
+- Dodano `PostsService.findFollowingFeed`.
+- Dodano chronione `GET /posts/following?limit=20&offset=0`.
+- Feed obserwowanych zwraca posty autorów, których aktualny użytkownik obserwuje przez model `Follow`.
+- Endpoint używa istniejących query params `limit` i `offset` oraz sortowania `createdAt desc`, `id desc`.
+- Dodano devlog `devlog/16_following-feed.md`.
+- Zweryfikowano `backend`: `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test`, `npm run test:e2e` przechodzą.
+
 ## 2026-06-29 — Relationships/follows
 
 - Dodano model Prisma `Follow` i migrację `20260629123023_add_follows`.

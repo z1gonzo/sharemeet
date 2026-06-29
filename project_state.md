@@ -4,11 +4,11 @@
 
 ## Status
 
-- Etap: Faza 2 — Core Social MVP / Relacje i follows
+- Etap: Faza 2 — Core Social MVP / Feed obserwowanych
 - Ostatnia sesja: 2026-06-29
 - Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
-- Główne ryzyko: feed obserwowanych nie istnieje jeszcze mimo działających relacji/follows
-- Następny krok: dodać feed obserwowanych `GET /posts/following` albo liczniki followers/following na profilu
+- Główne ryzyko: profile nie pokazują jeszcze liczników followers/following, a komentarze nie istnieją
+- Następny krok: dodać liczniki followers/following do publicznego profilu albo zacząć comments
 
 ## Organizacja projektu
 
@@ -37,11 +37,11 @@
 - `UsersModule` obsługuje chronione `PATCH /users/me` dla aktualizacji profilu.
 - `UsersModule` obsługuje publiczne `GET /users/:username` bez ujawniania email/passwordHash/isActive.
 - Avatar URL jest publiczny na razie; automatyczna moderacja jest odłożona, a przyszłe reportowanie profilu/avatarów opisuje `docs/profile-content-policy.md`.
-- `PostsModule` obsługuje chronione `POST /posts`, `PATCH /posts/:id`, `DELETE /posts/:id`, publiczne `GET /posts/:id`, publiczny globalny feed `GET /posts?limit=20&offset=0` i paginowaną listę postów użytkownika `GET /users/:username/posts?limit=20&offset=0` przez `UsersModule`.
+- `PostsModule` obsługuje chronione `POST /posts`, `PATCH /posts/:id`, `DELETE /posts/:id`, chroniony feed obserwowanych `GET /posts/following?limit=20&offset=0`, publiczne `GET /posts/:id`, publiczny globalny feed `GET /posts?limit=20&offset=0` i paginowaną listę postów użytkownika `GET /users/:username/posts?limit=20&offset=0` przez `UsersModule`.
 - `UsersModule` obsługuje relacje: `POST /users/:username/follow`, `DELETE /users/:username/follow`, `GET /users/:username/followers?limit=20&offset=0`, `GET /users/:username/following?limit=20&offset=0`.
 - PostgreSQL z Docker Compose działa lokalnie na porcie hosta `5433`.
 - `npm run build` w `backend/` przechodzi.
-- `npm test` i `npm run test:e2e` w `backend/` przechodzą: 8 test suites, 76 testów łącznie.
+- `npm test` i `npm run test:e2e` w `backend/` przechodzą: 8 test suites, 81 testów łącznie.
 - Istnieje devlog opisujący plan PostgreSQL + MongoDB: `devlog/01_db-choice.md`.
 - Repo ma standardowe pliki workflow dla pracy Hermes ↔ VSCode/Cline/Codex.
 
@@ -49,11 +49,20 @@
 
 Zweryfikowane przez `npm run lint && npm run prisma:validate && npm run build && npm test && npm run test:e2e` w `backend/` na 2026-06-29:
 
-- Brakuje feedu obserwowanych.
+- Brakuje liczników followers/following na profilu.
 - Brakuje komentarzy.
 - Reportowanie profilu/avatarów jest świadomie w backlogu, nie w bieżącym zakresie.
 
 ## Ostatnio wykonane
+
+Data: 2026-06-29 — Following feed
+
+- Dodano `PostsService.findFollowingFeed`.
+- Dodano chronione `GET /posts/following?limit=20&offset=0`.
+- Endpoint filtruje posty po relacji `Follow`: autor posta musi być obserwowany przez aktualnego użytkownika.
+- Endpoint używa istniejącego `ListPostsQueryDto` i sortowania `createdAt desc`, `id desc`.
+- Dodano devlog `devlog/16_following-feed.md`.
+- Uruchomiono `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test` i `npm run test:e2e` w `backend/` — wszystko przechodzi.
 
 Data: 2026-06-29 — Relationships/follows
 
@@ -246,7 +255,8 @@ Data: 2026-06-22
 - [x] Dodać paginację dla `GET /users/:username/posts`.
 - [x] Dodać edycję/usuwanie własnych postów.
 - [x] Dodać relacje/friends/follows.
-- [ ] Dodać feed obserwowanych `GET /posts/following`.
+- [x] Dodać feed obserwowanych `GET /posts/following`.
+- [ ] Dodać liczniki followers/following do profilu publicznego.
 - [ ] Dodać komentarze.
 
 ## Decyzje techniczne
@@ -262,10 +272,11 @@ Data: 2026-06-22
 | 2026-06-29 | Ujednolicamy paginację list postów | `GET /posts` i `GET /users/:username/posts` powinny mieć ten sam kontrakt `limit/offset` |
 | 2026-06-29 | Tylko autor może edytować/usunąć własny post | Minimalna reguła własności jest potrzebna przed rozbudową social features |
 | 2026-06-29 | Dodajemy model `Follow` jako relację użytkownik → użytkownik | To najprostszy fundament pod feed obserwowanych i social graph |
+| 2026-06-29 | Dodajemy `GET /posts/following` jako pierwszy social feed | Wykorzystujemy istniejący model `Follow`; ranking i cursor pagination zostają na później |
 
 ## Otwarte pytania
 
-- Czy po relacjach najpierw dodajemy feed obserwowanych, liczniki followers/following, czy comments?
+- Czy po feedzie obserwowanych najpierw dodajemy liczniki followers/following, comments, czy visibility/privacy?
 
 ## Instrukcja dla agenta
 

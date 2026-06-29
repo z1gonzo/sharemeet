@@ -62,6 +62,10 @@ describe('PostsController (e2e)', () => {
       Promise<PostRecord[]>,
       [{ limit: number; offset: number }]
     >;
+    findFollowingFeed: jest.Mock<
+      Promise<PostRecord[]>,
+      [{ followerId: string; limit: number; offset: number }]
+    >;
     updateOwnPost: jest.Mock<
       Promise<PostRecord>,
       [string, string, UpdatePostDto]
@@ -79,6 +83,10 @@ describe('PostsController (e2e)', () => {
       findFeed: jest.fn<
         Promise<PostRecord[]>,
         [{ limit: number; offset: number }]
+      >(),
+      findFollowingFeed: jest.fn<
+        Promise<PostRecord[]>,
+        [{ followerId: string; limit: number; offset: number }]
       >(),
       updateOwnPost: jest.fn<
         Promise<PostRecord>,
@@ -222,6 +230,79 @@ describe('PostsController (e2e)', () => {
       limit: 1,
       offset: 1,
     });
+  });
+
+  it('GET /posts/following returns posts from followed users', async () => {
+    jwtService.verifyAsync.mockResolvedValue({
+      sub: author.id,
+      email: 'lukasz@example.com',
+      username: 'z1gonzo',
+    });
+    postsService.findFollowingFeed.mockResolvedValue([newerPost, existingPost]);
+
+    const response = await request(app.getHttpServer())
+      .get('/posts/following')
+      .set('authorization', 'Bearer signed-access-token')
+      .expect(200);
+
+    expect(postsService.findFollowingFeed).toHaveBeenCalledWith({
+      followerId: author.id,
+      limit: 20,
+      offset: 0,
+    });
+    expect(response.body).toMatchObject([
+      {
+        id: newerPost.id,
+        content: 'Newest ShareMeet update',
+        author: { id: author.id, username: 'z1gonzo' },
+      },
+      {
+        id: existingPost.id,
+        content: 'Hello ShareMeet',
+        author: { id: author.id, username: 'z1gonzo' },
+      },
+    ]);
+    expect(JSON.stringify(response.body)).not.toContain('email');
+    expect(JSON.stringify(response.body)).not.toContain('passwordHash');
+  });
+
+  it('GET /posts/following passes limit and offset to the service', async () => {
+    jwtService.verifyAsync.mockResolvedValue({
+      sub: author.id,
+      email: 'lukasz@example.com',
+      username: 'z1gonzo',
+    });
+    postsService.findFollowingFeed.mockResolvedValue([existingPost]);
+
+    await request(app.getHttpServer())
+      .get('/posts/following?limit=1&offset=1')
+      .set('authorization', 'Bearer signed-access-token')
+      .expect(200);
+
+    expect(postsService.findFollowingFeed).toHaveBeenCalledWith({
+      followerId: author.id,
+      limit: 1,
+      offset: 1,
+    });
+  });
+
+  it('GET /posts/following rejects requests without a bearer token', async () => {
+    await request(app.getHttpServer()).get('/posts/following').expect(401);
+
+    expect(postsService.findFollowingFeed).not.toHaveBeenCalled();
+  });
+
+  it('GET /posts/following rejects invalid pagination query params', async () => {
+    await request(app.getHttpServer())
+      .get('/posts/following?limit=51')
+      .set('authorization', 'Bearer signed-access-token')
+      .expect(400);
+    await request(app.getHttpServer())
+      .get('/posts/following?offset=-1')
+      .set('authorization', 'Bearer signed-access-token')
+      .expect(400);
+
+    expect(postsService.findFollowingFeed).not.toHaveBeenCalled();
   });
 
   it('GET /posts rejects invalid pagination query params', async () => {

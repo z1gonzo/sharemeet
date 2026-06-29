@@ -392,6 +392,37 @@ createdAt desc, id desc
 | `200` | Zwrócono listę postów; jeśli brak postów, `[]` |
 | `400` | Niepoprawne query params |
 
+## `GET /posts/following`
+
+Zwraca chroniony feed postów od użytkowników obserwowanych przez aktualnego użytkownika. Endpoint wymaga JWT access tokena.
+
+### Header
+
+```http
+Authorization: Bearer ***
+```
+
+### Query params
+
+| Param | Default | Walidacja | Znaczenie |
+|---|---:|---|---|
+| `limit` | `20` | integer `1..50` | Maksymalna liczba postów |
+| `offset` | `0` | integer `>= 0` | Liczba najnowszych postów do pominięcia |
+
+### Sortowanie
+
+```text
+createdAt desc, id desc
+```
+
+### Responses
+
+| Status | Znaczenie |
+|---|---|
+| `200` | Zwrócono feed obserwowanych; jeśli brak postów, `[]` |
+| `400` | Niepoprawne query params |
+| `401` | Brak tokena albo token niepoprawny |
+
 ## Decyzja: refresh token
 
 Na tym etapie refresh token jest w backlogu. Powód: najpierw utrwalamy prosty, testowalny fundament `register → login → me`, potem przechodzimy do profilu użytkownika. Refresh token wróci, gdy pojawi się realna potrzeba sesji długotrwałych po stronie frontendu.

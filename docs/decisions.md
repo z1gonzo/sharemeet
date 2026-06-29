@@ -265,3 +265,28 @@ Po dodaniu profili i postów globalny feed nadal nie ma social graphu. Najprosts
 - Można zbudować feed obserwowanych przez filtr po `followingId` aktualnego użytkownika.
 - Nie obsługujemy jeszcze kont prywatnych jako request/approval workflow.
 - Nie dodajemy jeszcze liczników followers/following ani pola `isFollowing` na profilu.
+
+---
+
+## 2026-06-29 — Feed obserwowanych jako filtrowany feed postów
+
+Status: accepted
+
+### Kontekst
+
+Po dodaniu modelu `Follow` globalny feed nadal pokazuje wszystkich. Pierwszy social feed powinien używać istniejącego grafu obserwacji bez dodawania rankingu ani nowego modelu.
+
+### Decyzja
+
+- Dodajemy chronione `GET /posts/following`.
+- Endpoint używa tych samych query params co globalny feed: `limit` i `offset`.
+- Feed zawiera posty autorów, których aktualny użytkownik obserwuje.
+- Nie mieszamy automatycznie własnych postów użytkownika do feedu obserwowanych.
+- Sortowanie pozostaje `createdAt desc`, `id desc`.
+- Ranking, cursor pagination i prywatność widoczności postów są odłożone.
+
+### Konsekwencje
+
+- Backend ma teraz publiczny globalny feed i chroniony social feed.
+- Przyszły frontend może rozdzielić widoki „global” i „following”.
+- Przy większej skali trzeba będzie wrócić do cursor pagination i ewentualnie denormalizacji feedu.

@@ -30,6 +30,10 @@ interface FindByAuthorOptions extends FindFeedOptions {
   authorId: string;
 }
 
+interface FindFollowingFeedOptions extends FindFeedOptions {
+  followerId: string;
+}
+
 @Injectable()
 export class PostsService {
   constructor(private readonly prisma: PrismaService) {}
@@ -53,6 +57,22 @@ export class PostsService {
 
   findFeed({ limit, offset }: FindFeedOptions) {
     return this.prisma.post.findMany({
+      include: postInclude,
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      take: limit,
+      skip: offset,
+    });
+  }
+
+  findFollowingFeed({ followerId, limit, offset }: FindFollowingFeedOptions) {
+    return this.prisma.post.findMany({
+      where: {
+        author: {
+          followers: {
+            some: { followerId },
+          },
+        },
+      },
       include: postInclude,
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       take: limit,
