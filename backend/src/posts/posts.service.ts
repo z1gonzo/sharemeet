@@ -36,6 +36,10 @@ interface FindByAuthorOptions extends FindFeedOptions {
   authorId: string;
 }
 
+interface FindOwnPostsOptions extends FindFeedOptions {
+  authorId: string;
+}
+
 interface FindFollowingFeedOptions extends FindFeedOptions {
   followerId: string;
 }
@@ -99,6 +103,16 @@ export class PostsService {
   findByAuthorId({ authorId, limit, offset }: FindByAuthorOptions) {
     return this.prisma.post.findMany({
       where: { authorId, visibility: PostVisibility.PUBLIC },
+      include: postInclude,
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      take: limit,
+      skip: offset,
+    });
+  }
+
+  findOwnPosts({ authorId, limit, offset }: FindOwnPostsOptions) {
+    return this.prisma.post.findMany({
+      where: { authorId },
       include: postInclude,
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       take: limit,

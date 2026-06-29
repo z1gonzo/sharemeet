@@ -72,6 +72,10 @@ describe('PostsController (e2e)', () => {
       Promise<PostRecord[]>,
       [{ followerId: string; limit: number; offset: number }]
     >;
+    findOwnPosts: jest.Mock<
+      Promise<PostRecord[]>,
+      [{ authorId: string; limit: number; offset: number }]
+    >;
     updateOwnPost: jest.Mock<
       Promise<PostRecord>,
       [string, string, UpdatePostDto]
@@ -93,6 +97,10 @@ describe('PostsController (e2e)', () => {
       findFollowingFeed: jest.fn<
         Promise<PostRecord[]>,
         [{ followerId: string; limit: number; offset: number }]
+      >(),
+      findOwnPosts: jest.fn<
+        Promise<PostRecord[]>,
+        [{ authorId: string; limit: number; offset: number }]
       >(),
       updateOwnPost: jest.fn<
         Promise<PostRecord>,
@@ -329,6 +337,87 @@ describe('PostsController (e2e)', () => {
       limit: 1,
       offset: 1,
     });
+  });
+
+  it('GET /posts/me returns all current user posts across visibilities', async () => {
+    jwtService.verifyAsync.mockResolvedValue({
+      sub: author.id,
+      email: 'lukasz@example.com',
+      username: 'z1gonzo',
+    });
+    const privatePost = {
+      ...existingPost,
+      id: 'e7b79ee3-720b-48e4-9a12-f3c9e7e90fe1',
+      content: 'Private ShareMeet note',
+      visibility: PostVisibility.PRIVATE,
+    };
+    postsService.findOwnPosts.mockResolvedValue([privatePost, existingPost]);
+
+    const response = await request(app.getHttpServer())
+      .get('/posts/me')
+      .set('authorization', 'Bearer signed-access-token')
+      .expect(200);
+
+    expect(postsService.findOwnPosts).toHaveBeenCalledWith({
+      authorId: author.id,
+      limit: 20,
+      offset: 0,
+    });
+    expect(response.body).toMatchObject([
+      {
+        id: privatePost.id,
+        content: 'Private ShareMeet note',
+        visibility: PostVisibility.PRIVATE,
+        commentsCount: 4,
+        author: { id: author.id, username: 'z1gonzo' },
+      },
+      {
+        id: existingPost.id,
+        content: 'Hello ShareMeet',
+        visibility: PostVisibility.PUBLIC,
+        commentsCount: 4,
+        author: { id: author.id, username: 'z1gonzo' },
+      },
+    ]);
+  });
+
+  it('GET /posts/me passes limit and offset to the service', async () => {
+    jwtService.verifyAsync.mockResolvedValue({
+      sub: author.id,
+      email: 'lukasz@example.com',
+      username: 'z1gonzo',
+    });
+    postsService.findOwnPosts.mockResolvedValue([existingPost]);
+
+    await request(app.getHttpServer())
+      .get('/posts/me?limit=1&offset=1')
+      .set('authorization', 'Bearer signed-access-token')
+      .expect(200);
+
+    expect(postsService.findOwnPosts).toHaveBeenCalledWith({
+      authorId: author.id,
+      limit: 1,
+      offset: 1,
+    });
+  });
+
+  it('GET /posts/me rejects requests without a bearer token', async () => {
+    await request(app.getHttpServer()).get('/posts/me').expect(401);
+
+    expect(postsService.findOwnPosts).not.toHaveBeenCalled();
+  });
+
+  it('GET /posts/me rejects invalid pagination query params', async () => {
+    await request(app.getHttpServer())
+      .get('/posts/me?limit=51')
+      .set('authorization', 'Bearer signed-access-token')
+      .expect(400);
+    await request(app.getHttpServer())
+      .get('/posts/me?offset=-1')
+      .set('authorization', 'Bearer signed-access-token')
+      .expect(400);
+
+    expect(postsService.findOwnPosts).not.toHaveBeenCalled();
   });
 
   it('GET /posts/following rejects requests without a bearer token', async () => {

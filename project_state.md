@@ -4,11 +4,11 @@
 
 ## Status
 
-- Etap: Faza 2 — Core Social MVP / Post comment counts
+- Etap: Faza 2 — Core Social MVP / My posts endpoint
 - Ostatnia sesja: 2026-06-29
 - Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
-- Główne ryzyko: brak podglądu własnych prywatnych postów i brak frontendu
-- Następny krok: dodać endpoint „moje posty” albo zacząć podstawowy frontend
+- Główne ryzyko: brak frontendu
+- Następny krok: zacząć podstawowy frontend albo dodać małe backendowe pola pod frontend, np. `isFollowing`
 
 ## Organizacja projektu
 
@@ -37,14 +37,14 @@
 - `UsersModule` obsługuje chronione `PATCH /users/me` dla aktualizacji profilu.
 - `UsersModule` obsługuje publiczne `GET /users/:username` bez ujawniania email/passwordHash/isActive.
 - Avatar URL jest publiczny na razie; automatyczna moderacja jest odłożona, a przyszłe reportowanie profilu/avatarów opisuje `docs/profile-content-policy.md`.
-- `PostsModule` obsługuje chronione `POST /posts`, `PATCH /posts/:id`, `DELETE /posts/:id`, `PostVisibility` (`PUBLIC`, `FOLLOWERS`, `PRIVATE`), chroniony feed obserwowanych `GET /posts/following?limit=20&offset=0`, publiczne `GET /posts/:id`, publiczny globalny feed `GET /posts?limit=20&offset=0` i paginowaną listę postów użytkownika `GET /users/:username/posts?limit=20&offset=0` przez `UsersModule`.
+- `PostsModule` obsługuje chronione `POST /posts`, `PATCH /posts/:id`, `DELETE /posts/:id`, `GET /posts/me?limit=20&offset=0`, `PostVisibility` (`PUBLIC`, `FOLLOWERS`, `PRIVATE`), chroniony feed obserwowanych `GET /posts/following?limit=20&offset=0`, publiczne `GET /posts/:id`, publiczny globalny feed `GET /posts?limit=20&offset=0` i paginowaną listę postów użytkownika `GET /users/:username/posts?limit=20&offset=0` przez `UsersModule`.
 - Publiczne odpowiedzi z postami zwracają `commentsCount` wyliczany przez Prisma `_count`.
 - `CommentsModule` obsługuje `POST /posts/:postId/comments`, `GET /posts/:postId/comments?limit=20&offset=0`, `PATCH /comments/:id` i `DELETE /comments/:id` dla publicznych postów.
 - `UsersModule` obsługuje relacje: `POST /users/:username/follow`, `DELETE /users/:username/follow`, `GET /users/:username/followers?limit=20&offset=0`, `GET /users/:username/following?limit=20&offset=0`.
 - Publiczne profile `GET /users/:username` zwracają `followersCount` i `followingCount`.
 - PostgreSQL z Docker Compose działa lokalnie na porcie hosta `5433`.
 - `npm run build` w `backend/` przechodzi.
-- `npm test` i `npm run test:e2e` w `backend/` przechodzą: 10 test suites, 108 testów łącznie.
+- `npm test` i `npm run test:e2e` w `backend/` przechodzą: 10 test suites, 113 testów łącznie.
 - Istnieje devlog opisujący plan PostgreSQL + MongoDB: `devlog/01_db-choice.md`.
 - Repo ma standardowe pliki workflow dla pracy Hermes ↔ VSCode/Cline/Codex.
 
@@ -52,10 +52,18 @@
 
 Zweryfikowane przez `npm run lint && npm run prisma:validate && npm run build && npm test && npm run test:e2e` w `backend/` na 2026-06-29:
 
-- Brakuje endpointu do podglądu własnych prywatnych postów.
 - Reportowanie profilu/avatarów jest świadomie w backlogu, nie w bieżącym zakresie.
 
 ## Ostatnio wykonane
+
+Data: 2026-06-29 — My posts endpoint
+
+- Dodano `PostsService.findOwnPosts({ authorId, limit, offset })`.
+- Dodano chronione `GET /posts/me?limit=20&offset=0`.
+- Endpoint zwraca własne posty aktualnego użytkownika we wszystkich widocznościach: `PUBLIC`, `FOLLOWERS`, `PRIVATE`.
+- Endpoint jest zarejestrowany przed `GET /posts/:id`, żeby `/posts/me` nie konfliktowało z dynamicznym `:id`.
+- Dodano devlog `devlog/21_my-posts.md`.
+- Uruchomiono `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test` i `npm run test:e2e` w `backend/` — wszystko przechodzi.
 
 Data: 2026-06-29 — Post comments count
 
@@ -296,7 +304,7 @@ Data: 2026-06-22
 - [x] Dodać widoczność/prywatność postów.
 - [x] Dodać komentarze.
 - [x] Dodać liczniki komentarzy na postach.
-- [ ] Dodać endpoint „moje posty” dla własnych prywatnych treści.
+- [x] Dodać endpoint „moje posty” dla własnych prywatnych treści.
 
 ## Decyzje techniczne
 

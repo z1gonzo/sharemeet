@@ -60,6 +60,21 @@ export class PostsController {
     return posts.map((post) => this.toPublicPost(post));
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  async listMyPosts(
+    @Req() request: AuthenticatedRequest,
+    @Query() query: ListPostsQueryDto,
+  ) {
+    const posts = await this.postsService.findOwnPosts({
+      authorId: request.user.sub,
+      limit: query.limit ?? 20,
+      offset: query.offset ?? 0,
+    });
+
+    return posts.map((post) => this.toPublicPost(post));
+  }
+
   @Get(':id')
   async getPost(@Param('id') id: string) {
     const post = await this.postsService.findPublicById(id);

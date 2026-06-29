@@ -435,6 +435,61 @@ createdAt desc, id desc
 | `400` | Niepoprawne query params |
 | `401` | Brak tokena albo token niepoprawny |
 
+## `GET /posts/me`
+
+Zwraca chronioną listę własnych postów aktualnego użytkownika. Endpoint wymaga JWT access tokena.
+
+W przeciwieństwie do publicznych feedów endpoint zwraca własne posty we wszystkich widocznościach: `PUBLIC`, `FOLLOWERS`, `PRIVATE`.
+
+### Header
+
+```http
+Authorization: Bearer ***
+```
+
+### Query params
+
+| Param | Default | Walidacja | Znaczenie |
+|---|---:|---|---|
+| `limit` | `20` | integer `1..50` | Maksymalna liczba postów |
+| `offset` | `0` | integer `>= 0` | Liczba postów do pominięcia |
+
+### Sortowanie
+
+```text
+createdAt desc, id desc
+```
+
+### Response `200`
+
+```json
+[
+  {
+    "id": "uuid",
+    "content": "Private ShareMeet note",
+    "visibility": "PRIVATE",
+    "commentsCount": 0,
+    "createdAt": "2026-06-29T00:00:00.000Z",
+    "updatedAt": "2026-06-29T00:00:00.000Z",
+    "author": {
+      "id": "uuid",
+      "username": "z1gonzo",
+      "displayName": "Łukasz",
+      "avatarUrl": "https://example.com/avatar.png",
+      "isPrivate": false
+    }
+  }
+]
+```
+
+### Responses
+
+| Status | Znaczenie |
+|---|---|
+| `200` | Zwrócono własne posty; jeśli brak postów, `[]` |
+| `400` | Niepoprawne query params |
+| `401` | Brak tokena albo token niepoprawny |
+
 ## `POST /posts/:postId/comments`
 
 Tworzy komentarz do publicznego posta. Endpoint wymaga JWT access tokena.

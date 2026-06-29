@@ -86,7 +86,7 @@ Przygotować repo pod spokojną sesję kodowania w VSCode/Cline i ustabilizować
   - [x] Dodać liczniki followers/following na profilu
 - [x] Komentarze
 - [x] Liczniki komentarzy na postach
-- [ ] Endpoint „moje posty” dla własnych prywatnych treści
+- [x] Endpoint „moje posty” dla własnych prywatnych treści
 - [x] Widoczność/prywatność postów
 - [ ] Podstawowy frontend — odłożony na później
 

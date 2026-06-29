@@ -2,6 +2,14 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-06-29 — My posts endpoint
+
+- Dodano chronione `GET /posts/me?limit=20&offset=0`.
+- Endpoint zwraca własne posty aktualnego użytkownika we wszystkich widocznościach: `PUBLIC`, `FOLLOWERS`, `PRIVATE`.
+- Używa istniejącego kształtu odpowiedzi posta, w tym `visibility` i `commentsCount`.
+- Dodano devlog `devlog/21_my-posts.md`.
+- Zweryfikowano `backend`: `npm run lint`, `npm run prisma:validate`, `npm run build`, `npm test`, `npm run test:e2e` przechodzą.
+
 ## 2026-06-29 — Post comments count
 
 - Dodano `commentsCount` do publicznych odpowiedzi z postami.

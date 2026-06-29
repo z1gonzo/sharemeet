@@ -10,7 +10,7 @@ Projekt ma być edukacyjny: architektura powinna być jasna, opisana i rozwijana
 
 | Moduł | Odpowiedzialność | Status |
 |---|---|---|
-| `backend/` | API, auth, users, posts, follows, comments, logika biznesowa | NestJS + Prisma 6 + auth + profile + text posts CRUD + visibility + `commentsCount` + global/following feeds + follow relationships + comments |
+| `backend/` | API, auth, users, posts, follows, comments, logika biznesowa | NestJS + Prisma 6 + auth + profile + text posts CRUD + visibility + `commentsCount` + global/following/my-posts feeds + follow relationships + comments |
 | `frontend/` | UI użytkownika | TODO |
 | `db/` | Docker Compose dla PostgreSQL i MongoDB | PostgreSQL działa lokalnie na porcie hosta `5433`; MongoDB na później |
 | `docs/` | architektura, decyzje techniczne i krótkie referencje API | auth API i lekka polityka profilu opisane w `docs/` |
@@ -23,7 +23,7 @@ W devlogu przyjęto architekturę hybrydową:
 - PostgreSQL: users, friends, posts, comments
 - MongoDB: media uploads, activity logs, notifications
 
-Kod auth/users oparty o Mongoose został usunięty 2026-06-27 jako eksperyment niespójny z planem. Fundament PostgreSQL + Prisma został rozpoczęty: `backend/prisma/schema.prisma`, migracja `init_user`, globalny `PrismaModule`, `PrismaService`, minimalny `UsersService`, `POST /auth/register`, `POST /auth/login` z JWT access token, chronione `GET /auth/me`, DTO validation, przyjazne konflikty `409`, protected `PATCH /users/me`, publiczne `GET /users/:username`, pierwsze posty tekstowe przez `POST /posts`, `PATCH /posts/:id`, `DELETE /posts/:id`, `GET /posts/:id`, `PostVisibility` (`PUBLIC`, `FOLLOWERS`, `PRIVATE`), `commentsCount` na odpowiedziach z postami, globalny feed `GET /posts?limit=20&offset=0`, chroniony feed obserwowanych `GET /posts/following?limit=20&offset=0`, paginowana lista postów użytkownika `GET /users/:username/posts?limit=20&offset=0`, follow relationships przez `POST/DELETE /users/:username/follow` i listy followers/following oraz komentarze przez `POST/GET /posts/:postId/comments`, `PATCH/DELETE /comments/:id`.
+Kod auth/users oparty o Mongoose został usunięty 2026-06-27 jako eksperyment niespójny z planem. Fundament PostgreSQL + Prisma został rozpoczęty: `backend/prisma/schema.prisma`, migracja `init_user`, globalny `PrismaModule`, `PrismaService`, minimalny `UsersService`, `POST /auth/register`, `POST /auth/login` z JWT access token, chronione `GET /auth/me`, DTO validation, przyjazne konflikty `409`, protected `PATCH /users/me`, publiczne `GET /users/:username`, pierwsze posty tekstowe przez `POST /posts`, `PATCH /posts/:id`, `DELETE /posts/:id`, `GET /posts/:id`, `PostVisibility` (`PUBLIC`, `FOLLOWERS`, `PRIVATE`), `commentsCount` na odpowiedziach z postami, globalny feed `GET /posts?limit=20&offset=0`, chroniony feed obserwowanych `GET /posts/following?limit=20&offset=0`, chroniony endpoint własnych postów `GET /posts/me?limit=20&offset=0`, paginowana lista postów użytkownika `GET /users/:username/posts?limit=20&offset=0`, follow relationships przez `POST/DELETE /users/:username/follow` i listy followers/following oraz komentarze przez `POST/GET /posts/:postId/comments`, `PATCH/DELETE /comments/:id`.
 
 ## Rekomendowany kierunek MVP
 

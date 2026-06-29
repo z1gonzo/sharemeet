@@ -180,6 +180,22 @@ describe('PostsService', () => {
     });
   });
 
+  it('finds own posts across all visibilities newest first with pagination', async () => {
+    prisma.post.findMany.mockResolvedValue([post]);
+
+    await expect(
+      service.findOwnPosts({ authorId: author.id, limit: 20, offset: 0 }),
+    ).resolves.toEqual([post]);
+
+    expect(prisma.post.findMany).toHaveBeenCalledWith({
+      where: { authorId: author.id },
+      include: postInclude,
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      take: 20,
+      skip: 0,
+    });
+  });
+
   it('updates own post content and visibility', async () => {
     const updatedPost = {
       ...post,
