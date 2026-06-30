@@ -1,0 +1,434 @@
+import { useMemo, useState } from 'react';
+
+type Visibility = 'PUBLIC' | 'FOLLOWERS' | 'PRIVATE';
+
+type FeedTab = 'Global' | 'Following' | 'My posts';
+
+interface Author {
+  initials: string;
+  name: string;
+  username: string;
+  role: string;
+  accent: 'indigo' | 'emerald' | 'warm';
+}
+
+interface Post {
+  id: string;
+  author: Author;
+  content: string;
+  visibility: Visibility;
+  createdAt: string;
+  commentsCount: number;
+  comments: Array<{
+    author: string;
+    text: string;
+  }>;
+}
+
+const initialPosts: Post[] = [
+  {
+    id: 'post-1',
+    author: {
+      initials: 'A',
+      name: 'Anna Nowak',
+      username: 'anna',
+      role: 'Product designer',
+      accent: 'indigo',
+    },
+    content:
+      'ShareMeet zaczyna wyglądać jak prawdziwy social-tech produkt. Najważniejsze, że UI pokazuje visibility, komentarze i stan follow bez zamiany feedu w dashboard.',
+    visibility: 'PUBLIC',
+    createdAt: '12 min',
+    commentsCount: 4,
+    comments: [
+      {
+        author: 'Łukasz',
+        text: 'Dokładnie — backendowe ficzery mają być widoczne, ale nie krzyczeć.',
+      },
+      {
+        author: 'Marta',
+        text: 'Ten kierunek wygląda bardziej portfolio-ready niż klasyczny jasny feed.',
+      },
+    ],
+  },
+  {
+    id: 'post-2',
+    author: {
+      initials: 'K',
+      name: 'Kamil Zieliński',
+      username: 'kamil',
+      role: 'Backend engineer',
+      accent: 'emerald',
+    },
+    content:
+      'Visibility FOLLOWERS dobrze pokazuje, że ShareMeet ma już przemyślany model prywatności, a nie tylko publiczny CRUD postów.',
+    visibility: 'FOLLOWERS',
+    createdAt: '1 h',
+    commentsCount: 2,
+    comments: [
+      {
+        author: 'Anna',
+        text: 'To będzie fajny element do pokazania rekruterowi w demo.',
+      },
+    ],
+  },
+  {
+    id: 'post-3',
+    author: {
+      initials: 'M',
+      name: 'Maria Kowalska',
+      username: 'maria',
+      role: 'Community lead',
+      accent: 'warm',
+    },
+    content:
+      'Ciemny styl jest elegancki, ale zostawmy trochę ludzkiego tonu: krótkie bio, social stats, komentarze i prosty Follow button.',
+    visibility: 'PUBLIC',
+    createdAt: '3 h',
+    commentsCount: 6,
+    comments: [
+      {
+        author: 'Łukasz',
+        text: 'Tak, to jest ten kompromis: premium, ale nadal społecznościowe.',
+      },
+    ],
+  },
+];
+
+const currentUser = {
+  name: 'Łukasz',
+  username: 'z1gonzo',
+  initials: 'Ł',
+  bio: 'Building ShareMeet — NestJS, Prisma, PostgreSQL and now a dark social-tech frontend.',
+  followersCount: 128,
+  followingCount: 86,
+};
+
+const viewedProfile = {
+  name: 'Maria Kowalska',
+  username: 'maria',
+  initials: 'M',
+  bio: 'Community organizer focused on local groups, thoughtful conversations and useful social tools.',
+  followersCount: 421,
+  followingCount: 73,
+  isFollowing: false,
+};
+
+export function App() {
+  const [activeTab, setActiveTab] = useState<FeedTab>('Global');
+  const [composerValue, setComposerValue] = useState('');
+  const [visibility, setVisibility] = useState<Visibility>('PUBLIC');
+  const [posts, setPosts] = useState(initialPosts);
+  const [openComments, setOpenComments] = useState<string | null>('post-1');
+  const [isFollowing, setIsFollowing] = useState(viewedProfile.isFollowing);
+
+  const filteredPosts = useMemo(() => {
+    if (activeTab === 'Following') {
+      return posts.filter((post) => post.visibility !== 'PRIVATE');
+    }
+
+    if (activeTab === 'My posts') {
+      return posts.filter((post) => post.author.username === currentUser.username);
+    }
+
+    return posts.filter((post) => post.visibility === 'PUBLIC');
+  }, [activeTab, posts]);
+
+  function publishPost() {
+    const trimmed = composerValue.trim();
+
+    if (!trimmed) {
+      return;
+    }
+
+    const newPost: Post = {
+      id: `post-${Date.now()}`,
+      author: {
+        initials: currentUser.initials,
+        name: currentUser.name,
+        username: currentUser.username,
+        role: 'Founder',
+        accent: 'indigo',
+      },
+      content: trimmed,
+      visibility,
+      createdAt: 'teraz',
+      commentsCount: 0,
+      comments: [],
+    };
+
+    setPosts((previousPosts) => [newPost, ...previousPosts]);
+    setComposerValue('');
+    setActiveTab('My posts');
+  }
+
+  return (
+    <div className="app-shell">
+      <aside className="sidebar" aria-label="Główna nawigacja">
+        <div className="brand-lockup">
+          <div className="brand-mark">S</div>
+          <div>
+            <strong>ShareMeet</strong>
+            <span>social-tech MVP</span>
+          </div>
+        </div>
+
+        <nav className="sidebar-nav">
+          {(['Global', 'Following', 'My posts'] as const).map((tab) => (
+            <button
+              className={activeTab === tab ? 'nav-item active' : 'nav-item'}
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              type="button"
+            >
+              <span>{getTabIcon(tab)}</span>
+              {tab}
+            </button>
+          ))}
+          <button className="nav-item" type="button">
+            <span>⌘</span>
+            Profiles
+          </button>
+          <button className="nav-item" type="button">
+            <span>⚙</span>
+            Settings
+          </button>
+        </nav>
+
+        <div className="current-user-card">
+          <Avatar accent="indigo" initials={currentUser.initials} />
+          <div>
+            <strong>{currentUser.name}</strong>
+            <span>@{currentUser.username}</span>
+          </div>
+        </div>
+
+        <div className="backend-status">
+          <span className="status-dot" />
+          Backend ready
+          <small>117 tests passing</small>
+        </div>
+      </aside>
+
+      <main className="main-column">
+        <section className="hero-strip" aria-labelledby="feed-title">
+          <div>
+            <p className="eyebrow">CORE SOCIAL MVP</p>
+            <h1 id="feed-title">Dark social feed, built to show the backend.</h1>
+            <p>
+              Mockowany pierwszy frontend slice: app shell, feed, composer, profile
+              state, visibility i komentarze — bez podłączania API na tym kroku.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <button className="button ghost" type="button">
+              View API contract
+            </button>
+            <button className="button primary" type="button">
+              New post
+            </button>
+          </div>
+        </section>
+
+        <section className="composer-card" aria-label="Utwórz post">
+          <textarea
+            onChange={(event) => setComposerValue(event.target.value)}
+            placeholder="Write an update for your network..."
+            value={composerValue}
+          />
+          <div className="composer-footer">
+            <div className="visibility-switcher" aria-label="Widoczność posta">
+              {(['PUBLIC', 'FOLLOWERS', 'PRIVATE'] as const).map((option) => (
+                <button
+                  className={visibility === option ? 'visibility-pill active' : 'visibility-pill'}
+                  key={option}
+                  onClick={() => setVisibility(option)}
+                  type="button"
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+            <button className="button primary" onClick={publishPost} type="button">
+              Publish
+            </button>
+          </div>
+        </section>
+
+        <div className="feed-tabs" aria-label="Feed filters">
+          {(['Global', 'Following', 'My posts'] as const).map((tab) => (
+            <button
+              className={activeTab === tab ? 'feed-tab active' : 'feed-tab'}
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              type="button"
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        <section className="feed-list" aria-label="Posty">
+          {filteredPosts.length === 0 ? (
+            <div className="empty-state">
+              <strong>No posts in this view yet.</strong>
+              <span>Create a post or switch feed tabs.</span>
+            </div>
+          ) : (
+            filteredPosts.map((post) => (
+              <PostCard
+                isCommentsOpen={openComments === post.id}
+                key={post.id}
+                onToggleComments={() =>
+                  setOpenComments((current) => (current === post.id ? null : post.id))
+                }
+                post={post}
+              />
+            ))
+          )}
+        </section>
+      </main>
+
+      <aside className="context-panel" aria-label="Profil i kontekst">
+        <section className="profile-card">
+          <div className="profile-gradient" />
+          <Avatar accent="warm" className="profile-avatar" initials={viewedProfile.initials} />
+          <div className="profile-heading">
+            <div>
+              <h2>{viewedProfile.name}</h2>
+              <span>@{viewedProfile.username}</span>
+            </div>
+            <button
+              className={isFollowing ? 'button success' : 'button primary'}
+              onClick={() => setIsFollowing((current) => !current)}
+              type="button"
+            >
+              {isFollowing ? 'Following' : 'Follow'}
+            </button>
+          </div>
+          <p>{viewedProfile.bio}</p>
+          <div className="profile-stats">
+            <StatCard label="followers" value={viewedProfile.followersCount} />
+            <StatCard label="following" value={viewedProfile.followingCount} />
+          </div>
+          <div className="contract-row">
+            <span>isFollowing</span>
+            <strong>{String(isFollowing)}</strong>
+          </div>
+        </section>
+
+        <section className="contract-card">
+          <div className="section-heading">
+            <span className="eyebrow">BACKEND CONTRACT</span>
+            <h3>Visible portfolio features</h3>
+          </div>
+          <ul className="contract-list">
+            <li>
+              <span>profile counts</span>
+              <code>followersCount</code>
+            </li>
+            <li>
+              <span>viewer state</span>
+              <code>isFollowing</code>
+            </li>
+            <li>
+              <span>post privacy</span>
+              <code>visibility</code>
+            </li>
+            <li>
+              <span>comments</span>
+              <code>commentsCount</code>
+            </li>
+          </ul>
+        </section>
+      </aside>
+    </div>
+  );
+}
+
+function PostCard({
+  isCommentsOpen,
+  onToggleComments,
+  post,
+}: {
+  isCommentsOpen: boolean;
+  onToggleComments: () => void;
+  post: Post;
+}) {
+  return (
+    <article className="post-card">
+      <header className="post-header">
+        <Avatar accent={post.author.accent} initials={post.author.initials} />
+        <div>
+          <strong>{post.author.name}</strong>
+          <span>
+            @{post.author.username} · {post.createdAt} · {post.author.role}
+          </span>
+        </div>
+        <VisibilityBadge visibility={post.visibility} />
+      </header>
+      <p>{post.content}</p>
+      <footer className="post-actions">
+        <button onClick={onToggleComments} type="button">
+          💬 {post.commentsCount} comments
+        </button>
+        <button type="button">↗ Share</button>
+        <button type="button">•••</button>
+      </footer>
+      {isCommentsOpen && (
+        <div className="comments-panel">
+          {post.comments.length === 0 ? (
+            <span className="muted-text">No comments yet.</span>
+          ) : (
+            post.comments.map((comment) => (
+              <div className="comment-row" key={`${post.id}-${comment.author}-${comment.text}`}>
+                <Avatar accent="indigo" initials={comment.author.at(0) ?? '?'} small />
+                <div>
+                  <strong>{comment.author}</strong>
+                  <span>{comment.text}</span>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+    </article>
+  );
+}
+
+function Avatar({
+  accent,
+  className,
+  initials,
+  small = false,
+}: {
+  accent: Author['accent'];
+  className?: string;
+  initials: string;
+  small?: boolean;
+}) {
+  return (
+    <div className={`avatar avatar-${accent} ${small ? 'avatar-small' : ''} ${className ?? ''}`}>
+      {initials}
+    </div>
+  );
+}
+
+function VisibilityBadge({ visibility }: { visibility: Visibility }) {
+  return <span className={`visibility-badge visibility-${visibility.toLowerCase()}`}>{visibility}</span>;
+}
+
+function StatCard({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="stat-card">
+      <strong>{value}</strong>
+      <span>{label}</span>
+    </div>
+  );
+}
+
+function getTabIcon(tab: FeedTab) {
+  if (tab === 'Global') return '◎';
+  if (tab === 'Following') return '◆';
+  return '◉';
+}

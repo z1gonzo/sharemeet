@@ -4,11 +4,11 @@
 
 ## Status
 
-- Etap: Faza 2 — Core Social MVP / Frontend direction selected
+- Etap: Faza 2 — Core Social MVP / Frontend shell
 - Ostatnia sesja: 2026-06-30
 - Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
-- Główne ryzyko: brak produkcyjnego frontendu
-- Następny krok: zacząć podstawowy frontend w stylu Focus Dark social-tech
+- Główne ryzyko: frontend nie jest jeszcze podłączony do backend API
+- Następny krok: dodać frontend auth screens albo zacząć podłączać global feed API
 
 ## Organizacja projektu
 
@@ -49,14 +49,25 @@
 - Repo ma standardowe pliki workflow dla pracy Hermes ↔ VSCode/Cline/Codex.
 - Przygotowano 3 throwaway mockupy HTML w `sketches/`; wybrany kierunek to `002-sharemeet-focus-dark` jako baza.
 - Frontend design direction jest zapisany w `docs/frontend-design.md`: premium dark social-tech UI inspirowany Linear/Vercel, z czytelnością Clean i subtelnymi community akcentami.
+- Istnieje pierwszy produkcyjny frontend w `frontend/`: Vite + React + TypeScript, mockowany Focus Dark app shell/feed/profile/post cards/comments preview.
 
 ## Co nie działa / wymaga naprawy
 
 Zweryfikowane przez `npm run lint && npm run prisma:validate && npm run build && npm test && npm run test:e2e` w `backend/` na 2026-06-29:
 
 - Reportowanie profilu/avatarów jest świadomie w backlogu, nie w bieżącym zakresie.
+- Frontend używa jeszcze mockowanych danych; brak integracji z backend API.
 
 ## Ostatnio wykonane
+
+Data: 2026-06-30 — Frontend shell
+
+- Dodano `frontend/` jako Vite + React + TypeScript app.
+- Zaimplementowano Focus Dark app shell z lewym sidebarem, głównym feedem i prawym panelem profilu/kontekstu.
+- Dodano mockowane komponenty: composer, post cards, visibility pills, comments preview, profile card z `followersCount`, `followingCount`, `isFollowing`.
+- Dodano `frontend/README.md` i devlog `devlog/24_frontend-shell.md`.
+- `npm run build` w `frontend/` przechodzi.
+- Aplikacja została uruchomiona lokalnie przez Vite i sprawdzona wizualnie w przeglądarce.
 
 Data: 2026-06-30 — Frontend design direction
 

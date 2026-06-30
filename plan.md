@@ -91,6 +91,11 @@ Przygotować repo pod spokojną sesję kodowania w VSCode/Cline i ustabilizować
 - [x] Widoczność/prywatność postów
 - [x] Wybrać kierunek frontend UI na bazie mockupów: Focus Dark social-tech
 - [ ] Podstawowy frontend
+  - [x] Utworzyć `frontend/` jako Vite + React + TypeScript
+  - [x] Dodać Focus Dark app shell na mockowanych danych
+  - [x] Dodać mockowany feed/profile/post card/comments preview
+  - [ ] Dodać login/register screens
+  - [ ] Podłączyć realne API krok po kroku
 
 ## Faza 3 — Media i aktywność
 

@@ -2,6 +2,13 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-06-30 — Frontend shell
+
+- Dodano `frontend/` jako Vite + React + TypeScript app.
+- Zaimplementowano pierwszy mockowany Focus Dark shell: sidebar, feed, composer, post cards, comments preview, profile/context panel.
+- Dodano `frontend/README.md` i `devlog/24_frontend-shell.md`.
+- Zweryfikowano `frontend`: `npm run build` przechodzi, aplikacja renderuje się lokalnie przez Vite.
+
 ## 2026-06-30 — Frontend design direction
 
 - Przygotowano 3 mockupy HTML w `sketches/`: Clean, Focus Dark, Local Community.
