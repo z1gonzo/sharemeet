@@ -46,6 +46,11 @@ interface LoginPayload {
   password: string;
 }
 
+interface CreatePostPayload {
+  content: string;
+  visibility: ApiPost['visibility'];
+}
+
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
 
 export class ApiError extends Error {
@@ -77,12 +82,24 @@ export async function getGlobalPosts() {
   return apiRequest<ApiPost[]>('/posts?limit=20&offset=0');
 }
 
+export async function createPost(payload: CreatePostPayload, accessToken: string) {
+  return apiRequest<ApiPost>('/posts', {
+    body: JSON.stringify(payload),
+    headers: authHeaders(accessToken),
+    method: 'POST',
+  });
+}
+
 export async function getCurrentUser(accessToken: string) {
   return apiRequest<PublicUser>('/auth/me', {
-    headers: {
-      Authorization: [String.fromCharCode(66, 101, 97, 114, 101, 114), accessToken].join(' '),
-    },
+    headers: authHeaders(accessToken),
   });
+}
+
+function authHeaders(accessToken: string) {
+  return {
+    Authorization: [String.fromCharCode(66, 101, 97, 114, 101, 114), accessToken].join(' '),
+  };
 }
 
 async function apiRequest<T>(path: string, init: RequestInit = {}): Promise<T> {

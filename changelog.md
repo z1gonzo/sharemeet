@@ -2,6 +2,14 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-06-30 — Frontend post composer API integration
+
+- Podłączono composer do realnego `POST /posts` z JWT access tokenem.
+- Brak tokena otwiera login i pokazuje komunikat zamiast tworzyć lokalnego mocka.
+- Dodano loading/success/error feedback oraz blokadę kontrolek podczas publikowania.
+- Po publicznym poście frontend odświeża realny `GET /posts` feed.
+- Zweryfikowano realnym smoke testem przez UI: klik `Publish` utworzył post w backendzie i pokazał go w feedzie; konsola JS bez błędów.
+
 ## 2026-06-30 — Frontend global feed API integration
 
 - Podłączono frontendowy `Global` feed do `GET /posts?limit=20&offset=0`.

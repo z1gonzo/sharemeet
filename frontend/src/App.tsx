@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ApiError, getCurrentUser, getGlobalPosts, loginUser, registerUser } from './api';
+import { ApiError, createPost, getCurrentUser, getGlobalPosts, loginUser, registerUser } from './api';
 import type { ApiPost, AuthTokenResponse, PublicUser } from './api';
 
 type Visibility = 'PUBLIC' | 'FOLLOWERS' | 'PRIVATE';
@@ -122,6 +122,8 @@ export function App() {
   const [composerValue, setComposerValue] = useState('');
   const [visibility, setVisibility] = useState<Visibility>('PUBLIC');
   const [posts, setPosts] = useState(initialPosts);
+  const [composerStatus, setComposerStatus] = useState<'idle' | 'publishing' | 'published' | 'error'>('idle');
+  const [composerMessage, setComposerMessage] = useState<string | null>(null);
   const [feedStatus, setFeedStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
   const [feedError, setFeedError] = useState<string | null>(null);
   const [openComments, setOpenComments] = useState<string | null>('post-1');
@@ -203,32 +205,45 @@ export function App() {
     return posts.filter((post) => post.visibility === 'PUBLIC');
   }, [activeTab, activeUser.username, posts]);
 
-  function publishPost() {
+  async function publishPost() {
     const trimmed = composerValue.trim();
 
     if (!trimmed) {
+      setComposerStatus('error');
+      setComposerMessage('Write something before publishing.');
       return;
     }
 
-    const newPost: Post = {
-      id: `post-${Date.now()}`,
-      author: {
-        initials: activeUser.initials,
-        name: activeUser.name,
-        username: activeUser.username,
-        role: authenticatedUser ? 'Authenticated user' : 'Founder',
-        accent: 'indigo',
-      },
-      content: trimmed,
-      visibility,
-      createdAt: 'teraz',
-      commentsCount: 0,
-      comments: [],
-    };
+    if (!accessToken || !authenticatedUser) {
+      setComposerStatus('error');
+      setComposerMessage('Sign in before publishing a post.');
+      openAuth('login');
+      return;
+    }
 
-    setPosts((previousPosts) => [newPost, ...previousPosts]);
-    setComposerValue('');
-    setActiveTab('My posts');
+    setComposerStatus('publishing');
+    setComposerMessage(null);
+
+    try {
+      const createdPost = await createPost({ content: trimmed, visibility }, accessToken);
+      setComposerValue('');
+      setPosts((previousPosts) => [mapApiPost(createdPost), ...previousPosts.filter((post) => post.id !== createdPost.id)]);
+      setOpenComments(null);
+      setActiveTab(createdPost.visibility === 'PUBLIC' ? 'Global' : 'My posts');
+      setComposerStatus('published');
+      setComposerMessage(
+        createdPost.visibility === 'PUBLIC'
+          ? 'Post published and added to the live feed.'
+          : 'Post published. My posts feed API is the next slice for non-public posts.',
+      );
+
+      if (createdPost.visibility === 'PUBLIC') {
+        await loadGlobalFeed();
+      }
+    } catch (error) {
+      setComposerStatus('error');
+      setComposerMessage(getErrorMessage(error));
+    }
   }
 
   function openAuth(mode: AuthMode) {
@@ -385,8 +400,15 @@ export function App() {
 
         <section className="composer-card" aria-label="Utwórz post">
           <textarea
-            onChange={(event) => setComposerValue(event.target.value)}
-            placeholder="Write an update for your network..."
+            disabled={composerStatus === 'publishing'}
+            onChange={(event) => {
+              setComposerValue(event.target.value);
+              if (composerStatus !== 'publishing') {
+                setComposerStatus('idle');
+                setComposerMessage(null);
+              }
+            }}
+            placeholder={authenticatedUser ? 'Write an update for your network...' : 'Sign in to publish a real post...'}
             value={composerValue}
           />
           <div className="composer-footer">
@@ -394,6 +416,7 @@ export function App() {
               {(['PUBLIC', 'FOLLOWERS', 'PRIVATE'] as const).map((option) => (
                 <button
                   className={visibility === option ? 'visibility-pill active' : 'visibility-pill'}
+                  disabled={composerStatus === 'publishing'}
                   key={option}
                   onClick={() => setVisibility(option)}
                   type="button"
@@ -402,10 +425,20 @@ export function App() {
                 </button>
               ))}
             </div>
-            <button className="button primary" onClick={publishPost} type="button">
-              Publish
+            <button
+              className="button primary"
+              disabled={composerStatus === 'publishing'}
+              onClick={() => void publishPost()}
+              type="button"
+            >
+              {composerStatus === 'publishing' ? 'Publishing…' : 'Publish'}
             </button>
           </div>
+          {composerMessage && (
+            <div className={`composer-status composer-${composerStatus}`} role={composerStatus === 'error' ? 'alert' : 'status'}>
+              {composerMessage}
+            </div>
+          )}
         </section>
 
         <div className="feed-toolbar">
@@ -549,8 +582,8 @@ function AuthPanel({
         <p className="eyebrow">AUTH FLOW</p>
         <h2 id="auth-title">{isRegister ? 'Create your ShareMeet account.' : 'Welcome back to ShareMeet.'}</h2>
         <p>
-          Mockowany ekran pod istniejące backend endpoints. Następny krok to podłączenie
-          `POST /auth/{isRegister ? 'register' : 'login'}` i zapis JWT access token.
+          Realny auth flow korzysta z backendu: `POST /auth/{isRegister ? 'register' : 'login'}`
+          oraz `GET /auth/me`. Token JWT jest zapisywany lokalnie dla kolejnych requestów.
         </p>
         <div className="auth-contract-grid" aria-label="Auth API contract preview">
           <code>POST /auth/register</code>

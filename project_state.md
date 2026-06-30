@@ -4,11 +4,11 @@
 
 ## Status
 
-- Etap: Faza 2 — Core Social MVP / Frontend global feed API integration
+- Etap: Faza 2 — Core Social MVP / Frontend post composer API integration
 - Ostatnia sesja: 2026-06-30
 - Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
-- Główne ryzyko: composer/profile/follow/comments frontend są jeszcze mockowane
-- Następny krok: podłączyć tworzenie posta `POST /posts` do composera frontendu
+- Główne ryzyko: My posts/following/profile/follow/comments frontend są jeszcze mockowane/lokalne
+- Następny krok: podłączyć `GET /posts/me` do zakładki My posts
 
 ## Organizacja projektu
 
@@ -52,15 +52,24 @@
 - Istnieje pierwszy produkcyjny frontend w `frontend/`: Vite + React + TypeScript, Focus Dark app shell/feed/profile/post cards/comments preview oraz login/register screens.
 - Frontend auth jest podłączony do backendu: `POST /auth/register`, `POST /auth/login`, JWT w `localStorage`, `GET /auth/me` hydration i logout.
 - Frontend global feed jest podłączony do backendu: `GET /posts?limit=20&offset=0`, loading/error state, refresh i realne `commentsCount` na kartach.
+- Frontend composer jest podłączony do backendu: `POST /posts` z JWT, loading/error/success state i refresh publicznego feedu po publikacji.
 
 ## Co nie działa / wymaga naprawy
 
 Zweryfikowane przez `npm run lint && npm run prisma:validate && npm run build && npm test && npm run test:e2e` w `backend/` na 2026-06-29:
 
 - Reportowanie profilu/avatarów jest świadomie w backlogu, nie w bieżącym zakresie.
-- Composer, profile, follow i comments list po stronie frontendu używają jeszcze mockowanych/lokalnych danych.
+- `My posts`, following feed, profile, follow i comments list po stronie frontendu używają jeszcze mockowanych/lokalnych danych.
 
 ## Ostatnio wykonane
+
+Data: 2026-06-30 — Frontend post composer API integration
+
+- Dodano `createPost()` w `frontend/src/api.ts`.
+- Composer wysyła realne `POST /posts` z JWT access tokenem.
+- Brak tokena otwiera login i pokazuje komunikat zamiast tworzyć mocka.
+- Dodano `Publishing…`, success/error feedback, blokadę kontrolek podczas publikowania i refresh global feed po publicznym poście.
+- Realny smoke test przeszedł: post utworzony kliknięciem `Publish` w UI pojawił się w `GET /posts` i na froncie; konsola JS bez błędów.
 
 Data: 2026-06-30 — Frontend global feed API integration
 
