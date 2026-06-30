@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ApiError, createPost, getCurrentUser, getGlobalPosts, loginUser, registerUser } from './api';
+import { ApiError, createPost, getCurrentUser, getGlobalPosts, getMyPosts, loginUser, registerUser } from './api';
 import type { ApiPost, AuthTokenResponse, PublicUser } from './api';
 
 type Visibility = 'PUBLIC' | 'FOLLOWERS' | 'PRIVATE';
 
 type FeedTab = 'Global' | 'Following' | 'My posts';
 type AuthMode = 'login' | 'register';
+type FeedStatus = 'idle' | 'loading' | 'ready' | 'error';
 
 interface Author {
   initials: string;
@@ -122,10 +123,13 @@ export function App() {
   const [composerValue, setComposerValue] = useState('');
   const [visibility, setVisibility] = useState<Visibility>('PUBLIC');
   const [posts, setPosts] = useState(initialPosts);
+  const [myPosts, setMyPosts] = useState<Post[]>([]);
   const [composerStatus, setComposerStatus] = useState<'idle' | 'publishing' | 'published' | 'error'>('idle');
   const [composerMessage, setComposerMessage] = useState<string | null>(null);
-  const [feedStatus, setFeedStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
+  const [feedStatus, setFeedStatus] = useState<FeedStatus>('idle');
   const [feedError, setFeedError] = useState<string | null>(null);
+  const [myPostsStatus, setMyPostsStatus] = useState<FeedStatus>('idle');
+  const [myPostsError, setMyPostsError] = useState<string | null>(null);
   const [openComments, setOpenComments] = useState<string | null>('post-1');
   const [isFollowing, setIsFollowing] = useState(viewedProfile.isFollowing);
   const [authMode, setAuthMode] = useState<AuthMode | null>(null);
@@ -178,6 +182,21 @@ export function App() {
     void loadGlobalFeed();
   }, []);
 
+  useEffect(() => {
+    if (activeTab !== 'My posts') {
+      return;
+    }
+
+    if (!accessToken || !authenticatedUser) {
+      setMyPosts([]);
+      setMyPostsStatus('error');
+      setMyPostsError('Sign in to view your posts.');
+      return;
+    }
+
+    void loadMyPosts();
+  }, [accessToken, activeTab, authenticatedUser?.id]);
+
   async function loadGlobalFeed() {
     setFeedStatus('loading');
     setFeedError(null);
@@ -193,17 +212,49 @@ export function App() {
     }
   }
 
+  async function loadMyPosts() {
+    if (!accessToken) {
+      setMyPosts([]);
+      setMyPostsStatus('error');
+      setMyPostsError('Sign in to view your posts.');
+      openAuth('login');
+      return;
+    }
+
+    setMyPostsStatus('loading');
+    setMyPostsError(null);
+
+    try {
+      const apiPosts = await getMyPosts(accessToken);
+      setMyPosts(apiPosts.map(mapApiPost));
+      setOpenComments(null);
+      setMyPostsStatus('ready');
+    } catch (error) {
+      setMyPostsError(getErrorMessage(error));
+      setMyPostsStatus('error');
+    }
+  }
+
+  function refreshActiveFeed() {
+    if (activeTab === 'My posts') {
+      void loadMyPosts();
+      return;
+    }
+
+    void loadGlobalFeed();
+  }
+
   const filteredPosts = useMemo(() => {
     if (activeTab === 'Following') {
       return posts.filter((post) => post.visibility !== 'PRIVATE');
     }
 
     if (activeTab === 'My posts') {
-      return posts.filter((post) => post.author.username === activeUser.username);
+      return myPosts;
     }
 
     return posts.filter((post) => post.visibility === 'PUBLIC');
-  }, [activeTab, activeUser.username, posts]);
+  }, [activeTab, myPosts, posts]);
 
   async function publishPost() {
     const trimmed = composerValue.trim();
@@ -226,19 +277,23 @@ export function App() {
 
     try {
       const createdPost = await createPost({ content: trimmed, visibility }, accessToken);
+      const mappedPost = mapApiPost(createdPost);
       setComposerValue('');
-      setPosts((previousPosts) => [mapApiPost(createdPost), ...previousPosts.filter((post) => post.id !== createdPost.id)]);
+      setPosts((previousPosts) => [mappedPost, ...previousPosts.filter((post) => post.id !== createdPost.id)]);
+      setMyPosts((previousPosts) => [mappedPost, ...previousPosts.filter((post) => post.id !== createdPost.id)]);
       setOpenComments(null);
       setActiveTab(createdPost.visibility === 'PUBLIC' ? 'Global' : 'My posts');
       setComposerStatus('published');
       setComposerMessage(
         createdPost.visibility === 'PUBLIC'
           ? 'Post published and added to the live feed.'
-          : 'Post published. My posts feed API is the next slice for non-public posts.',
+          : 'Post published and added to My posts.',
       );
 
       if (createdPost.visibility === 'PUBLIC') {
         await loadGlobalFeed();
+      } else {
+        await loadMyPosts();
       }
     } catch (error) {
       setComposerStatus('error');
@@ -285,8 +340,14 @@ export function App() {
     localStorage.removeItem('sharemeet.accessToken');
     setAccessToken(null);
     setAuthenticatedUser(null);
+    setMyPosts([]);
+    setMyPostsStatus('idle');
+    setMyPostsError(null);
     setAuthStatus('Signed out.');
   }
+
+  const activeFeedStatus = activeTab === 'My posts' ? myPostsStatus : feedStatus;
+  const activeFeedError = activeTab === 'My posts' ? myPostsError : feedError;
 
   return (
     <div className="app-shell">
@@ -364,8 +425,8 @@ export function App() {
             <p className="eyebrow">CORE SOCIAL MVP</p>
             <h1 id="feed-title">Dark social feed, built to show the backend.</h1>
             <p>
-              Realny auth jest już podłączony. Global feed pobiera `GET /posts`, a composer,
-              profile, follow i comments są jeszcze kolejnymi slice’ami integracji.
+              Realny auth, global feed i composer są już podłączone. Zakładka My posts pobiera
+              teraz `GET /posts/me`, a following/profile/follow/comments są kolejnymi slice’ami integracji.
             </p>
           </div>
           <div className="hero-actions">
@@ -455,25 +516,29 @@ export function App() {
             ))}
           </div>
           <div className="feed-sync-status">
-            <span className={`sync-dot sync-${feedStatus}`} />
-            <span>{getFeedStatusLabel(feedStatus)}</span>
-            <button className="refresh-button" onClick={() => void loadGlobalFeed()} type="button">
+            <span className={`sync-dot sync-${activeFeedStatus}`} />
+            <span>{getFeedStatusLabel(activeFeedStatus, activeTab)}</span>
+            <button className="refresh-button" onClick={refreshActiveFeed} type="button">
               Refresh
             </button>
           </div>
         </div>
 
-        {feedError && (
+        {activeFeedError && (
           <div className="feed-error" role="alert">
-            {feedError}
+            {activeFeedError}
           </div>
         )}
 
         <section className="feed-list" aria-label="Posty">
           {filteredPosts.length === 0 ? (
             <div className="empty-state">
-              <strong>No posts in this view yet.</strong>
-              <span>Create a post or switch feed tabs.</span>
+              <strong>{activeTab === 'My posts' ? 'No own posts yet.' : 'No posts in this view yet.'}</strong>
+              <span>
+                {activeTab === 'My posts'
+                  ? 'Publish a post or switch feed tabs.'
+                  : 'Create a post or switch feed tabs.'}
+              </span>
             </div>
           ) : (
             filteredPosts.map((post) => (
@@ -832,11 +897,12 @@ function formatRelativeTime(isoDate: string) {
   return `${days} d`;
 }
 
-function getFeedStatusLabel(status: 'idle' | 'loading' | 'ready' | 'error') {
-  if (status === 'loading') return 'Syncing feed';
-  if (status === 'ready') return 'Live from API';
-  if (status === 'error') return 'Feed API error';
-  return 'Feed pending';
+function getFeedStatusLabel(status: FeedStatus, activeTab: FeedTab) {
+  const feedName = activeTab === 'My posts' ? 'My posts' : 'Feed';
+  if (status === 'loading') return `Syncing ${feedName}`;
+  if (status === 'ready') return activeTab === 'My posts' ? 'My posts from API' : 'Live from API';
+  if (status === 'error') return `${feedName} API error`;
+  return `${feedName} pending`;
 }
 
 function getInitials(user: PublicUser) {

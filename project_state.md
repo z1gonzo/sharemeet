@@ -4,11 +4,11 @@
 
 ## Status
 
-- Etap: Faza 2 — Core Social MVP / Frontend post composer API integration
+- Etap: Faza 2 — Core Social MVP / Frontend My posts API integration
 - Ostatnia sesja: 2026-06-30
 - Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
-- Główne ryzyko: My posts/following/profile/follow/comments frontend są jeszcze mockowane/lokalne
-- Następny krok: podłączyć `GET /posts/me` do zakładki My posts
+- Główne ryzyko: following/profile/follow/comments frontend są jeszcze mockowane/lokalne
+- Następny krok: podłączyć `GET /posts/following` do zakładki Following
 
 ## Organizacja projektu
 
@@ -53,15 +53,23 @@
 - Frontend auth jest podłączony do backendu: `POST /auth/register`, `POST /auth/login`, JWT w `localStorage`, `GET /auth/me` hydration i logout.
 - Frontend global feed jest podłączony do backendu: `GET /posts?limit=20&offset=0`, loading/error state, refresh i realne `commentsCount` na kartach.
 - Frontend composer jest podłączony do backendu: `POST /posts` z JWT, loading/error/success state i refresh publicznego feedu po publikacji.
+- Frontend My posts jest podłączony do backendu: `GET /posts/me?limit=20&offset=0`, pokazuje własne `PUBLIC`/`FOLLOWERS`/`PRIVATE` posty i wymaga JWT.
 
 ## Co nie działa / wymaga naprawy
 
 Zweryfikowane przez `npm run lint && npm run prisma:validate && npm run build && npm test && npm run test:e2e` w `backend/` na 2026-06-29:
 
 - Reportowanie profilu/avatarów jest świadomie w backlogu, nie w bieżącym zakresie.
-- `My posts`, following feed, profile, follow i comments list po stronie frontendu używają jeszcze mockowanych/lokalnych danych.
+- Following feed, profile, follow i comments list po stronie frontendu używają jeszcze mockowanych/lokalnych danych.
 
 ## Ostatnio wykonane
+
+Data: 2026-06-30 — Frontend My posts API integration
+
+- Dodano `getMyPosts(accessToken)` w `frontend/src/api.ts`.
+- Zakładka `My posts` pobiera realne `GET /posts/me?limit=20&offset=0`.
+- Dodano osobny stan `myPosts`, loading/error/ready state, refresh zależny od aktywnej zakładki i auth guard dla braku tokena.
+- Realny smoke test przeszedł: prywatny post utworzony przez UI pojawił się w `My posts`/`GET /posts/me`, nie pojawił się w `GET /posts`; konsola JS bez błędów.
 
 Data: 2026-06-30 — Frontend post composer API integration
 

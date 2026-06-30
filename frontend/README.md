@@ -11,7 +11,7 @@ First production frontend slice for ShareMeet.
 
 ## Current scope
 
-This is a mixed frontend slice: auth, global feed, and post composer are connected to the backend, while My posts/following/profile/follow/comments are still mocked/local.
+This is a mixed frontend slice: auth, global feed, post composer, and My posts are connected to the backend, while following/profile/follow/comments are still mocked/local.
 
 Implemented:
 
@@ -19,6 +19,7 @@ Implemented:
 - left navigation/sidebar,
 - main feed layout connected to `GET /posts`,
 - connected composer with visibility pills and `POST /posts`,
+- My posts tab connected to `GET /posts/me`,
 - post cards with real `visibility` and `commentsCount` from the global feed,
 - comments preview panel,
 - right profile/context panel with `followersCount`, `followingCount`, `isFollowing`,
@@ -58,7 +59,6 @@ VITE_API_URL=http://localhost:3000 npm run dev
 
 Connect API gradually:
 
-1. connect `GET /posts/me` for the My posts tab,
-2. connect `GET /posts/following`,
-3. connect public profile/follow state,
-4. connect comments.
+1. connect `GET /posts/following`,
+2. connect public profile/follow state,
+3. connect comments.

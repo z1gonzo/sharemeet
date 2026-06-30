@@ -2,6 +2,13 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-06-30 — Frontend My posts API integration
+
+- Podłączono zakładkę `My posts` do `GET /posts/me?limit=20&offset=0`.
+- Dodano osobny stan listy, loading/error/ready, auth guard i refresh aktywnej zakładki.
+- `My posts` pokazuje własne `PUBLIC`/`FOLLOWERS`/`PRIVATE` posty z backendu.
+- Zweryfikowano realnym smoke testem: prywatny post utworzony przez UI pojawił się w `My posts`, ale nie w globalnym `GET /posts`; konsola JS bez błędów.
+
 ## 2026-06-30 — Frontend post composer API integration
 
 - Podłączono composer do realnego `POST /posts` z JWT access tokenem.

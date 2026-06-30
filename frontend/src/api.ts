@@ -82,6 +82,12 @@ export async function getGlobalPosts() {
   return apiRequest<ApiPost[]>('/posts?limit=20&offset=0');
 }
 
+export async function getMyPosts(accessToken: string) {
+  return apiRequest<ApiPost[]>('/posts/me?limit=20&offset=0', {
+    headers: authHeaders(accessToken),
+  });
+}
+
 export async function createPost(payload: CreatePostPayload, accessToken: string) {
   return apiRequest<ApiPost>('/posts', {
     body: JSON.stringify(payload),
