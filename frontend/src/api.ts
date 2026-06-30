@@ -16,6 +16,24 @@ export interface AuthTokenResponse {
   user: PublicUser;
 }
 
+export interface ApiPostAuthor {
+  id: string;
+  username: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+  isPrivate: boolean;
+}
+
+export interface ApiPost {
+  id: string;
+  content: string;
+  visibility: 'PUBLIC' | 'FOLLOWERS' | 'PRIVATE';
+  commentsCount: number;
+  createdAt: string;
+  updatedAt: string;
+  author: ApiPostAuthor;
+}
+
 interface RegisterPayload {
   email: string;
   username: string;
@@ -52,6 +70,11 @@ export async function loginUser(payload: LoginPayload) {
     body: JSON.stringify(payload),
     method: 'POST',
   });
+}
+
+
+export async function getGlobalPosts() {
+  return apiRequest<ApiPost[]>('/posts?limit=20&offset=0');
 }
 
 export async function getCurrentUser(accessToken: string) {

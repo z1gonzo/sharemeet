@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ApiError, getCurrentUser, loginUser, registerUser } from './api';
-import type { AuthTokenResponse, PublicUser } from './api';
+import { ApiError, getCurrentUser, getGlobalPosts, loginUser, registerUser } from './api';
+import type { ApiPost, AuthTokenResponse, PublicUser } from './api';
 
 type Visibility = 'PUBLIC' | 'FOLLOWERS' | 'PRIVATE';
 
@@ -122,6 +122,8 @@ export function App() {
   const [composerValue, setComposerValue] = useState('');
   const [visibility, setVisibility] = useState<Visibility>('PUBLIC');
   const [posts, setPosts] = useState(initialPosts);
+  const [feedStatus, setFeedStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
+  const [feedError, setFeedError] = useState<string | null>(null);
   const [openComments, setOpenComments] = useState<string | null>('post-1');
   const [isFollowing, setIsFollowing] = useState(viewedProfile.isFollowing);
   const [authMode, setAuthMode] = useState<AuthMode | null>(null);
@@ -169,6 +171,25 @@ export function App() {
       cancelled = true;
     };
   }, [accessToken]);
+
+  useEffect(() => {
+    void loadGlobalFeed();
+  }, []);
+
+  async function loadGlobalFeed() {
+    setFeedStatus('loading');
+    setFeedError(null);
+
+    try {
+      const apiPosts = await getGlobalPosts();
+      setPosts(apiPosts.map(mapApiPost));
+      setOpenComments(null);
+      setFeedStatus('ready');
+    } catch (error) {
+      setFeedError(getErrorMessage(error));
+      setFeedStatus('error');
+    }
+  }
 
   const filteredPosts = useMemo(() => {
     if (activeTab === 'Following') {
@@ -328,8 +349,8 @@ export function App() {
             <p className="eyebrow">CORE SOCIAL MVP</p>
             <h1 id="feed-title">Dark social feed, built to show the backend.</h1>
             <p>
-              Mockowany pierwszy frontend slice: app shell, feed, composer, profile
-              state, visibility i komentarze — bez podłączania API na tym kroku.
+              Realny auth jest już podłączony. Global feed pobiera `GET /posts`, a composer,
+              profile, follow i comments są jeszcze kolejnymi slice’ami integracji.
             </p>
           </div>
           <div className="hero-actions">
@@ -387,18 +408,33 @@ export function App() {
           </div>
         </section>
 
-        <div className="feed-tabs" aria-label="Feed filters">
-          {(['Global', 'Following', 'My posts'] as const).map((tab) => (
-            <button
-              className={activeTab === tab ? 'feed-tab active' : 'feed-tab'}
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              type="button"
-            >
-              {tab}
+        <div className="feed-toolbar">
+          <div className="feed-tabs" aria-label="Feed filters">
+            {(['Global', 'Following', 'My posts'] as const).map((tab) => (
+              <button
+                className={activeTab === tab ? 'feed-tab active' : 'feed-tab'}
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                type="button"
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+          <div className="feed-sync-status">
+            <span className={`sync-dot sync-${feedStatus}`} />
+            <span>{getFeedStatusLabel(feedStatus)}</span>
+            <button className="refresh-button" onClick={() => void loadGlobalFeed()} type="button">
+              Refresh
             </button>
-          ))}
+          </div>
         </div>
+
+        {feedError && (
+          <div className="feed-error" role="alert">
+            {feedError}
+          </div>
+        )}
 
         <section className="feed-list" aria-label="Posty">
           {filteredPosts.length === 0 ? (
@@ -714,6 +750,60 @@ function getTabIcon(tab: FeedTab) {
   if (tab === 'Global') return '◎';
   if (tab === 'Following') return '◆';
   return '◉';
+}
+
+function mapApiPost(post: ApiPost): Post {
+  const displayName = post.author.displayName ?? post.author.username;
+
+  return {
+    id: post.id,
+    author: {
+      initials: displayName.slice(0, 1).toUpperCase(),
+      name: displayName,
+      username: post.author.username,
+      role: post.author.isPrivate ? 'Private profile' : 'ShareMeet user',
+      accent: pickAuthorAccent(post.author.username),
+    },
+    comments: [],
+    commentsCount: post.commentsCount,
+    content: post.content,
+    createdAt: formatRelativeTime(post.createdAt),
+    visibility: post.visibility,
+  };
+}
+
+function pickAuthorAccent(username: string): Author['accent'] {
+  const accents: Array<Author['accent']> = ['indigo', 'emerald', 'warm'];
+  const sum = [...username].reduce((total, char) => total + char.charCodeAt(0), 0);
+  return accents[sum % accents.length];
+}
+
+function formatRelativeTime(isoDate: string) {
+  const timestamp = new Date(isoDate).getTime();
+
+  if (Number.isNaN(timestamp)) {
+    return 'recently';
+  }
+
+  const seconds = Math.max(0, Math.floor((Date.now() - timestamp) / 1000));
+
+  if (seconds < 60) return 'teraz';
+
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} min`;
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} h`;
+
+  const days = Math.floor(hours / 24);
+  return `${days} d`;
+}
+
+function getFeedStatusLabel(status: 'idle' | 'loading' | 'ready' | 'error') {
+  if (status === 'loading') return 'Syncing feed';
+  if (status === 'ready') return 'Live from API';
+  if (status === 'error') return 'Feed API error';
+  return 'Feed pending';
 }
 
 function getInitials(user: PublicUser) {

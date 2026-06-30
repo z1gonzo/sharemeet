@@ -96,7 +96,7 @@ Przygotować repo pod spokojną sesję kodowania w VSCode/Cline i ustabilizować
   - [x] Dodać mockowany feed/profile/post card/comments preview
   - [x] Dodać login/register screens
   - [x] Podłączyć auth API: register, login, token, `GET /auth/me`, logout
-  - [ ] Podłączyć global feed `GET /posts`
+  - [x] Podłączyć global feed `GET /posts`
   - [ ] Podłączyć tworzenie posta `POST /posts`
   - [ ] Podłączyć profile/follow/comments
 

@@ -4,11 +4,11 @@
 
 ## Status
 
-- Etap: Faza 2 — Core Social MVP / Frontend auth API integration
+- Etap: Faza 2 — Core Social MVP / Frontend global feed API integration
 - Ostatnia sesja: 2026-06-30
 - Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
-- Główne ryzyko: feed/profile/follow/comments frontend są jeszcze mockowane
-- Następny krok: podłączyć global feed API (`GET /posts`) do frontendu
+- Główne ryzyko: composer/profile/follow/comments frontend są jeszcze mockowane
+- Następny krok: podłączyć tworzenie posta `POST /posts` do composera frontendu
 
 ## Organizacja projektu
 
@@ -51,15 +51,23 @@
 - Frontend design direction jest zapisany w `docs/frontend-design.md`: premium dark social-tech UI inspirowany Linear/Vercel, z czytelnością Clean i subtelnymi community akcentami.
 - Istnieje pierwszy produkcyjny frontend w `frontend/`: Vite + React + TypeScript, Focus Dark app shell/feed/profile/post cards/comments preview oraz login/register screens.
 - Frontend auth jest podłączony do backendu: `POST /auth/register`, `POST /auth/login`, JWT w `localStorage`, `GET /auth/me` hydration i logout.
+- Frontend global feed jest podłączony do backendu: `GET /posts?limit=20&offset=0`, loading/error state, refresh i realne `commentsCount` na kartach.
 
 ## Co nie działa / wymaga naprawy
 
 Zweryfikowane przez `npm run lint && npm run prisma:validate && npm run build && npm test && npm run test:e2e` w `backend/` na 2026-06-29:
 
 - Reportowanie profilu/avatarów jest świadomie w backlogu, nie w bieżącym zakresie.
-- Feed, profile, follow i comments po stronie frontendu używają jeszcze mockowanych danych.
+- Composer, profile, follow i comments list po stronie frontendu używają jeszcze mockowanych/lokalnych danych.
 
 ## Ostatnio wykonane
+
+Data: 2026-06-30 — Frontend global feed API integration
+
+- Dodano `getGlobalPosts()` oraz typy `ApiPost`/`ApiPostAuthor` w `frontend/src/api.ts`.
+- `Global` feed pobiera realne posty z `GET /posts?limit=20&offset=0`.
+- Dodano status `Live from API`, refresh, loading/error state i mapowanie backend postów na `PostCard`.
+- Realny smoke test przeszedł: utworzono publiczny post przez API, `GET /posts` go zwrócił, frontend go wyrenderował, konsola JS bez błędów.
 
 Data: 2026-06-30 — Frontend auth API integration
 

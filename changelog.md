@@ -2,6 +2,13 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-06-30 — Frontend global feed API integration
+
+- Podłączono frontendowy `Global` feed do `GET /posts?limit=20&offset=0`.
+- Dodano typy `ApiPost`/`ApiPostAuthor`, loading/error state, status `Live from API` i przycisk Refresh.
+- Karty postów pokazują realne `visibility` i `commentsCount` z backendu.
+- Zweryfikowano realnym smoke testem: publiczny post utworzony przez API pojawił się na froncie, brak błędów JS.
+
 ## 2026-06-30 — Frontend auth API integration
 
 - Podłączono frontendowe Login/Register do realnego backend API.
