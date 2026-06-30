@@ -2,6 +2,13 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-06-30 — Frontend auth screens
+
+- Dodano mockowane ekrany Login/Register w istniejącym froncie Focus Dark.
+- Panel pokazuje kontrakt backendu: `POST /auth/register`, `POST /auth/login`, `GET /auth/me`.
+- Dodano mock submit status dla przyszłej integracji API.
+- Zweryfikowano `frontend`: `npm run build` przechodzi, brak błędów JS w konsoli przeglądarki.
+
 ## 2026-06-30 — Frontend shell
 
 - Dodano `frontend/` jako Vite + React + TypeScript app.

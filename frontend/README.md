@@ -22,6 +22,8 @@ Implemented:
 - mocked post cards with `visibility` and `commentsCount`,
 - comments preview panel,
 - right profile/context panel with `followersCount`, `followingCount`, `isFollowing`,
+- mocked login/register screens for existing auth endpoints,
+- mock submit status for `POST /auth/login` and `POST /auth/register`,
 - responsive single-column fallback.
 
 Design source of truth:
@@ -42,8 +44,8 @@ npm run build
 
 Keep the UI mocked for one more small slice if needed, then connect API gradually:
 
-1. auth login/register,
-2. global feed,
-3. public profile,
-4. follow/unfollow,
-5. comments.
+1. connect `POST /auth/login` and `POST /auth/register`,
+2. persist the JWT access token,
+3. connect `GET /auth/me`,
+4. connect global feed,
+5. connect public profile/follow/comments.

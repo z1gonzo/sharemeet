@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 type Visibility = 'PUBLIC' | 'FOLLOWERS' | 'PRIVATE';
 
 type FeedTab = 'Global' | 'Following' | 'My posts';
+type AuthMode = 'login' | 'register';
 
 interface Author {
   initials: string;
@@ -121,6 +122,11 @@ export function App() {
   const [posts, setPosts] = useState(initialPosts);
   const [openComments, setOpenComments] = useState<string | null>('post-1');
   const [isFollowing, setIsFollowing] = useState(viewedProfile.isFollowing);
+  const [authMode, setAuthMode] = useState<AuthMode | null>(null);
+  const [authEmail, setAuthEmail] = useState('lukasz@example.com');
+  const [authUsername, setAuthUsername] = useState('z1gonzo');
+  const [authPassword, setAuthPassword] = useState('sharemeet-demo');
+  const [authStatus, setAuthStatus] = useState<string | null>(null);
 
   const filteredPosts = useMemo(() => {
     if (activeTab === 'Following') {
@@ -162,6 +168,16 @@ export function App() {
     setActiveTab('My posts');
   }
 
+  function openAuth(mode: AuthMode) {
+    setAuthMode(mode);
+    setAuthStatus(null);
+  }
+
+  function submitAuth() {
+    const endpoint = authMode === 'register' ? 'POST /auth/register' : 'POST /auth/login';
+    setAuthStatus(`${endpoint} mock ready — API integration next.`);
+  }
+
   return (
     <div className="app-shell">
       <aside className="sidebar" aria-label="Główna nawigacja">
@@ -195,6 +211,23 @@ export function App() {
           </button>
         </nav>
 
+        <div className="auth-shortcuts" aria-label="Auth shortcuts">
+          <button
+            className={authMode === 'login' ? 'button ghost compact active-auth' : 'button ghost compact'}
+            onClick={() => openAuth('login')}
+            type="button"
+          >
+            Login
+          </button>
+          <button
+            className={authMode === 'register' ? 'button primary compact active-auth' : 'button primary compact'}
+            onClick={() => openAuth('register')}
+            type="button"
+          >
+            Register
+          </button>
+        </div>
+
         <div className="current-user-card">
           <Avatar accent="indigo" initials={currentUser.initials} />
           <div>
@@ -221,14 +254,33 @@ export function App() {
             </p>
           </div>
           <div className="hero-actions">
-            <button className="button ghost" type="button">
-              View API contract
+            <button className="button ghost" onClick={() => openAuth('login')} type="button">
+              Login
             </button>
-            <button className="button primary" type="button">
-              New post
+            <button className="button primary" onClick={() => openAuth('register')} type="button">
+              Register
             </button>
           </div>
         </section>
+
+        {authMode && (
+          <AuthPanel
+            authEmail={authEmail}
+            authMode={authMode}
+            authPassword={authPassword}
+            authStatus={authStatus}
+            authUsername={authUsername}
+            onClose={() => {
+              setAuthMode(null);
+              setAuthStatus(null);
+            }}
+            onEmailChange={setAuthEmail}
+            onModeChange={openAuth}
+            onPasswordChange={setAuthPassword}
+            onSubmit={submitAuth}
+            onUsernameChange={setAuthUsername}
+          />
+        )}
 
         <section className="composer-card" aria-label="Utwórz post">
           <textarea
@@ -343,6 +395,149 @@ export function App() {
         </section>
       </aside>
     </div>
+  );
+}
+
+function AuthPanel({
+  authEmail,
+  authMode,
+  authPassword,
+  authStatus,
+  authUsername,
+  onClose,
+  onEmailChange,
+  onModeChange,
+  onPasswordChange,
+  onSubmit,
+  onUsernameChange,
+}: {
+  authEmail: string;
+  authMode: AuthMode;
+  authPassword: string;
+  authStatus: string | null;
+  authUsername: string;
+  onClose: () => void;
+  onEmailChange: (value: string) => void;
+  onModeChange: (mode: AuthMode) => void;
+  onPasswordChange: (value: string) => void;
+  onSubmit: () => void;
+  onUsernameChange: (value: string) => void;
+}) {
+  const isRegister = authMode === 'register';
+
+  return (
+    <section className="auth-panel" aria-labelledby="auth-title">
+      <div className="auth-copy">
+        <p className="eyebrow">AUTH FLOW</p>
+        <h2 id="auth-title">{isRegister ? 'Create your ShareMeet account.' : 'Welcome back to ShareMeet.'}</h2>
+        <p>
+          Mockowany ekran pod istniejące backend endpoints. Następny krok to podłączenie
+          `POST /auth/{isRegister ? 'register' : 'login'}` i zapis JWT access token.
+        </p>
+        <div className="auth-contract-grid" aria-label="Auth API contract preview">
+          <code>POST /auth/register</code>
+          <code>POST /auth/login</code>
+          <code>GET /auth/me</code>
+        </div>
+      </div>
+
+      <form
+        className="auth-form"
+        onSubmit={(event) => {
+          event.preventDefault();
+          onSubmit();
+        }}
+      >
+        <div className="auth-mode-switch" role="tablist" aria-label="Auth mode">
+          <button
+            aria-selected={authMode === 'login'}
+            className={authMode === 'login' ? 'feed-tab active' : 'feed-tab'}
+            onClick={() => onModeChange('login')}
+            role="tab"
+            type="button"
+          >
+            Login
+          </button>
+          <button
+            aria-selected={authMode === 'register'}
+            className={authMode === 'register' ? 'feed-tab active' : 'feed-tab'}
+            onClick={() => onModeChange('register')}
+            role="tab"
+            type="button"
+          >
+            Register
+          </button>
+        </div>
+
+        {isRegister && (
+          <FormField
+            label="Username"
+            name="username"
+            onChange={onUsernameChange}
+            placeholder="z1gonzo"
+            value={authUsername}
+          />
+        )}
+        <FormField
+          label="Email"
+          name="email"
+          onChange={onEmailChange}
+          placeholder="lukasz@example.com"
+          type="email"
+          value={authEmail}
+        />
+        <FormField
+          label="Password"
+          name="password"
+          onChange={onPasswordChange}
+          placeholder="minimum 8 characters"
+          type="password"
+          value={authPassword}
+        />
+
+        <div className="auth-form-actions">
+          <button className="button ghost" onClick={onClose} type="button">
+            Close
+          </button>
+          <button className="button primary" type="submit">
+            {isRegister ? 'Create account' : 'Sign in'}
+          </button>
+        </div>
+
+        {authStatus && <div className="auth-status">{authStatus}</div>}
+      </form>
+    </section>
+  );
+}
+
+function FormField({
+  label,
+  name,
+  onChange,
+  placeholder,
+  type = 'text',
+  value,
+}: {
+  label: string;
+  name: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  type?: 'email' | 'password' | 'text';
+  value: string;
+}) {
+  return (
+    <label className="form-field" htmlFor={name}>
+      <span>{label}</span>
+      <input
+        autoComplete={name === 'password' ? 'current-password' : name}
+        id={name}
+        name={name}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        type={type}
+        value={value}
+      />
+    </label>
   );
 }
 

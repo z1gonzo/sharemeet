@@ -4,11 +4,11 @@
 
 ## Status
 
-- Etap: Faza 2 — Core Social MVP / Frontend shell
+- Etap: Faza 2 — Core Social MVP / Frontend auth screens
 - Ostatnia sesja: 2026-06-30
 - Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
 - Główne ryzyko: frontend nie jest jeszcze podłączony do backend API
-- Następny krok: dodać frontend auth screens albo zacząć podłączać global feed API
+- Następny krok: podłączyć frontend auth API (`POST /auth/login`, `POST /auth/register`, `GET /auth/me`)
 
 ## Organizacja projektu
 
@@ -49,7 +49,7 @@
 - Repo ma standardowe pliki workflow dla pracy Hermes ↔ VSCode/Cline/Codex.
 - Przygotowano 3 throwaway mockupy HTML w `sketches/`; wybrany kierunek to `002-sharemeet-focus-dark` jako baza.
 - Frontend design direction jest zapisany w `docs/frontend-design.md`: premium dark social-tech UI inspirowany Linear/Vercel, z czytelnością Clean i subtelnymi community akcentami.
-- Istnieje pierwszy produkcyjny frontend w `frontend/`: Vite + React + TypeScript, mockowany Focus Dark app shell/feed/profile/post cards/comments preview.
+- Istnieje pierwszy produkcyjny frontend w `frontend/`: Vite + React + TypeScript, mockowany Focus Dark app shell/feed/profile/post cards/comments preview oraz login/register screens.
 
 ## Co nie działa / wymaga naprawy
 
@@ -59,6 +59,14 @@ Zweryfikowane przez `npm run lint && npm run prisma:validate && npm run build &&
 - Frontend używa jeszcze mockowanych danych; brak integracji z backend API.
 
 ## Ostatnio wykonane
+
+Data: 2026-06-30 — Frontend auth screens
+
+- Dodano mockowane ekrany Login/Register w istniejącym Focus Dark froncie.
+- Panel auth pokazuje backend contract: `POST /auth/register`, `POST /auth/login`, `GET /auth/me`.
+- Dodano mock submit status dla przyszłej integracji API.
+- `npm run build` w `frontend/` przechodzi.
+- Sprawdzono panel auth wizualnie w przeglądarce; brak błędów JS.
 
 Data: 2026-06-30 — Frontend shell
 
