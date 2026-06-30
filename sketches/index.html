@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ShareMeet UI Sketches</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Inter, system-ui, sans-serif; background: #f7f7f8; color: #111; }
+    header { padding: 32px 24px 20px; max-width: 1180px; margin: 0 auto; }
+    h1 { margin: 0 0 8px; font-size: 38px; letter-spacing: -1px; }
+    p { color: #60646c; line-height: 1.55; }
+    .grid { max-width: 1180px; margin: 0 auto; padding: 0 24px 48px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .card { background: white; border: 1px solid rgba(0,0,0,.08); border-radius: 22px; padding: 18px; box-shadow: 0 10px 30px rgba(0,0,0,.06); }
+    .preview { height: 180px; border-radius: 16px; margin-bottom: 16px; display: grid; place-items: center; color: white; font-weight: 800; font-size: 22px; overflow: hidden; }
+    .clean { background: linear-gradient(135deg, #0075de, #e9f3ff); }
+    .dark { background: linear-gradient(135deg, #08090a, #5e6ad2); }
+    .local { background: linear-gradient(135deg, #ff385c, #ffc65c); }
+    .selected { border: 2px solid #5e6ad2; box-shadow: 0 0 0 4px rgba(94,106,210,.12), 0 18px 45px rgba(0,0,0,.10); }
+    .badge { display: inline-flex; margin-bottom: 10px; padding: 6px 9px; border-radius: 999px; background: #eef0ff; color: #4f46d8; font-size: 12px; font-weight: 800; }
+    h2 { margin: 0 0 8px; letter-spacing: -.4px; }
+    .meta { color: #60646c; min-height: 78px; }
+    a.button { display: inline-flex; align-items: center; justify-content: center; margin-top: 12px; padding: 11px 14px; border-radius: 999px; background: #111; color: white; text-decoration: none; font-weight: 700; }
+    table { width: calc(100% - 48px); max-width: 1180px; margin: 0 auto 48px; border-collapse: collapse; background: white; border-radius: 18px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,.05); }
+    th, td { padding: 14px 16px; border-bottom: 1px solid rgba(0,0,0,.07); text-align: left; vertical-align: top; }
+    th { background: #111; color: white; }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } table { width: calc(100% - 24px); } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>ShareMeet — 3 kierunki UI</h1>
+    <p>Wyrzucalne mockupy HTML do wyboru kierunku wizualnego przed budową prawdziwego frontendu.</p>
+  </header>
+  <section class="grid">
+    <article class="card">
+      <div class="preview clean">Clean Social</div>
+      <h2>ShareMeet Clean</h2>
+      <p class="meta">Jasny, bezpieczny, czytelny MVP. Najłatwiejszy do przerobienia na produkcyjny frontend.</p>
+      <a class="button" href="001-sharemeet-clean/index.html">Otwórz wariant</a>
+    </article>
+    <article class="card selected">
+      <span class="badge">WYBRANA BAZA</span>
+      <div class="preview dark">Focus Dark</div>
+      <h2>ShareMeet Focus Dark</h2>
+      <p class="meta">Premium dark UI w klimacie Linear. Najlepszy dla technicznego, portfolio-like produktu.</p>
+      <a class="button" href="002-sharemeet-focus-dark/index.html">Otwórz wariant</a>
+    </article>
+    <article class="card">
+      <div class="preview local">Local Community</div>
+      <h2>ShareMeet Local Community</h2>
+      <p class="meta">Cieplejszy, bardziej ludzki kierunek dla lokalnych grup, wydarzeń i społeczności.</p>
+      <a class="button" href="003-sharemeet-local-community/index.html">Otwórz wariant</a>
+    </article>
+  </section>
+  <table>
+    <thead><tr><th>Wymiar</th><th>Clean</th><th>Focus Dark</th><th>Local Community</th></tr></thead>
+    <tbody>
+      <tr><td>Ryzyko wdrożenia</td><td>Niskie</td><td>Średnie</td><td>Średnie</td></tr>
+      <tr><td>Charakter</td><td>Prosty social MVP</td><td>Premium social-tech</td><td>Lokalna społeczność</td></tr>
+      <tr><td>Najmocniejsze</td><td>Czytelność i neutralność</td><td>Wyrazisty styl</td><td>Ludzkość i emocje</td></tr>
+      <tr><td>Najsłabsze</td><td>Mniej unikalny</td><td>Może być za techniczny</td><td>Może iść za bardzo w marketplace/eventy</td></tr>
+    </tbody>
+  </table>
+</body>
+</html>

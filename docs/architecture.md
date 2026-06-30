@@ -11,7 +11,7 @@ Projekt ma być edukacyjny: architektura powinna być jasna, opisana i rozwijana
 | Moduł | Odpowiedzialność | Status |
 |---|---|---|
 | `backend/` | API, auth, users, posts, follows, comments, logika biznesowa | NestJS + Prisma 6 + auth + profile + counts + `isFollowing` + text posts CRUD + visibility + `commentsCount` + global/following/my-posts feeds + follow relationships + comments |
-| `frontend/` | UI użytkownika | TODO |
+| `frontend/` | UI użytkownika | TODO; wybrany kierunek: Focus Dark social-tech opisany w `docs/frontend-design.md` |
 | `db/` | Docker Compose dla PostgreSQL i MongoDB | PostgreSQL działa lokalnie na porcie hosta `5433`; MongoDB na później |
 | `docs/` | architektura, decyzje techniczne i krótkie referencje API | auth API i lekka polityka profilu opisane w `docs/` |
 | `devlog/` | dokumentacja nauki i uzasadnień | część głównego repo |
@@ -39,7 +39,7 @@ To zostało formalnie potwierdzone decyzją z 2026-06-27 w `docs/decisions.md`.
 
 1. Najpierw działający monolit/modularny backend NestJS.
 2. Jeden storage dla users/auth w MVP.
-3. Potem frontend i podstawowy flow użytkownika.
+3. Potem frontend i podstawowy flow użytkownika w ustalonym kierunku Focus Dark social-tech.
 4. Dopiero po MVP: Redis, GraphQL, WebSockets, queues.
 
 ## Ryzyka

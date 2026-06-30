@@ -89,6 +89,7 @@ Przygotować repo pod spokojną sesję kodowania w VSCode/Cline i ustabilizować
 - [x] Liczniki komentarzy na postach
 - [x] Endpoint „moje posty” dla własnych prywatnych treści
 - [x] Widoczność/prywatność postów
+- [x] Wybrać kierunek frontend UI na bazie mockupów: Focus Dark social-tech
 - [ ] Podstawowy frontend
 
 ## Faza 3 — Media i aktywność

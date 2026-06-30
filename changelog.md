@@ -2,6 +2,14 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-06-30 — Frontend design direction
+
+- Przygotowano 3 mockupy HTML w `sketches/`: Clean, Focus Dark, Local Community.
+- Wybrano Focus Dark jako bazę wizualną pod portfolio/rekrutacyjny charakter projektu.
+- Dodano `docs/frontend-design.md` z wytycznymi: premium dark social-tech UI inspirowany Linear/Vercel, z czytelnością Clean i lekkimi community akcentami.
+- Mockupy pozostają referencją przed startem produkcyjnego frontendu.
+- Dodano devlog `devlog/23_frontend-design-direction.md`.
+
 ## 2026-06-29 — Profile isFollowing
 
 - Dodano `isFollowing` do `GET /users/:username`.

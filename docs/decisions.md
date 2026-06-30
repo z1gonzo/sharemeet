@@ -1,6 +1,35 @@
 # Decyzje techniczne ShareMeet
 
-> Lekki ADR log. Większe decyzje technologiczne zapisujemy tutaj, żeby Hermes/Cline/Codex nie zgadywały kontekstu.
+> Lekki ADR log. Większe decyzje technologiczne i produktowo-techniczne zapisujemy tutaj, żeby Hermes/Cline/Codex nie zgadywały kontekstu.
+
+---
+
+## 2026-06-30 — Frontend visual direction: Focus Dark social-tech
+
+Status: accepted
+
+### Decyzja
+
+- Produkcyjny frontend ShareMeet ma iść w kierunku **premium dark social-tech UI**.
+- Bazą jest mockup `sketches/002-sharemeet-focus-dark/index.html`.
+- Zachowujemy czytelność feedu z wariantu Clean i subtelne community akcenty z wariantu Local Community.
+- Szczegóły są w `docs/frontend-design.md`.
+
+### Uzasadnienie
+
+- ShareMeet ma działać również jako projekt portfolio/rekrutacyjny.
+- Focus Dark lepiej komunikuje profesjonalizm i techniczną jakość niż generyczny jasny CRUD/social UI.
+- UI nadal ma pozostać społecznościowy, a nie stać się panelem administracyjnym.
+
+### Konsekwencje
+
+- Pierwszy frontend powinien zacząć od dark shell/layout, feedu, profilu i post cards.
+- Nie dodajemy jeszcze pełnego design systemu ani rozbudowanych animacji.
+- Mockupy w `sketches/` są referencją, nie kodem produkcyjnym.
+
+---
+
+## 2026-06-27 — PostgreSQL jako źródło prawdy dla users/auth
 
 ## 2026-06-14 — PostgreSQL + MongoDB jako kierunek docelowy
 

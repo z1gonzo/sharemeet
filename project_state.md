@@ -4,11 +4,11 @@
 
 ## Status
 
-- Etap: Faza 2 — Core Social MVP / Profile isFollowing
-- Ostatnia sesja: 2026-06-29
+- Etap: Faza 2 — Core Social MVP / Frontend direction selected
+- Ostatnia sesja: 2026-06-30
 - Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
-- Główne ryzyko: brak frontendu
-- Następny krok: zacząć podstawowy frontend
+- Główne ryzyko: brak produkcyjnego frontendu
+- Następny krok: zacząć podstawowy frontend w stylu Focus Dark social-tech
 
 ## Organizacja projektu
 
@@ -47,6 +47,8 @@
 - `npm test` i `npm run test:e2e` w `backend/` przechodzą: 10 test suites, 117 testów łącznie.
 - Istnieje devlog opisujący plan PostgreSQL + MongoDB: `devlog/01_db-choice.md`.
 - Repo ma standardowe pliki workflow dla pracy Hermes ↔ VSCode/Cline/Codex.
+- Przygotowano 3 throwaway mockupy HTML w `sketches/`; wybrany kierunek to `002-sharemeet-focus-dark` jako baza.
+- Frontend design direction jest zapisany w `docs/frontend-design.md`: premium dark social-tech UI inspirowany Linear/Vercel, z czytelnością Clean i subtelnymi community akcentami.
 
 ## Co nie działa / wymaga naprawy
 
@@ -55,6 +57,14 @@ Zweryfikowane przez `npm run lint && npm run prisma:validate && npm run build &&
 - Reportowanie profilu/avatarów jest świadomie w backlogu, nie w bieżącym zakresie.
 
 ## Ostatnio wykonane
+
+Data: 2026-06-30 — Frontend design direction
+
+- Przygotowano 3 mockupy HTML w `sketches/`: Clean, Focus Dark, Local Community.
+- Wybrano `002-sharemeet-focus-dark` jako bazę wizualną pod portfolio/rekrutacyjny charakter projektu.
+- Ustalono korektę kierunku: Focus Dark + czytelność Clean + lekkie community akcenty z Local Community.
+- Dodano `docs/frontend-design.md` jako źródło wytycznych UI przed startem produkcyjnego frontendu.
+- Dodano devlog `devlog/23_frontend-design-direction.md`.
 
 Data: 2026-06-29 — Profile isFollowing
 

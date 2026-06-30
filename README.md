@@ -19,7 +19,7 @@ Current/planned stack:
 - Backend: NestJS + TypeScript
 - Auth: JWT first; Google OAuth later or behind a clear milestone decision
 - Databases: PostgreSQL + MongoDB in Docker Compose
-- Frontend: TODO
+- Frontend: TODO; selected visual direction is Focus Dark social-tech (`docs/frontend-design.md`)
 - Workflow: Hermes for planning/review/state; VSCode/Cline/Codex for implementation
 
 ## Repository structure
@@ -33,9 +33,11 @@ Current/planned stack:
 ├── changelog.md
 ├── docs/
 │   ├── architecture.md
-│   └── decisions.md
+│   ├── decisions.md
+│   └── frontend-design.md
 ├── devlog/
 │   └── 01_db-choice.md
+├── sketches/
 ├── backend/
 ├── frontend/
 └── db/
@@ -48,6 +50,8 @@ Current/planned stack:
 - `AGENTS.md` — rules for Hermes/Cline/Codex/other coding agents
 - `docs/architecture.md` — architecture and module boundaries
 - `docs/decisions.md` — ADR-style technical decisions
+- `docs/frontend-design.md` — selected frontend visual direction
+- `sketches/` — throwaway HTML mockups used to choose the frontend direction
 - `devlog/` — learning journal and explanations of why decisions were made
 - `changelog.md` — concise session summaries
 
@@ -69,7 +73,7 @@ npm run build
 npm run start:dev
 ```
 
-> Current state: backend is build-green with Prisma 6, PostgreSQL on local port `5433`, email/password JWT auth, DTO validation, protected `GET /auth/me`, profile endpoints with follow counts and `isFollowing`, text posts CRUD/global feed/following feed/my-posts endpoint with `PUBLIC`/`FOLLOWERS`/`PRIVATE` visibility and `commentsCount`, comments on public posts, and follow relationships (`POST/DELETE /users/:username/follow`, followers/following lists). Avatar/profile reporting is documented as future backlog. `npm run build`, `npm test` and `npm run test:e2e` pass. See `project_state.md`.
+> Current state: backend is build-green with Prisma 6, PostgreSQL on local port `5433`, email/password JWT auth, DTO validation, protected `GET /auth/me`, profile endpoints with follow counts and `isFollowing`, text posts CRUD/global feed/following feed/my-posts endpoint with `PUBLIC`/`FOLLOWERS`/`PRIVATE` visibility and `commentsCount`, comments on public posts, and follow relationships (`POST/DELETE /users/:username/follow`, followers/following lists). Frontend direction is selected: Focus Dark social-tech. Avatar/profile reporting is documented as future backlog. `npm run build`, `npm test` and `npm run test:e2e` pass. See `project_state.md`.
 
 ## AI-assisted workflow
 
