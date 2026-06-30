@@ -4,11 +4,11 @@
 
 ## Status
 
-- Etap: Faza 2 — Core Social MVP / Frontend auth screens
+- Etap: Faza 2 — Core Social MVP / Frontend auth API integration
 - Ostatnia sesja: 2026-06-30
 - Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
-- Główne ryzyko: frontend nie jest jeszcze podłączony do backend API
-- Następny krok: podłączyć frontend auth API (`POST /auth/login`, `POST /auth/register`, `GET /auth/me`)
+- Główne ryzyko: feed/profile/follow/comments frontend są jeszcze mockowane
+- Następny krok: podłączyć global feed API (`GET /posts`) do frontendu
 
 ## Organizacja projektu
 
@@ -49,16 +49,28 @@
 - Repo ma standardowe pliki workflow dla pracy Hermes ↔ VSCode/Cline/Codex.
 - Przygotowano 3 throwaway mockupy HTML w `sketches/`; wybrany kierunek to `002-sharemeet-focus-dark` jako baza.
 - Frontend design direction jest zapisany w `docs/frontend-design.md`: premium dark social-tech UI inspirowany Linear/Vercel, z czytelnością Clean i subtelnymi community akcentami.
-- Istnieje pierwszy produkcyjny frontend w `frontend/`: Vite + React + TypeScript, mockowany Focus Dark app shell/feed/profile/post cards/comments preview oraz login/register screens.
+- Istnieje pierwszy produkcyjny frontend w `frontend/`: Vite + React + TypeScript, Focus Dark app shell/feed/profile/post cards/comments preview oraz login/register screens.
+- Frontend auth jest podłączony do backendu: `POST /auth/register`, `POST /auth/login`, JWT w `localStorage`, `GET /auth/me` hydration i logout.
 
 ## Co nie działa / wymaga naprawy
 
 Zweryfikowane przez `npm run lint && npm run prisma:validate && npm run build && npm test && npm run test:e2e` w `backend/` na 2026-06-29:
 
 - Reportowanie profilu/avatarów jest świadomie w backlogu, nie w bieżącym zakresie.
-- Frontend używa jeszcze mockowanych danych; brak integracji z backend API.
+- Feed, profile, follow i comments po stronie frontendu używają jeszcze mockowanych danych.
 
 ## Ostatnio wykonane
+
+Data: 2026-06-30 — Frontend auth API integration
+
+- Dodano `frontend/src/api.ts` z klientem auth API.
+- Podłączono Register do `POST /auth/register` i automatycznego loginu.
+- Podłączono Login do `POST /auth/login`.
+- JWT access token jest zapisywany w `localStorage` jako `sharemeet.accessToken`.
+- Sesja jest hydratowana przez `GET /auth/me`; sidebar pokazuje zalogowanego użytkownika.
+- Dodano logout usuwający token.
+- Backend dostał lokalny CORS dla Vite dev servera.
+- Realny smoke test przez UI przeszedł: register, token, `GET /auth/me` `200`, logout i ponowny login.
 
 Data: 2026-06-30 — Frontend auth screens
 

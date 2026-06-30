@@ -19,7 +19,7 @@ Current/planned stack:
 - Backend: NestJS + TypeScript
 - Auth: JWT first; Google OAuth later or behind a clear milestone decision
 - Databases: PostgreSQL + MongoDB in Docker Compose
-- Frontend: Vite + React + TypeScript; mocked Focus Dark shell/auth screens (`docs/frontend-design.md`)
+- Frontend: Vite + React + TypeScript; Focus Dark shell with connected auth and mocked feed/profile (`docs/frontend-design.md`)
 - Workflow: Hermes for planning/review/state; VSCode/Cline/Codex for implementation
 
 ## Repository structure
@@ -81,7 +81,7 @@ npm install
 npm run dev
 ```
 
-> Current state: backend is build-green with Prisma 6, PostgreSQL on local port `5433`, email/password JWT auth, DTO validation, protected `GET /auth/me`, profile endpoints with follow counts and `isFollowing`, text posts CRUD/global feed/following feed/my-posts endpoint with `PUBLIC`/`FOLLOWERS`/`PRIVATE` visibility and `commentsCount`, comments on public posts, and follow relationships (`POST/DELETE /users/:username/follow`, followers/following lists). Frontend has mocked Focus Dark shell/auth screens in `frontend/`. Avatar/profile reporting is documented as future backlog. Backend tests pass; frontend `npm run build` passes. See `project_state.md`.
+> Current state: backend is build-green with Prisma 6, PostgreSQL on local port `5433`, email/password JWT auth, DTO validation, protected `GET /auth/me`, profile endpoints with follow counts and `isFollowing`, text posts CRUD/global feed/following feed/my-posts endpoint with `PUBLIC`/`FOLLOWERS`/`PRIVATE` visibility and `commentsCount`, comments on public posts, and follow relationships (`POST/DELETE /users/:username/follow`, followers/following lists). Frontend has Focus Dark shell with connected auth (`register`, `login`, JWT local storage, `GET /auth/me`, logout) and mocked feed/profile surfaces in `frontend/`. Avatar/profile reporting is documented as future backlog. Backend tests pass; frontend `npm run build` passes. See `project_state.md`.
 
 ## AI-assisted workflow
 

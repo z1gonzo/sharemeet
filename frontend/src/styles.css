@@ -178,6 +178,26 @@ input:focus-visible {
   padding: 13px;
 }
 
+.current-user-card > div {
+  min-width: 0;
+}
+
+.logout-button {
+  margin-left: auto;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.025);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 6px 8px;
+}
+
+.logout-button:hover {
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+
 .backend-status {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -262,6 +282,12 @@ input:focus-visible {
 
 .button:hover {
   transform: translateY(-1px);
+}
+
+.button:disabled,
+.form-field input:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
 }
 
 .button.primary {

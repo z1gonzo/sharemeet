@@ -1,4 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { ApiError, getCurrentUser, loginUser, registerUser } from './api';
+import type { AuthTokenResponse, PublicUser } from './api';
 
 type Visibility = 'PUBLIC' | 'FOLLOWERS' | 'PRIVATE';
 
@@ -96,7 +98,7 @@ const initialPosts: Post[] = [
   },
 ];
 
-const currentUser = {
+const mockCurrentUser = {
   name: 'Łukasz',
   username: 'z1gonzo',
   initials: 'Ł',
@@ -127,6 +129,46 @@ export function App() {
   const [authUsername, setAuthUsername] = useState('z1gonzo');
   const [authPassword, setAuthPassword] = useState('sharemeet-demo');
   const [authStatus, setAuthStatus] = useState<string | null>(null);
+  const [accessToken, setAccessToken] = useState(() => localStorage.getItem('sharemeet.accessToken'));
+  const [authenticatedUser, setAuthenticatedUser] = useState<PublicUser | null>(null);
+  const [authIsSubmitting, setAuthIsSubmitting] = useState(false);
+
+  const activeUser = authenticatedUser
+    ? {
+        initials: getInitials(authenticatedUser),
+        name: authenticatedUser.displayName ?? authenticatedUser.username,
+        username: authenticatedUser.username,
+      }
+    : mockCurrentUser;
+
+  useEffect(() => {
+    if (!accessToken) {
+      setAuthenticatedUser(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    getCurrentUser(accessToken)
+      .then((user) => {
+        if (!cancelled) {
+          setAuthenticatedUser(user);
+          setAuthStatus(`Session restored for @${user.username}.`);
+        }
+      })
+      .catch((error: unknown) => {
+        if (!cancelled) {
+          localStorage.removeItem('sharemeet.accessToken');
+          setAccessToken(null);
+          setAuthenticatedUser(null);
+          setAuthStatus(getErrorMessage(error));
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [accessToken]);
 
   const filteredPosts = useMemo(() => {
     if (activeTab === 'Following') {
@@ -134,11 +176,11 @@ export function App() {
     }
 
     if (activeTab === 'My posts') {
-      return posts.filter((post) => post.author.username === currentUser.username);
+      return posts.filter((post) => post.author.username === activeUser.username);
     }
 
     return posts.filter((post) => post.visibility === 'PUBLIC');
-  }, [activeTab, posts]);
+  }, [activeTab, activeUser.username, posts]);
 
   function publishPost() {
     const trimmed = composerValue.trim();
@@ -150,10 +192,10 @@ export function App() {
     const newPost: Post = {
       id: `post-${Date.now()}`,
       author: {
-        initials: currentUser.initials,
-        name: currentUser.name,
-        username: currentUser.username,
-        role: 'Founder',
+        initials: activeUser.initials,
+        name: activeUser.name,
+        username: activeUser.username,
+        role: authenticatedUser ? 'Authenticated user' : 'Founder',
         accent: 'indigo',
       },
       content: trimmed,
@@ -173,9 +215,41 @@ export function App() {
     setAuthStatus(null);
   }
 
-  function submitAuth() {
-    const endpoint = authMode === 'register' ? 'POST /auth/register' : 'POST /auth/login';
-    setAuthStatus(`${endpoint} mock ready — API integration next.`);
+  async function submitAuth() {
+    setAuthIsSubmitting(true);
+    setAuthStatus(null);
+
+    try {
+      let response: AuthTokenResponse;
+
+      if (authMode === 'register') {
+        await registerUser({
+          displayName: authUsername,
+          email: authEmail,
+          password: authPassword,
+          username: authUsername,
+        });
+        response = await loginUser({ email: authEmail, password: authPassword });
+      } else {
+        response = await loginUser({ email: authEmail, password: authPassword });
+      }
+
+      localStorage.setItem('sharemeet.accessToken', response.accessToken);
+      setAccessToken(response.accessToken);
+      setAuthenticatedUser(response.user);
+      setAuthStatus(`${authMode === 'register' ? 'Registered and signed in' : 'Signed in'} as @${response.user.username}.`);
+    } catch (error) {
+      setAuthStatus(getErrorMessage(error));
+    } finally {
+      setAuthIsSubmitting(false);
+    }
+  }
+
+  function logout() {
+    localStorage.removeItem('sharemeet.accessToken');
+    setAccessToken(null);
+    setAuthenticatedUser(null);
+    setAuthStatus('Signed out.');
   }
 
   return (
@@ -229,17 +303,22 @@ export function App() {
         </div>
 
         <div className="current-user-card">
-          <Avatar accent="indigo" initials={currentUser.initials} />
+          <Avatar accent="indigo" initials={activeUser.initials} />
           <div>
-            <strong>{currentUser.name}</strong>
-            <span>@{currentUser.username}</span>
+            <strong>{activeUser.name}</strong>
+            <span>@{activeUser.username}</span>
           </div>
+          {authenticatedUser && (
+            <button className="logout-button" onClick={logout} type="button">
+              Logout
+            </button>
+          )}
         </div>
 
         <div className="backend-status">
           <span className="status-dot" />
-          Backend ready
-          <small>117 tests passing</small>
+          {authenticatedUser ? 'Signed in' : 'Backend ready'}
+          <small>{accessToken ? 'JWT stored locally' : '117 tests passing'}</small>
         </div>
       </aside>
 
@@ -266,6 +345,7 @@ export function App() {
         {authMode && (
           <AuthPanel
             authEmail={authEmail}
+            authIsSubmitting={authIsSubmitting}
             authMode={authMode}
             authPassword={authPassword}
             authStatus={authStatus}
@@ -400,6 +480,7 @@ export function App() {
 
 function AuthPanel({
   authEmail,
+  authIsSubmitting,
   authMode,
   authPassword,
   authStatus,
@@ -412,6 +493,7 @@ function AuthPanel({
   onUsernameChange,
 }: {
   authEmail: string;
+  authIsSubmitting: boolean;
   authMode: AuthMode;
   authPassword: string;
   authStatus: string | null;
@@ -476,6 +558,7 @@ function AuthPanel({
             onChange={onUsernameChange}
             placeholder="z1gonzo"
             value={authUsername}
+            disabled={authIsSubmitting}
           />
         )}
         <FormField
@@ -485,6 +568,7 @@ function AuthPanel({
           placeholder="lukasz@example.com"
           type="email"
           value={authEmail}
+          disabled={authIsSubmitting}
         />
         <FormField
           label="Password"
@@ -493,14 +577,15 @@ function AuthPanel({
           placeholder="minimum 8 characters"
           type="password"
           value={authPassword}
+          disabled={authIsSubmitting}
         />
 
         <div className="auth-form-actions">
-          <button className="button ghost" onClick={onClose} type="button">
+          <button className="button ghost" disabled={authIsSubmitting} onClick={onClose} type="button">
             Close
           </button>
-          <button className="button primary" type="submit">
-            {isRegister ? 'Create account' : 'Sign in'}
+          <button className="button primary" disabled={authIsSubmitting} type="submit">
+            {authIsSubmitting ? 'Connecting…' : isRegister ? 'Create account' : 'Sign in'}
           </button>
         </div>
 
@@ -511,6 +596,7 @@ function AuthPanel({
 }
 
 function FormField({
+  disabled = false,
   label,
   name,
   onChange,
@@ -518,6 +604,7 @@ function FormField({
   type = 'text',
   value,
 }: {
+  disabled?: boolean;
   label: string;
   name: string;
   onChange: (value: string) => void;
@@ -530,6 +617,7 @@ function FormField({
       <span>{label}</span>
       <input
         autoComplete={name === 'password' ? 'current-password' : name}
+        disabled={disabled}
         id={name}
         name={name}
         onChange={(event) => onChange(event.target.value)}
@@ -626,4 +714,21 @@ function getTabIcon(tab: FeedTab) {
   if (tab === 'Global') return '◎';
   if (tab === 'Following') return '◆';
   return '◉';
+}
+
+function getInitials(user: PublicUser) {
+  const name = user.displayName ?? user.username;
+  return name.slice(0, 1).toUpperCase();
+}
+
+function getErrorMessage(error: unknown) {
+  if (error instanceof ApiError) {
+    return `${error.status}: ${error.message}`;
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return 'Unknown API error';
 }

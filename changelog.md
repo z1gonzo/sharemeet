@@ -2,6 +2,15 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-06-30 — Frontend auth API integration
+
+- Podłączono frontendowe Login/Register do realnego backend API.
+- Dodano `frontend/src/api.ts` dla `POST /auth/register`, `POST /auth/login`, `GET /auth/me`.
+- JWT access token jest zapisywany w `localStorage` jako `sharemeet.accessToken`.
+- Sidebar pokazuje zalogowanego użytkownika, a Logout usuwa token.
+- Backend dostał lokalny CORS dla Vite dev servera.
+- Zweryfikowano realnym smoke testem przez UI: register, token, `GET /auth/me` `200`, logout i ponowny login.
+
 ## 2026-06-30 — Frontend auth screens
 
 - Dodano mockowane ekrany Login/Register w istniejącym froncie Focus Dark.

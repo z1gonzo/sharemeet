@@ -11,7 +11,7 @@ First production frontend slice for ShareMeet.
 
 ## Current scope
 
-This is still a mocked UI slice — no backend API integration yet.
+This is a mixed first frontend slice: auth is connected to the backend, while feed/profile/follow/comments are still mocked.
 
 Implemented:
 
@@ -22,8 +22,10 @@ Implemented:
 - mocked post cards with `visibility` and `commentsCount`,
 - comments preview panel,
 - right profile/context panel with `followersCount`, `followingCount`, `isFollowing`,
-- mocked login/register screens for existing auth endpoints,
-- mock submit status for `POST /auth/login` and `POST /auth/register`,
+- connected login/register screens for existing auth endpoints,
+- JWT access token persisted in `localStorage` as `sharemeet.accessToken`,
+- session hydration through `GET /auth/me`,
+- logout that clears the local token,
 - responsive single-column fallback.
 
 Design source of truth:
@@ -40,12 +42,23 @@ npm run dev
 npm run build
 ```
 
+By default the frontend calls:
+
+```text
+http://localhost:3000
+```
+
+Override it with:
+
+```bash
+VITE_API_URL=http://localhost:3000 npm run dev
+```
+
 ## Next step
 
-Keep the UI mocked for one more small slice if needed, then connect API gradually:
+Connect API gradually:
 
-1. connect `POST /auth/login` and `POST /auth/register`,
-2. persist the JWT access token,
-3. connect `GET /auth/me`,
-4. connect global feed,
-5. connect public profile/follow/comments.
+1. connect global feed `GET /posts`,
+2. connect `POST /posts`,
+3. connect public profile/follow state,
+4. connect comments.
