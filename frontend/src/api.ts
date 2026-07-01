@@ -163,6 +163,44 @@ export async function createComment(postId: string, payload: CreateCommentPayloa
   });
 }
 
+export async function updatePost(
+  postId: string,
+  payload: { content: string; visibility: ApiPost['visibility'] },
+  accessToken: string,
+) {
+  return apiRequest<ApiPost>(`/posts/${postId}`, {
+    body: JSON.stringify(payload),
+    headers: authHeaders(accessToken),
+    method: 'PATCH',
+  });
+}
+
+export async function deletePost(postId: string, accessToken: string) {
+  return apiRequest<void>(`/posts/${postId}`, {
+    headers: authHeaders(accessToken),
+    method: 'DELETE',
+  });
+}
+
+export async function updateComment(
+  commentId: string,
+  payload: { content: string },
+  accessToken: string,
+) {
+  return apiRequest<ApiComment>(`/comments/${commentId}`, {
+    body: JSON.stringify(payload),
+    headers: authHeaders(accessToken),
+    method: 'PATCH',
+  });
+}
+
+export async function deleteComment(commentId: string, accessToken: string) {
+  return apiRequest<void>(`/comments/${commentId}`, {
+    headers: authHeaders(accessToken),
+    method: 'DELETE',
+  });
+}
+
 export async function getCurrentUser(accessToken: string) {
   return apiRequest<PublicUser>('/auth/me', {
     headers: authHeaders(accessToken),

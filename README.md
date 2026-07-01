@@ -19,7 +19,7 @@ Current/planned stack:
 - Backend: NestJS + TypeScript
 - Auth: JWT first; Google OAuth later or behind a clear milestone decision
 - Databases: PostgreSQL + MongoDB in Docker Compose
-- Frontend: Vite + React + TypeScript; Focus Dark shell with connected auth/global feed/following feed/composer/My posts/comments/profile/follow/profile posts preview (`docs/frontend-design.md`)
+- Frontend: Vite + React + TypeScript; Focus Dark shell with connected auth/global feed/following feed/composer/My posts/comments/profile/follow/profile posts preview/owner edit-delete (`docs/frontend-design.md`)
 - Workflow: Hermes for planning/review/state; VSCode/Cline/Codex for implementation
 
 ## Repository structure
@@ -81,7 +81,7 @@ npm install
 npm run dev
 ```
 
-> Current state: backend is build-green with Prisma 6, PostgreSQL on local port `5433`, email/password JWT auth, DTO validation, protected `GET /auth/me`, profile endpoints with follow counts and `isFollowing`, text posts CRUD/global feed/following feed/my-posts/user-posts endpoints with `PUBLIC`/`FOLLOWERS`/`PRIVATE` visibility and `commentsCount`, comments on public posts, and follow relationships (`POST/DELETE /users/:username/follow`, followers/following lists). Frontend has Focus Dark shell with connected auth (`register`, `login`, JWT local storage, `GET /auth/me`, logout), global feed (`GET /posts`), following feed (`GET /posts/following`), composer (`POST /posts`), My posts (`GET /posts/me`), comments list/create, profile/follow, and profile posts preview. Avatar/profile reporting is documented as future backlog. Backend tests pass; frontend `npm run build` passes. See `project_state.md`.
+> Current state: backend is build-green with Prisma 6, PostgreSQL on local port `5433`, email/password JWT auth, DTO validation, protected `GET /auth/me`, profile endpoints with follow counts and `isFollowing`, text posts CRUD/global feed/following feed/my-posts/user-posts endpoints with `PUBLIC`/`FOLLOWERS`/`PRIVATE` visibility and `commentsCount`, comments on public posts, and follow relationships (`POST/DELETE /users/:username/follow`, followers/following lists). Frontend has Focus Dark shell with connected auth (`register`, `login`, JWT local storage, `GET /auth/me`, logout), global feed (`GET /posts`), following feed (`GET /posts/following`), composer (`POST /posts`), My posts (`GET /posts/me`), comments list/create/edit/delete, profile/follow, profile posts preview, and owner edit/delete for posts. Avatar/profile reporting is documented as future backlog. Backend tests pass; frontend `npm run build` passes. See `project_state.md`.
 
 ## AI-assisted workflow
 

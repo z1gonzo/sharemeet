@@ -4,11 +4,11 @@
 
 ## Status
 
-- Etap: Faza 2 — Core Social MVP / Frontend profile posts preview
+- Etap: Faza 2 — Core Social MVP / Frontend owner edit/delete actions
 - Ostatnia sesja: 2026-07-01
 - Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
 - Główne ryzyko: minimalny frontend social MVP działa, ale wymaga polish UX, seed data i cleanupu mocków.
-- Następny krok: wybrać kolejny mały slice: edit/delete, polish UX albo demo seed data.
+- Następny krok: demo seed data / cleanup mockowych tekstów albo lekki polish owner action controls.
 
 ## Organizacja projektu
 
@@ -58,15 +58,23 @@
 - Frontend comments panel jest podłączony do backendu: `GET /posts/:postId/comments?limit=20&offset=0` po otwarciu komentarzy oraz `POST /posts/:postId/comments` z JWT przez formularz w UI.
 - Frontend profile/follow panel jest podłączony do backendu: `GET /users/maria`, `POST /users/:username/follow` i `DELETE /users/:username/follow`, z loading/error state i auth guard.
 - Frontend profile posts preview jest podłączony do backendu: `GET /users/maria/posts?limit=3&offset=0`, z loading/error/empty state w prawym panelu.
+- Frontend owner actions są podłączone do backendu: `PATCH/DELETE /posts/:id` i `PATCH/DELETE /comments/:id`, widoczne tylko dla autora posta/komentarza.
 
 ## Co nie działa / wymaga naprawy
 
 Zweryfikowane przez `npm run lint && npm run prisma:validate && npm run build && npm test && npm run test:e2e` w `backend/` na 2026-06-29:
 
 - Reportowanie profilu/avatarów jest świadomie w backlogu, nie w bieżącym zakresie.
-- Pozostają mockowe elementy prezentacyjne i brak pełnego widoku profilu; core API integration dla Fazy 2 jest minimalnie domknięte.
+- Pozostają mockowe elementy prezentacyjne, brak pełnego widoku profilu i brak polish UX dla inline owner actions; core API integration dla Fazy 2 jest minimalnie domknięte.
 
 ## Ostatnio wykonane
+
+Data: 2026-07-01 — Frontend owner edit/delete actions
+
+- Profil Hermes `coding` z Kimi K2.6 przez NVIDIA dostał około 10 minut i przygotował pierwszy pass.
+- Dodano frontend helpery `updatePost`, `deletePost`, `updateComment`, `deleteComment`.
+- `PostCard` pokazuje `Edit`/`Delete` tylko właścicielowi posta lub komentarza.
+- Realny smoke test przeszedł: API i UI poprawnie edytują/usuwają własny post oraz komentarz; konsola JS bez błędów.
 
 Data: 2026-07-01 — Frontend profile posts preview
 

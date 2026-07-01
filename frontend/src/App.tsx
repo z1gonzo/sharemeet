@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ApiError, createComment, createPost, followUser, getCurrentUser, getFollowingPosts, getGlobalPosts, getMyPosts, getPostComments, getUserPosts, getUserProfile, loginUser, registerUser, unfollowUser } from './api';
+import { ApiError, createComment, createPost, deleteComment, deletePost, followUser, getCurrentUser, getFollowingPosts, getGlobalPosts, getMyPosts, getPostComments, getUserPosts, getUserProfile, loginUser, registerUser, unfollowUser, updateComment, updatePost } from './api';
 import type { ApiComment, ApiPost, ApiPublicProfile, AuthTokenResponse, PublicUser } from './api';
 
 type Visibility = 'PUBLIC' | 'FOLLOWERS' | 'PRIVATE';
@@ -629,12 +629,28 @@ export function App() {
             filteredPosts.map((post) => (
               <PostCard
                 accessToken={accessToken}
+                authenticatedUser={authenticatedUser}
                 isCommentsOpen={openComments === post.id}
                 key={post.id}
+                onDeleted={() => {
+                  refreshActiveFeed();
+                }}
                 onRequireAuth={() => setAuthMode('login')}
                 onToggleComments={() =>
                   setOpenComments((current) => (current === post.id ? null : post.id))
                 }
+                onUpdated={(updated: Post) => {
+                  setPosts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+                  setFollowingPosts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+                  setMyPosts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+                  setProfilePosts((prev) =>
+                    prev.map((p) =>
+                      p.id === updated.id
+                        ? { ...p, content: updated.content, visibility: updated.visibility, commentsCount: updated.commentsCount }
+                        : p,
+                    ),
+                  );
+                }}
                 post={post}
               />
             ))
@@ -972,15 +988,21 @@ function FollowButton({
 
 function PostCard({
   accessToken,
+  authenticatedUser,
   isCommentsOpen,
+  onDeleted,
   onRequireAuth,
   onToggleComments,
+  onUpdated,
   post,
 }: {
   accessToken: string | null;
+  authenticatedUser: PublicUser | null;
   isCommentsOpen: boolean;
+  onDeleted: () => void;
   onRequireAuth: () => void;
   onToggleComments: () => void;
+  onUpdated: (updated: Post) => void;
   post: Post;
 }) {
   const [comments, setComments] = useState<CommentItem[]>(post.comments);
@@ -988,8 +1010,23 @@ function PostCard({
   const [commentStatus, setCommentStatus] = useState<'idle' | 'loading' | 'ready' | 'posting' | 'error'>('idle');
   const [commentError, setCommentError] = useState<string | null>(null);
 
+  // Post edit/delete state
+  const [isEditingPost, setIsEditingPost] = useState(false);
+  const [editPostContent, setEditPostContent] = useState(post.content);
+  const [editPostVisibility, setEditPostVisibility] = useState<Visibility>(post.visibility);
+  const [postActionStatus, setPostActionStatus] = useState<'idle' | 'updating' | 'deleting' | 'error'>('idle');
+  const [postActionError, setPostActionError] = useState<string | null>(null);
+
+  // Comment edit state
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [editingCommentText, setEditingCommentText] = useState('');
+  const [commentActionStatus, setCommentActionStatus] = useState<'idle' | 'loading' | 'error'>('idle');
+
+  const isOwner = !!authenticatedUser && authenticatedUser.username === post.author.username;
+
   useEffect(() => {
     if (!isCommentsOpen) {
+      setEditingCommentId(null);
       return;
     }
 
@@ -1015,6 +1052,137 @@ function PostCard({
       cancelled = true;
     };
   }, [isCommentsOpen, post.id]);
+
+  function startEditPost() {
+    setIsEditingPost(true);
+    setEditPostContent(post.content);
+    setEditPostVisibility(post.visibility);
+    setPostActionError(null);
+  }
+
+  function cancelEditPost() {
+    setIsEditingPost(false);
+    setEditPostContent(post.content);
+    setEditPostVisibility(post.visibility);
+    setPostActionError(null);
+  }
+
+  async function submitPostEdit() {
+    if (!accessToken || !authenticatedUser) {
+      setPostActionError('Sign in to edit posts.');
+      onRequireAuth();
+      return;
+    }
+
+    if (!editPostContent.trim()) {
+      setPostActionError('Post content cannot be empty.');
+      return;
+    }
+
+    setPostActionStatus('updating');
+    setPostActionError(null);
+
+    try {
+      const updated = await updatePost(
+        post.id,
+        { content: editPostContent.trim(), visibility: editPostVisibility },
+        accessToken,
+      );
+      const mapped = mapApiPost(updated);
+      onUpdated(mapped);
+      setIsEditingPost(false);
+      setPostActionStatus('idle');
+    } catch (error) {
+      setPostActionStatus('error');
+      setPostActionError(getErrorMessage(error));
+    }
+  }
+
+  async function submitPostDelete() {
+    if (!accessToken || !authenticatedUser) {
+      setPostActionError('Sign in to delete posts.');
+      onRequireAuth();
+      return;
+    }
+
+    if (!window.confirm('Are you sure you want to delete this post?')) {
+      return;
+    }
+
+    setPostActionStatus('deleting');
+    setPostActionError(null);
+
+    try {
+      await deletePost(post.id, accessToken);
+      setPostActionStatus('idle');
+      onDeleted();
+    } catch (error) {
+      setPostActionStatus('error');
+      setPostActionError(getErrorMessage(error));
+    }
+  }
+
+  async function startEditComment(comment: CommentItem) {
+    setEditingCommentId(comment.id);
+    setEditingCommentText(comment.text);
+    setCommentActionStatus('idle');
+  }
+
+  async function submitCommentEdit() {
+    if (!accessToken || !authenticatedUser) {
+      setCommentActionStatus('error');
+      onRequireAuth();
+      return;
+    }
+
+    if (!editingCommentId) return;
+    if (!editingCommentText.trim()) {
+      setCommentActionStatus('error');
+      setCommentError('Comment cannot be empty.');
+      return;
+    }
+
+    setCommentActionStatus('loading');
+    setCommentError(null);
+
+    try {
+      const updated = await updateComment(editingCommentId, { content: editingCommentText.trim() }, accessToken);
+      setComments((prev) => prev.map((c) => (c.id === editingCommentId ? mapApiComment(updated) : c)));
+      setEditingCommentId(null);
+      setEditingCommentText('');
+      setCommentActionStatus('idle');
+    } catch (error) {
+      setCommentActionStatus('error');
+      setCommentError(getErrorMessage(error));
+    }
+  }
+
+  async function submitCommentDelete(commentId: string) {
+    if (!accessToken || !authenticatedUser) {
+      onRequireAuth();
+      return;
+    }
+
+    if (!window.confirm('Delete this comment?')) {
+      return;
+    }
+
+    setCommentActionStatus('loading');
+    setCommentError(null);
+
+    try {
+      await deleteComment(commentId, accessToken);
+      setComments((prev) => prev.filter((c) => c.id !== commentId));
+      if (editingCommentId === commentId) {
+        setEditingCommentId(null);
+        setEditingCommentText('');
+      }
+      setCommentActionStatus('idle');
+    } catch (error) {
+      setCommentActionStatus('error');
+      setCommentError(getErrorMessage(error));
+    }
+  }
 
   async function submitComment() {
     const content = commentDraft.trim();
@@ -1060,14 +1228,63 @@ function PostCard({
         </div>
         <VisibilityBadge visibility={post.visibility} />
       </header>
-      <p>{post.content}</p>
+      {isEditingPost ? (
+        <div style={{ marginTop: 10 }}>
+          <textarea
+            rows={3}
+            style={{ width: '100%', padding: 8, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }}
+            value={editPostContent}
+            onChange={(e) => setEditPostContent(e.target.value)}
+          />
+          <div style={{ display: 'flex', gap: 8, marginTop: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+            <select
+              style={{ fontSize: 12, padding: '6px 10px', borderRadius: 999, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }}
+              value={editPostVisibility}
+              onChange={(e) => setEditPostVisibility(e.target.value as Visibility)}
+            >
+              {(['PUBLIC', 'FOLLOWERS', 'PRIVATE'] as const).map((v) => (
+                <option key={v} value={v}>{v}</option>
+              ))}
+            </select>
+            <button
+              className="button primary compact"
+              disabled={postActionStatus === 'updating'}
+              onClick={() => void submitPostEdit()}
+              type="button"
+            >
+              {postActionStatus === 'updating' ? 'Saving…' : 'Save'}
+            </button>
+            <button
+              className="button ghost compact"
+              disabled={postActionStatus === 'updating'}
+              onClick={cancelEditPost}
+              type="button"
+            >
+              Cancel
+            </button>
+            {postActionError && <span className="comment-error" style={{ fontSize: 13 }}>{postActionError}</span>}
+          </div>
+        </div>
+      ) : (
+        <p>{post.content}</p>
+      )}
       <footer className="post-actions">
         <button onClick={onToggleComments} type="button">
           💬 {visibleCommentsCount} comments
         </button>
         <button type="button">↗ Share</button>
-        <button type="button">•••</button>
+        {isOwner && (
+          <>
+            <button onClick={() => setIsEditingPost((p) => !p)} disabled={postActionStatus === 'updating'} type="button">
+              {isEditingPost ? 'Close' : 'Edit'}
+            </button>
+            <button onClick={() => void submitPostDelete()} disabled={postActionStatus === 'deleting'} type="button">
+              {postActionStatus === 'deleting' ? 'Deleting…' : 'Delete'}
+            </button>
+          </>
+        )}
       </footer>
+      {postActionError && !isEditingPost && <span className="comment-error">{postActionError}</span>}
       {isCommentsOpen && (
         <div className="comments-panel">
           <div className="comment-form">
@@ -1088,15 +1305,39 @@ function PostCard({
           {commentStatus !== 'loading' && comments.length === 0 ? (
             <span className="muted-text">No comments yet.</span>
           ) : (
-            comments.map((comment) => (
-              <div className="comment-row" key={comment.id}>
-                <Avatar accent="indigo" initials={comment.author.initials} small />
-                <div>
-                  <strong>{comment.author.name}</strong>
-                  <span>{comment.text}</span>
+            comments.map((comment) => {
+              const commentOwner = authenticatedUser?.username === comment.author.username;
+              return (
+                <div className="comment-row" key={comment.id}>
+                  <Avatar accent={pickAuthorAccent(comment.author.username)} initials={comment.author.initials} small />
+                  <div style={{ minWidth: 0 }}>
+                    <strong>{comment.author.name}</strong>
+                    {editingCommentId === comment.id ? (
+                      <div style={{ marginTop: 4 }}>
+                        <input
+                          style={{ width: '100%', padding: '4px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }}
+                          value={editingCommentText}
+                          onChange={(e) => setEditingCommentText(e.target.value)}
+                        />
+                        <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+                          <button className="button primary compact" disabled={commentActionStatus === 'loading'} onClick={() => void submitCommentEdit()} type="button">Save</button>
+                          <button className="button ghost compact" disabled={commentActionStatus === 'loading'} onClick={() => setEditingCommentId(null)} type="button">Cancel</button>
+                        </div>
+                        {commentActionStatus === 'error' && <span className="comment-error" style={{ fontSize: 13 }}>{commentError}</span>}
+                      </div>
+                    ) : (
+                      <span>{comment.text}</span>
+                    )}
+                  </div>
+                  {commentOwner && editingCommentId !== comment.id && (
+                    <div style={{ display: 'flex', gap: 6, marginLeft: 'auto' }}>
+                      <button className="button ghost compact" onClick={() => startEditComment(comment)} type="button">Edit</button>
+                      <button className="button ghost compact" onClick={() => void submitCommentDelete(comment.id)} type="button">Delete</button>
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       )}

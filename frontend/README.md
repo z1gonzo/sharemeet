@@ -11,7 +11,7 @@ First production frontend slice for ShareMeet.
 
 ## Current scope
 
-This frontend slice connects auth, global feed, following feed, post composer, My posts, comments, profile/follow, and profile posts preview to the backend.
+This frontend slice connects auth, global feed, following feed, post composer, My posts, comments, profile/follow, profile posts preview, and owner edit/delete actions to the backend.
 
 Implemented:
 
@@ -26,6 +26,7 @@ Implemented:
 - right profile/context panel connected to `GET /users/:username` with `followersCount`, `followingCount`, `isFollowing`,
 - follow/unfollow button connected to `POST /users/:username/follow` and `DELETE /users/:username/follow`,
 - profile posts preview connected to `GET /users/:username/posts`,
+- owner-only edit/delete controls for posts and comments,
 - connected login/register screens for existing auth endpoints,
 - JWT access token persisted in `localStorage` as `sharemeet.accessToken`,
 - session hydration through `GET /auth/me`,
@@ -62,5 +63,5 @@ VITE_API_URL=http://localhost:3000 npm run dev
 
 Connect API gradually:
 
-1. polish comments/profile UX,
-2. add edit/delete actions later.
+1. demo seed data / cleanup mock copy,
+2. polish inline owner-action controls later.

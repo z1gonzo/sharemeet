@@ -2,6 +2,13 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-07-01 — Frontend owner edit/delete actions
+
+- Dodano helpery API `updatePost`, `deletePost`, `updateComment`, `deleteComment`.
+- `PostCard` pokazuje `Edit`/`Delete` tylko autorowi posta albo komentarza.
+- Edycja posta obsługuje `content` i `visibility`; edycja komentarza obsługuje `content`.
+- Zweryfikowano realnym smoke testem API + UI: edit/delete posta i komentarza działają, konsola JS bez błędów.
+
 ## 2026-07-01 — Frontend profile posts preview
 
 - Dodano `getUserPosts(username)` dla `GET /users/:username/posts?limit=3&offset=0`.
