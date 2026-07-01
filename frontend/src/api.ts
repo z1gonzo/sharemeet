@@ -88,6 +88,12 @@ export async function getMyPosts(accessToken: string) {
   });
 }
 
+export async function getFollowingPosts(accessToken: string) {
+  return apiRequest<ApiPost[]>('/posts/following?limit=20&offset=0', {
+    headers: authHeaders(accessToken),
+  });
+}
+
 export async function createPost(payload: CreatePostPayload, accessToken: string) {
   return apiRequest<ApiPost>('/posts', {
     body: JSON.stringify(payload),

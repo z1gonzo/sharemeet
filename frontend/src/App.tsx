@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ApiError, createPost, getCurrentUser, getGlobalPosts, getMyPosts, loginUser, registerUser } from './api';
+import { ApiError, createPost, getCurrentUser, getFollowingPosts, getGlobalPosts, getMyPosts, loginUser, registerUser } from './api';
 import type { ApiPost, AuthTokenResponse, PublicUser } from './api';
 
 type Visibility = 'PUBLIC' | 'FOLLOWERS' | 'PRIVATE';
@@ -128,6 +128,9 @@ export function App() {
   const [composerMessage, setComposerMessage] = useState<string | null>(null);
   const [feedStatus, setFeedStatus] = useState<FeedStatus>('idle');
   const [feedError, setFeedError] = useState<string | null>(null);
+  const [followingPosts, setFollowingPosts] = useState<Post[]>([]);
+  const [followingStatus, setFollowingStatus] = useState<FeedStatus>('idle');
+  const [followingError, setFollowingError] = useState<string | null>(null);
   const [myPostsStatus, setMyPostsStatus] = useState<FeedStatus>('idle');
   const [myPostsError, setMyPostsError] = useState<string | null>(null);
   const [openComments, setOpenComments] = useState<string | null>('post-1');
@@ -181,6 +184,41 @@ export function App() {
   useEffect(() => {
     void loadGlobalFeed();
   }, []);
+
+  useEffect(() => {
+    const status = activeTab;
+
+    if (status === 'Following') {
+      if (!accessToken || !authenticatedUser) {
+        setFollowingPosts([]);
+        setFollowingStatus('idle');
+        setFollowingError(null);
+        return;
+      }
+
+      let cancelled = false;
+
+      setFollowingStatus('loading');
+      setFollowingError(null);
+      getFollowingPosts(accessToken)
+        .then((apiPosts) => {
+          if (!cancelled) {
+            setFollowingPosts(apiPosts.map(mapApiPost));
+            setFollowingStatus('ready');
+          }
+        })
+        .catch((error: unknown) => {
+          if (!cancelled) {
+            setFollowingStatus('error');
+            setFollowingError(getErrorMessage(error));
+          }
+        });
+
+      return () => {
+        cancelled = true;
+      };
+    }
+  }, [activeTab, accessToken, authenticatedUser]);
 
   useEffect(() => {
     if (activeTab !== 'My posts') {
@@ -246,7 +284,7 @@ export function App() {
 
   const filteredPosts = useMemo(() => {
     if (activeTab === 'Following') {
-      return posts.filter((post) => post.visibility !== 'PRIVATE');
+      return followingPosts;
     }
 
     if (activeTab === 'My posts') {
@@ -254,7 +292,7 @@ export function App() {
     }
 
     return posts.filter((post) => post.visibility === 'PUBLIC');
-  }, [activeTab, myPosts, posts]);
+  }, [activeTab, followingPosts, myPosts, posts]);
 
   async function publishPost() {
     const trimmed = composerValue.trim();
@@ -346,8 +384,21 @@ export function App() {
     setAuthStatus('Signed out.');
   }
 
-  const activeFeedStatus = activeTab === 'My posts' ? myPostsStatus : feedStatus;
-  const activeFeedError = activeTab === 'My posts' ? myPostsError : feedError;
+  const activeFeedStatus = activeTab === 'Following' ? followingStatus : activeTab === 'My posts' ? myPostsStatus : feedStatus;
+
+  const emptyStateMessage = useMemo(() => {
+    if (activeTab === 'Following') {
+      return 'No posts from followed users yet.';
+    }
+
+    if (activeTab === 'My posts') {
+      return 'No posts yet. Share an update to get started.';
+    }
+
+    return 'No posts in this view yet.';
+  }, [activeTab]);
+
+  const activeFeedError = activeTab === 'Following' ? followingError : activeTab === 'My posts' ? myPostsError : feedError;
 
   return (
     <div className="app-shell">
