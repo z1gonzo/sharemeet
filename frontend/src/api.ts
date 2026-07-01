@@ -34,6 +34,15 @@ export interface ApiPost {
   author: ApiPostAuthor;
 }
 
+export interface ApiComment {
+  id: string;
+  postId: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+  author: ApiPostAuthor;
+}
+
 interface RegisterPayload {
   email: string;
   username: string;
@@ -49,6 +58,10 @@ interface LoginPayload {
 interface CreatePostPayload {
   content: string;
   visibility: ApiPost['visibility'];
+}
+
+interface CreateCommentPayload {
+  content: string;
 }
 
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
@@ -77,7 +90,6 @@ export async function loginUser(payload: LoginPayload) {
   });
 }
 
-
 export async function getGlobalPosts() {
   return apiRequest<ApiPost[]>('/posts?limit=20&offset=0');
 }
@@ -96,6 +108,18 @@ export async function getFollowingPosts(accessToken: string) {
 
 export async function createPost(payload: CreatePostPayload, accessToken: string) {
   return apiRequest<ApiPost>('/posts', {
+    body: JSON.stringify(payload),
+    headers: authHeaders(accessToken),
+    method: 'POST',
+  });
+}
+
+export async function getPostComments(postId: string) {
+  return apiRequest<ApiComment[]>(`/posts/${postId}/comments?limit=20&offset=0`);
+}
+
+export async function createComment(postId: string, payload: CreateCommentPayload, accessToken: string) {
+  return apiRequest<ApiComment>(`/posts/${postId}/comments`, {
     body: JSON.stringify(payload),
     headers: authHeaders(accessToken),
     method: 'POST',

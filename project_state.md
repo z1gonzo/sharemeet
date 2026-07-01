@@ -4,11 +4,11 @@
 
 ## Status
 
-- Etap: Faza 2 — Core Social MVP / Frontend My posts API integration
-- Ostatnia sesja: 2026-06-30
+- Etap: Faza 2 — Core Social MVP / Frontend comments API integration
+- Ostatnia sesja: 2026-07-01
 - Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
-- Główne ryzyko: following/profile/follow/comments frontend są jeszcze mockowane/lokalne
-- Następny krok: podłączyć `GET /posts/following` do zakładki Following
+- Główne ryzyko: profile/follow frontend są jeszcze mockowane/lokalne
+- Następny krok: podłączyć publiczny profil i follow/unfollow na froncie
 
 ## Organizacja projektu
 
@@ -55,15 +55,23 @@
 - Frontend composer jest podłączony do backendu: `POST /posts` z JWT, loading/error/success state i refresh publicznego feedu po publikacji.
 - Frontend Following feed jest podłączony do backendu: `GET /posts/following?limit=20&offset=0`, pokazuje posty obserwowanych użytkowników (`PUBLIC` + `FOLLOWERS`) i wymaga JWT.
 - Frontend My posts jest podłączony do backendu: `GET /posts/me?limit=20&offset=0`, pokazuje własne `PUBLIC`/`FOLLOWERS`/`PRIVATE` posty i wymaga JWT.
+- Frontend comments panel jest podłączony do backendu: `GET /posts/:postId/comments?limit=20&offset=0` po otwarciu komentarzy oraz `POST /posts/:postId/comments` z JWT przez formularz w UI.
 
 ## Co nie działa / wymaga naprawy
 
 Zweryfikowane przez `npm run lint && npm run prisma:validate && npm run build && npm test && npm run test:e2e` w `backend/` na 2026-06-29:
 
 - Reportowanie profilu/avatarów jest świadomie w backlogu, nie w bieżącym zakresie.
-- Following feed, profile, follow i comments list po stronie frontendu używają jeszcze mockowanych/lokalnych danych.
+- Profile i follow/unfollow po stronie frontendu używają jeszcze mockowanych/lokalnych danych.
 
 ## Ostatnio wykonane
+
+Data: 2026-07-01 — Frontend comments API integration
+
+- Profil Hermes `coding` z Kimi K2.6 przez NVIDIA został użyty jako osobny coding worker do przygotowania części zmian.
+- Dodano `ApiComment`, `getPostComments(postId)` i `createComment(postId, payload, accessToken)` w `frontend/src/api.ts`.
+- `PostCard` pobiera realne komentarze po otwarciu panelu komentarzy i pokazuje formularz dodawania komentarza dla zalogowanego użytkownika.
+- Realny smoke test przeszedł: komentarz utworzony przez API został pokazany w UI, a komentarz dodany z UI pojawił się w API; konsola JS bez błędów.
 
 Data: 2026-06-30 — Frontend My posts API integration
 

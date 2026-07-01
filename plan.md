@@ -100,7 +100,8 @@ Przygotować repo pod spokojną sesję kodowania w VSCode/Cline i ustabilizować
   - [x] Podłączyć tworzenie posta `POST /posts`
   - [x] Podłączyć zakładkę My posts przez `GET /posts/me`
   - [x] Podłączyć following feed przez `GET /posts/following`
-  - [ ] Podłączyć profile/follow/comments
+  - [x] Podłączyć comments list/create przez `GET /posts/:postId/comments` i `POST /posts/:postId/comments`
+  - [ ] Podłączyć profile/follow
 
 ## Faza 3 — Media i aktywność
 

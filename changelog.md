@@ -2,6 +2,13 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-07-01 — Frontend comments API integration
+
+- Podłączono panel komentarzy do `GET /posts/:postId/comments?limit=20&offset=0`.
+- Dodano formularz komentarza przez `POST /posts/:postId/comments` z JWT access tokenem.
+- Dodano `ApiComment`, `getPostComments()` i `createComment()` w `frontend/src/api.ts`.
+- Zweryfikowano realnym smoke testem: komentarz z API pojawił się w UI, komentarz dodany z UI pojawił się w API; konsola JS bez błędów.
+
 ## 2026-06-30 — Frontend My posts API integration
 
 - Podłączono zakładkę `My posts` do `GET /posts/me?limit=20&offset=0`.

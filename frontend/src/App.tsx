@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ApiError, createPost, getCurrentUser, getFollowingPosts, getGlobalPosts, getMyPosts, loginUser, registerUser } from './api';
-import type { ApiPost, AuthTokenResponse, PublicUser } from './api';
+import { ApiError, createComment, createPost, getCurrentUser, getFollowingPosts, getGlobalPosts, getMyPosts, getPostComments, loginUser, registerUser } from './api';
+import type { ApiComment, ApiPost, AuthTokenResponse, PublicUser } from './api';
 
 type Visibility = 'PUBLIC' | 'FOLLOWERS' | 'PRIVATE';
 
@@ -16,6 +16,16 @@ interface Author {
   accent: 'indigo' | 'emerald' | 'warm';
 }
 
+type CommentItem = {
+  id: string;
+  author: {
+    name: string;
+    username: string;
+    initials: string;
+  };
+  text: string;
+};
+
 interface Post {
   id: string;
   author: Author;
@@ -23,10 +33,7 @@ interface Post {
   visibility: Visibility;
   createdAt: string;
   commentsCount: number;
-  comments: Array<{
-    author: string;
-    text: string;
-  }>;
+  comments: CommentItem[];
 }
 
 const initialPosts: Post[] = [
@@ -46,11 +53,13 @@ const initialPosts: Post[] = [
     commentsCount: 4,
     comments: [
       {
-        author: 'Łukasz',
+        id: 'c1',
+        author: { name: 'Łukasz', username: 'lukasz', initials: 'Ł' },
         text: 'Dokładnie — backendowe ficzery mają być widoczne, ale nie krzyczeć.',
       },
       {
-        author: 'Marta',
+        id: 'c2',
+        author: { name: 'Marta', username: 'marta', initials: 'M' },
         text: 'Ten kierunek wygląda bardziej portfolio-ready niż klasyczny jasny feed.',
       },
     ],
@@ -71,7 +80,8 @@ const initialPosts: Post[] = [
     commentsCount: 2,
     comments: [
       {
-        author: 'Anna',
+        id: 'c3',
+        author: { name: 'Anna', username: 'anna', initials: 'A' },
         text: 'To będzie fajny element do pokazania rekruterowi w demo.',
       },
     ],
@@ -92,7 +102,8 @@ const initialPosts: Post[] = [
     commentsCount: 6,
     comments: [
       {
-        author: 'Łukasz',
+        id: 'c4',
+        author: { name: 'Łukasz', username: 'lukasz', initials: 'Ł' },
         text: 'Tak, to jest ten kompromis: premium, ale nadal społecznościowe.',
       },
     ],
@@ -594,8 +605,10 @@ export function App() {
           ) : (
             filteredPosts.map((post) => (
               <PostCard
+                accessToken={accessToken}
                 isCommentsOpen={openComments === post.id}
                 key={post.id}
+                onRequireAuth={() => setAuthMode('login')}
                 onToggleComments={() =>
                   setOpenComments((current) => (current === post.id ? null : post.id))
                 }
@@ -815,14 +828,83 @@ function FormField({
 }
 
 function PostCard({
+  accessToken,
   isCommentsOpen,
+  onRequireAuth,
   onToggleComments,
   post,
 }: {
+  accessToken: string | null;
   isCommentsOpen: boolean;
+  onRequireAuth: () => void;
   onToggleComments: () => void;
   post: Post;
 }) {
+  const [comments, setComments] = useState<CommentItem[]>(post.comments);
+  const [commentDraft, setCommentDraft] = useState('');
+  const [commentStatus, setCommentStatus] = useState<'idle' | 'loading' | 'ready' | 'posting' | 'error'>('idle');
+  const [commentError, setCommentError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isCommentsOpen) {
+      return;
+    }
+
+    let cancelled = false;
+    setCommentStatus('loading');
+    setCommentError(null);
+
+    getPostComments(post.id)
+      .then((apiComments) => {
+        if (!cancelled) {
+          setComments(apiComments.map(mapApiComment));
+          setCommentStatus('ready');
+        }
+      })
+      .catch((error: unknown) => {
+        if (!cancelled) {
+          setCommentStatus('error');
+          setCommentError(getErrorMessage(error));
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isCommentsOpen, post.id]);
+
+  async function submitComment() {
+    const content = commentDraft.trim();
+
+    if (!content) {
+      setCommentStatus('error');
+      setCommentError('Write a comment before posting.');
+      return;
+    }
+
+    if (!accessToken) {
+      setCommentStatus('error');
+      setCommentError('Sign in to comment.');
+      onRequireAuth();
+      return;
+    }
+
+    setCommentStatus('posting');
+    setCommentError(null);
+
+    try {
+      const createdComment = await createComment(post.id, { content }, accessToken);
+      setComments((currentComments) => [mapApiComment(createdComment), ...currentComments]);
+      setCommentDraft('');
+      setCommentStatus('ready');
+    } catch (error) {
+      setCommentStatus('error');
+      setCommentError(getErrorMessage(error));
+    }
+  }
+
+  const visibleCommentsCount = Math.max(post.commentsCount, comments.length);
+
   return (
     <article className="post-card">
       <header className="post-header">
@@ -838,21 +920,36 @@ function PostCard({
       <p>{post.content}</p>
       <footer className="post-actions">
         <button onClick={onToggleComments} type="button">
-          💬 {post.commentsCount} comments
+          💬 {visibleCommentsCount} comments
         </button>
         <button type="button">↗ Share</button>
         <button type="button">•••</button>
       </footer>
       {isCommentsOpen && (
         <div className="comments-panel">
-          {post.comments.length === 0 ? (
+          <div className="comment-form">
+            <input
+              disabled={commentStatus === 'posting'}
+              onChange={(event) => setCommentDraft(event.target.value)}
+              placeholder={accessToken ? 'Add a thoughtful comment…' : 'Sign in to comment…'}
+              value={commentDraft}
+            />
+            <button disabled={commentStatus === 'posting'} onClick={() => void submitComment()} type="button">
+              {commentStatus === 'posting' ? 'Posting…' : 'Comment'}
+            </button>
+          </div>
+
+          {commentStatus === 'loading' && <span className="muted-text">Loading comments…</span>}
+          {commentError && <span className="comment-error">{commentError}</span>}
+
+          {commentStatus !== 'loading' && comments.length === 0 ? (
             <span className="muted-text">No comments yet.</span>
           ) : (
-            post.comments.map((comment) => (
-              <div className="comment-row" key={`${post.id}-${comment.author}-${comment.text}`}>
-                <Avatar accent="indigo" initials={comment.author.at(0) ?? '?'} small />
+            comments.map((comment) => (
+              <div className="comment-row" key={comment.id}>
+                <Avatar accent="indigo" initials={comment.author.initials} small />
                 <div>
-                  <strong>{comment.author}</strong>
+                  <strong>{comment.author.name}</strong>
                   <span>{comment.text}</span>
                 </div>
               </div>
@@ -918,6 +1015,20 @@ function mapApiPost(post: ApiPost): Post {
     content: post.content,
     createdAt: formatRelativeTime(post.createdAt),
     visibility: post.visibility,
+  };
+}
+
+function mapApiComment(comment: ApiComment): CommentItem {
+  const displayName = comment.author.displayName ?? comment.author.username;
+
+  return {
+    id: comment.id,
+    author: {
+      initials: displayName.slice(0, 1).toUpperCase(),
+      name: displayName,
+      username: comment.author.username,
+    },
+    text: comment.content,
   };
 }
 

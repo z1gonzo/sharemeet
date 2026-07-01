@@ -702,6 +702,32 @@ input:focus-visible {
   align-items: start;
 }
 
+.comment-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 9px;
+}
+
+.comment-form input {
+  min-width: 0;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  padding: 9px 12px;
+}
+
+.comment-form input:disabled,
+.comment-form button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.comment-error {
+  color: #fecdd3;
+  font-size: 13px;
+}
+
 .comment-row span {
   display: block;
   margin-top: 2px;
