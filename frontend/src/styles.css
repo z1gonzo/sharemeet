@@ -798,6 +798,28 @@ input:focus-visible {
   border: 4px solid #0b0c0e;
 }
 
+.profile-avatar-placeholder {
+  width: 68px;
+  height: 68px;
+  margin-top: -34px;
+  margin-left: 14px;
+  border: 4px solid #0b0c0e;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.follow-control {
+  display: grid;
+  justify-items: end;
+  gap: 6px;
+}
+
+.profile-action-error,
+.error-text {
+  color: #fecdd3;
+  font-size: 13px;
+}
+
 .profile-heading {
   margin-top: 12px;
   align-items: flex-start;

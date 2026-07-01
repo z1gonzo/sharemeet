@@ -2,6 +2,13 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-07-01 — Frontend profile/follow API integration
+
+- Podłączono prawy panel profilu do `GET /users/maria`.
+- Dodano `ApiPublicProfile`, `getUserProfile()`, `followUser()` i `unfollowUser()` w `frontend/src/api.ts`.
+- Przycisk `Follow` / `Following` wykonuje `POST /users/:username/follow` i `DELETE /users/:username/follow` z JWT.
+- Zweryfikowano realnym smoke testem: UI i API poprawnie zmieniają `isFollowing`; konsola JS bez błędów.
+
 ## 2026-07-01 — Frontend comments API integration
 
 - Podłączono panel komentarzy do `GET /posts/:postId/comments?limit=20&offset=0`.

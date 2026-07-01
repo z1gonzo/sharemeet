@@ -43,6 +43,19 @@ export interface ApiComment {
   author: ApiPostAuthor;
 }
 
+export interface ApiPublicProfile {
+  id: string;
+  username: string;
+  displayName: string | null;
+  bio: string | null;
+  avatarUrl: string | null;
+  isPrivate: boolean;
+  createdAt: string;
+  followersCount?: number;
+  followingCount?: number;
+  isFollowing?: boolean;
+}
+
 interface RegisterPayload {
   email: string;
   username: string;
@@ -118,6 +131,26 @@ export async function getPostComments(postId: string) {
   return apiRequest<ApiComment[]>(`/posts/${postId}/comments?limit=20&offset=0`);
 }
 
+export async function getUserProfile(username: string, accessToken?: string | null) {
+  return apiRequest<ApiPublicProfile>(`/users/${username}`, {
+    ...(accessToken ? { headers: authHeaders(accessToken) } : {}),
+  });
+}
+
+export async function followUser(username: string, accessToken: string) {
+  return apiRequest<ApiPublicProfile>(`/users/${username}/follow`, {
+    headers: authHeaders(accessToken),
+    method: 'POST',
+  });
+}
+
+export async function unfollowUser(username: string, accessToken: string) {
+  return apiRequest<void>(`/users/${username}/follow`, {
+    headers: authHeaders(accessToken),
+    method: 'DELETE',
+  });
+}
+
 export async function createComment(postId: string, payload: CreateCommentPayload, accessToken: string) {
   return apiRequest<ApiComment>(`/posts/${postId}/comments`, {
     body: JSON.stringify(payload),
@@ -149,6 +182,10 @@ async function apiRequest<T>(path: string, init: RequestInit = {}): Promise<T> {
 
   if (!response.ok) {
     throw new ApiError(await readErrorMessage(response), response.status);
+  }
+
+  if (response.status === 204) {
+    return undefined as T;
   }
 
   return response.json() as Promise<T>;

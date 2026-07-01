@@ -19,7 +19,7 @@ Current/planned stack:
 - Backend: NestJS + TypeScript
 - Auth: JWT first; Google OAuth later or behind a clear milestone decision
 - Databases: PostgreSQL + MongoDB in Docker Compose
-- Frontend: Vite + React + TypeScript; Focus Dark shell with connected auth/global feed/following feed/composer/My posts/comments and mocked profile/follow (`docs/frontend-design.md`)
+- Frontend: Vite + React + TypeScript; Focus Dark shell with connected auth/global feed/following feed/composer/My posts/comments/profile/follow (`docs/frontend-design.md`)
 - Workflow: Hermes for planning/review/state; VSCode/Cline/Codex for implementation
 
 ## Repository structure

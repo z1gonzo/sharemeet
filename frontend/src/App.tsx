@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ApiError, createComment, createPost, getCurrentUser, getFollowingPosts, getGlobalPosts, getMyPosts, getPostComments, loginUser, registerUser } from './api';
-import type { ApiComment, ApiPost, AuthTokenResponse, PublicUser } from './api';
+import { ApiError, createComment, createPost, followUser, getCurrentUser, getFollowingPosts, getGlobalPosts, getMyPosts, getPostComments, getUserProfile, loginUser, registerUser, unfollowUser } from './api';
+import type { ApiComment, ApiPost, ApiPublicProfile, AuthTokenResponse, PublicUser } from './api';
 
 type Visibility = 'PUBLIC' | 'FOLLOWERS' | 'PRIVATE';
 
@@ -119,16 +119,6 @@ const mockCurrentUser = {
   followingCount: 86,
 };
 
-const viewedProfile = {
-  name: 'Maria Kowalska',
-  username: 'maria',
-  initials: 'M',
-  bio: 'Community organizer focused on local groups, thoughtful conversations and useful social tools.',
-  followersCount: 421,
-  followingCount: 73,
-  isFollowing: false,
-};
-
 export function App() {
   const [activeTab, setActiveTab] = useState<FeedTab>('Global');
   const [composerValue, setComposerValue] = useState('');
@@ -145,7 +135,10 @@ export function App() {
   const [myPostsStatus, setMyPostsStatus] = useState<FeedStatus>('idle');
   const [myPostsError, setMyPostsError] = useState<string | null>(null);
   const [openComments, setOpenComments] = useState<string | null>('post-1');
-  const [isFollowing, setIsFollowing] = useState(viewedProfile.isFollowing);
+  const [profile, setProfile] = useState<ApiPublicProfile | null>(null);
+  const [profileStatus, setProfileStatus] = useState<FeedStatus>('idle');
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const [followActionStatus, setFollowActionStatus] = useState<'idle' | 'loading'>('idle');
   const [authMode, setAuthMode] = useState<AuthMode | null>(null);
   const [authEmail, setAuthEmail] = useState('lukasz@example.com');
   const [authUsername, setAuthUsername] = useState('z1gonzo');
@@ -195,6 +188,10 @@ export function App() {
   useEffect(() => {
     void loadGlobalFeed();
   }, []);
+
+  useEffect(() => {
+    void loadProfile(accessToken);
+  }, [accessToken]);
 
   useEffect(() => {
     const status = activeTab;
@@ -281,6 +278,20 @@ export function App() {
     } catch (error) {
       setMyPostsError(getErrorMessage(error));
       setMyPostsStatus('error');
+    }
+  }
+
+  async function loadProfile(token: string | null = accessToken) {
+    setProfileStatus('loading');
+    setProfileError(null);
+
+    try {
+      const profileData = await getUserProfile('maria', token);
+      setProfile(profileData);
+      setProfileStatus('ready');
+    } catch (error) {
+      setProfileError(getErrorMessage(error));
+      setProfileStatus('error');
     }
   }
 
@@ -487,8 +498,8 @@ export function App() {
             <p className="eyebrow">CORE SOCIAL MVP</p>
             <h1 id="feed-title">Dark social feed, built to show the backend.</h1>
             <p>
-              Realny auth, global feed i composer są już podłączone. Zakładka My posts pobiera
-              teraz `GET /posts/me`, a following/profile/follow/comments są kolejnymi slice’ami integracji.
+              Realny auth, feedy, composer, My posts, komentarze oraz panel profilu/follow są już
+              podłączone do backendu. Następne slice’y to polish UX i kolejne funkcje społecznościowe.
             </p>
           </div>
           <div className="hero-actions">
@@ -620,32 +631,51 @@ export function App() {
       </main>
 
       <aside className="context-panel" aria-label="Profil i kontekst">
-        <section className="profile-card">
-          <div className="profile-gradient" />
-          <Avatar accent="warm" className="profile-avatar" initials={viewedProfile.initials} />
-          <div className="profile-heading">
-            <div>
-              <h2>{viewedProfile.name}</h2>
-              <span>@{viewedProfile.username}</span>
+        {profileStatus === 'loading' && (
+          <section className="profile-card">
+            <div className="profile-gradient" />
+            <div className="profile-avatar-placeholder" />
+            <p className="muted-text">Loading profile…</p>
+          </section>
+        )}
+        {profileStatus === 'error' && (
+          <section className="profile-card">
+            <div className="profile-gradient" />
+            <p className="error-text" role="alert">{profileError ?? 'Failed to load profile.'}</p>
+          </section>
+        )}
+        {profile && profileStatus !== 'loading' && (
+          <section className="profile-card">
+            <div className="profile-gradient" />
+            <Avatar accent="warm" className="profile-avatar" initials={profileInitials(profile)} />
+            <div className="profile-heading">
+              <div>
+                <h2>{profile.displayName ?? profile.username}</h2>
+                <span>@{profile.username}</span>
+              </div>
+              <FollowButton
+                accessToken={accessToken}
+                isFollowing={profile.isFollowing ?? false}
+                onRequireAuth={() => openAuth('login')}
+                onUpdateProfile={(updated: Partial<ApiPublicProfile>) =>
+                  setProfile((current) => (current ? { ...current, ...updated } : current))
+                }
+                profile={profile}
+                setFollowActionStatus={setFollowActionStatus}
+              />
             </div>
-            <button
-              className={isFollowing ? 'button success' : 'button primary'}
-              onClick={() => setIsFollowing((current) => !current)}
-              type="button"
-            >
-              {isFollowing ? 'Following' : 'Follow'}
-            </button>
-          </div>
-          <p>{viewedProfile.bio}</p>
-          <div className="profile-stats">
-            <StatCard label="followers" value={viewedProfile.followersCount} />
-            <StatCard label="following" value={viewedProfile.followingCount} />
-          </div>
-          <div className="contract-row">
-            <span>isFollowing</span>
-            <strong>{String(isFollowing)}</strong>
-          </div>
-        </section>
+            <p>{profile.bio}</p>
+            <div className="profile-stats">
+              <StatCard label="followers" value={profile.followersCount ?? 0} />
+              <StatCard label="following" value={profile.followingCount ?? 0} />
+            </div>
+            {followActionStatus !== 'idle' && (
+              <div className="contract-row">
+                <span>updating…</span>
+              </div>
+            )}
+          </section>
+        )}
 
         <section className="contract-card">
           <div className="section-heading">
@@ -824,6 +854,76 @@ function FormField({
         value={value}
       />
     </label>
+  );
+}
+
+function profileInitials(profile: ApiPublicProfile) {
+  return (profile.displayName ?? profile.username).slice(0, 1).toUpperCase();
+}
+
+function FollowButton({
+  accessToken,
+  isFollowing,
+  onRequireAuth,
+  onUpdateProfile,
+  profile,
+  setFollowActionStatus,
+}: {
+  accessToken: string | null;
+  isFollowing: boolean;
+  onRequireAuth: () => void;
+  onUpdateProfile: (updated: Partial<ApiPublicProfile>) => void;
+  profile: ApiPublicProfile;
+  setFollowActionStatus: (status: 'idle' | 'loading') => void;
+}) {
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  async function toggleFollow() {
+    if (!accessToken) {
+      setError('Sign in to follow profiles.');
+      onRequireAuth();
+      return;
+    }
+
+    setIsSubmitting(true);
+    setFollowActionStatus('loading');
+    setError(null);
+
+    try {
+      if (isFollowing) {
+        await unfollowUser(profile.username, accessToken);
+        onUpdateProfile({
+          followersCount: Math.max(0, (profile.followersCount ?? 0) - 1),
+          isFollowing: false,
+        });
+      } else {
+        await followUser(profile.username, accessToken);
+        onUpdateProfile({
+          followersCount: (profile.followersCount ?? 0) + 1,
+          isFollowing: true,
+        });
+      }
+    } catch (error) {
+      setError(getErrorMessage(error));
+    } finally {
+      setIsSubmitting(false);
+      setFollowActionStatus('idle');
+    }
+  }
+
+  return (
+    <div className="follow-control">
+      <button
+        className={isFollowing ? 'button success' : 'button primary'}
+        disabled={isSubmitting}
+        onClick={() => void toggleFollow()}
+        type="button"
+      >
+        {isSubmitting ? 'Updating…' : isFollowing ? 'Following' : 'Follow'}
+      </button>
+      {error && <span className="profile-action-error">{error}</span>}
+    </div>
   );
 }
 

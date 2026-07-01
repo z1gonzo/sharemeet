@@ -11,7 +11,7 @@ Projekt ma być edukacyjny: architektura powinna być jasna, opisana i rozwijana
 | Moduł | Odpowiedzialność | Status |
 |---|---|---|
 | `backend/` | API, auth, users, posts, follows, comments, logika biznesowa | NestJS + Prisma 6 + auth + profile + counts + `isFollowing` + text posts CRUD + visibility + `commentsCount` + global/following/my-posts feeds + follow relationships + comments |
-| `frontend/` | UI użytkownika | Vite + React + TypeScript; Focus Dark shell z podłączonym auth/global feed/following feed/composer/My posts/comments i mockowanym profile/follow; design w `docs/frontend-design.md` |
+| `frontend/` | UI użytkownika | Vite + React + TypeScript; Focus Dark shell z podłączonym auth/global feed/following feed/composer/My posts/comments/profile/follow; design w `docs/frontend-design.md` |
 | `db/` | Docker Compose dla PostgreSQL i MongoDB | PostgreSQL działa lokalnie na porcie hosta `5433`; MongoDB na później |
 | `docs/` | architektura, decyzje techniczne i krótkie referencje API | auth API i lekka polityka profilu opisane w `docs/` |
 | `devlog/` | dokumentacja nauki i uzasadnień | część głównego repo |
