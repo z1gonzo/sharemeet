@@ -131,6 +131,10 @@ export async function getPostComments(postId: string) {
   return apiRequest<ApiComment[]>(`/posts/${postId}/comments?limit=20&offset=0`);
 }
 
+export async function getUserPosts(username: string) {
+  return apiRequest<ApiPost[]>(`/users/${username}/posts?limit=3&offset=0`);
+}
+
 export async function getUserProfile(username: string, accessToken?: string | null) {
   return apiRequest<ApiPublicProfile>(`/users/${username}`, {
     ...(accessToken ? { headers: authHeaders(accessToken) } : {}),

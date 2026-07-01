@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ApiError, createComment, createPost, followUser, getCurrentUser, getFollowingPosts, getGlobalPosts, getMyPosts, getPostComments, getUserProfile, loginUser, registerUser, unfollowUser } from './api';
+import { ApiError, createComment, createPost, followUser, getCurrentUser, getFollowingPosts, getGlobalPosts, getMyPosts, getPostComments, getUserPosts, getUserProfile, loginUser, registerUser, unfollowUser } from './api';
 import type { ApiComment, ApiPost, ApiPublicProfile, AuthTokenResponse, PublicUser } from './api';
 
 type Visibility = 'PUBLIC' | 'FOLLOWERS' | 'PRIVATE';
@@ -138,6 +138,9 @@ export function App() {
   const [profile, setProfile] = useState<ApiPublicProfile | null>(null);
   const [profileStatus, setProfileStatus] = useState<FeedStatus>('idle');
   const [profileError, setProfileError] = useState<string | null>(null);
+  const [profilePosts, setProfilePosts] = useState<ApiPost[]>([]);
+  const [profilePostsStatus, setProfilePostsStatus] = useState<FeedStatus>('idle');
+  const [profilePostsError, setProfilePostsError] = useState<string | null>(null);
   const [followActionStatus, setFollowActionStatus] = useState<'idle' | 'loading'>('idle');
   const [authMode, setAuthMode] = useState<AuthMode | null>(null);
   const [authEmail, setAuthEmail] = useState('lukasz@example.com');
@@ -284,14 +287,23 @@ export function App() {
   async function loadProfile(token: string | null = accessToken) {
     setProfileStatus('loading');
     setProfileError(null);
+    setProfilePostsStatus('loading');
+    setProfilePostsError(null);
 
     try {
-      const profileData = await getUserProfile('maria', token);
+      const [profileData, postsData] = await Promise.all([
+        getUserProfile('maria', token),
+        getUserPosts('maria'),
+      ]);
       setProfile(profileData);
+      setProfilePosts(postsData);
       setProfileStatus('ready');
+      setProfilePostsStatus('ready');
     } catch (error) {
       setProfileError(getErrorMessage(error));
       setProfileStatus('error');
+      setProfilePostsStatus('error');
+      setProfilePostsError(getErrorMessage(error));
     }
   }
 
@@ -700,6 +712,37 @@ export function App() {
               <code>commentsCount</code>
             </li>
           </ul>
+        </section>
+
+        <section className="contract-card" aria-label="Recent posts">
+          <div className="section-heading">
+            <span className="eyebrow">RECENT POSTS</span>
+            <h3>@{profile?.username ?? 'maria'}</h3>
+          </div>
+
+          {profilePostsStatus === 'loading' && (
+            <div className="contract-row"><span>Loading posts…</span></div>
+          )}
+          {profilePostsStatus === 'error' && (
+            <div className="contract-row" role="alert"><span className="error-text">{profilePostsError ?? 'Failed to load posts.'}</span></div>
+          )}
+          {profilePostsStatus === 'ready' && profilePosts.length === 0 && (
+            <div className="contract-row"><span className="muted-text">No posts yet.</span></div>
+          )}
+          {profilePostsStatus === 'ready' && profilePosts.length > 0 && (
+            <ul className="contract-list">
+              {profilePosts.slice(0, 3).map((post) => (
+                <li key={post.id}>
+                  <span>{truncate(post.content, 60)}</span>
+                  <span className="post-meta">
+                    <code>{post.visibility}</code>
+                    {' '}
+                    <span>{post.commentsCount} comments</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
       </aside>
     </div>
@@ -1182,4 +1225,11 @@ function getErrorMessage(error: unknown) {
   }
 
   return 'Unknown API error';
+}
+
+function truncate(text: string, maxLength: number) {
+  if (text.length <= maxLength) {
+    return text;
+  }
+  return `${text.slice(0, maxLength).trimEnd()}…`;
 }

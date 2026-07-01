@@ -4,11 +4,11 @@
 
 ## Status
 
-- Etap: Faza 2 — Core Social MVP / Frontend profile/follow API integration
+- Etap: Faza 2 — Core Social MVP / Frontend profile posts preview
 - Ostatnia sesja: 2026-07-01
 - Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
 - Główne ryzyko: minimalny frontend social MVP działa, ale wymaga polish UX, seed data i cleanupu mocków.
-- Następny krok: wybrać kolejny mały slice: profile posts, edit/delete, polish UX albo demo seed data.
+- Następny krok: wybrać kolejny mały slice: edit/delete, polish UX albo demo seed data.
 
 ## Organizacja projektu
 
@@ -57,15 +57,23 @@
 - Frontend My posts jest podłączony do backendu: `GET /posts/me?limit=20&offset=0`, pokazuje własne `PUBLIC`/`FOLLOWERS`/`PRIVATE` posty i wymaga JWT.
 - Frontend comments panel jest podłączony do backendu: `GET /posts/:postId/comments?limit=20&offset=0` po otwarciu komentarzy oraz `POST /posts/:postId/comments` z JWT przez formularz w UI.
 - Frontend profile/follow panel jest podłączony do backendu: `GET /users/maria`, `POST /users/:username/follow` i `DELETE /users/:username/follow`, z loading/error state i auth guard.
+- Frontend profile posts preview jest podłączony do backendu: `GET /users/maria/posts?limit=3&offset=0`, z loading/error/empty state w prawym panelu.
 
 ## Co nie działa / wymaga naprawy
 
 Zweryfikowane przez `npm run lint && npm run prisma:validate && npm run build && npm test && npm run test:e2e` w `backend/` na 2026-06-29:
 
 - Reportowanie profilu/avatarów jest świadomie w backlogu, nie w bieżącym zakresie.
-- Pozostają mockowe elementy prezentacyjne i brak pełnego widoku profilu/postów profilu; core API integration dla Fazy 2 jest minimalnie domknięte.
+- Pozostają mockowe elementy prezentacyjne i brak pełnego widoku profilu; core API integration dla Fazy 2 jest minimalnie domknięte.
 
 ## Ostatnio wykonane
+
+Data: 2026-07-01 — Frontend profile posts preview
+
+- Profil Hermes `coding` z Kimi K2.6 przez NVIDIA dostał około 10 minut i wprowadził działający kod.
+- Dodano `getUserPosts(username)` w `frontend/src/api.ts`.
+- Prawy panel profilu pokazuje sekcję `RECENT POSTS` z maks. 3 najnowszymi postami Marii, visibility i `commentsCount`.
+- Realny smoke test przeszedł: API i UI pokazują post Marii; konsola JS bez błędów.
 
 Data: 2026-07-01 — Frontend profile/follow API integration
 

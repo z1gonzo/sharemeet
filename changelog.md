@@ -2,6 +2,13 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-07-01 — Frontend profile posts preview
+
+- Dodano `getUserPosts(username)` dla `GET /users/:username/posts?limit=3&offset=0`.
+- Prawy panel profilu pokazuje sekcję `RECENT POSTS` z maks. 3 postami Marii.
+- Preview pokazuje skróconą treść, `visibility` i `commentsCount` oraz ma loading/error/empty state.
+- Zweryfikowano buildami frontend/backend oraz smoke testem API + UI.
+
 ## 2026-07-01 — Frontend profile/follow API integration
 
 - Podłączono prawy panel profilu do `GET /users/maria`.
