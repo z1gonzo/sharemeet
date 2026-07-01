@@ -53,6 +53,7 @@
 - Frontend auth jest podłączony do backendu: `POST /auth/register`, `POST /auth/login`, JWT w `localStorage`, `GET /auth/me` hydration i logout.
 - Frontend global feed jest podłączony do backendu: `GET /posts?limit=20&offset=0`, loading/error state, refresh i realne `commentsCount` na kartach.
 - Frontend composer jest podłączony do backendu: `POST /posts` z JWT, loading/error/success state i refresh publicznego feedu po publikacji.
+- Frontend Following feed jest podłączony do backendu: `GET /posts/following?limit=20&offset=0`, pokazuje posty obserwowanych użytkowników (`PUBLIC` + `FOLLOWERS`) i wymaga JWT.
 - Frontend My posts jest podłączony do backendu: `GET /posts/me?limit=20&offset=0`, pokazuje własne `PUBLIC`/`FOLLOWERS`/`PRIVATE` posty i wymaga JWT.
 
 ## Co nie działa / wymaga naprawy
