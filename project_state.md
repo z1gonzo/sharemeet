@@ -4,11 +4,11 @@
 
 ## Status
 
-- Etap: Faza 2 — Core Social MVP / Safe smoke-test data cleanup
+- Etap: Faza 2 — Core Social MVP / Owner actions UX polish
 - Ostatnia sesja: 2026-07-01
 - Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
-- Główne ryzyko: minimalny frontend social MVP działa, ale wymaga świadomego apply cleanupu starych losowych smoke records i późniejszego polish UX.
-- Następny krok: opcjonalnie uruchomić `cd backend && npm run cleanup:smoke:apply` po review dry-run albo przejść do lekkiego polish owner action controls. UX/design taski dla Kimi traktować tylko jako łatwo odwracalne eksperymenty/warianty, nie jako źródło decyzji designowych.
+- Główne ryzyko: minimalny frontend social MVP działa, ale wymaga świadomego apply cleanupu starych losowych smoke records i późniejszego większego UX/design passu.
+- Następny krok: opcjonalnie uruchomić `cd backend && npm run cleanup:smoke:apply` po review dry-run albo przygotować deployment checklist/public demo plan. UX/design taski dla Kimi traktować tylko jako łatwo odwracalne eksperymenty/warianty, nie jako źródło decyzji designowych.
 
 ## Organizacja projektu
 
@@ -59,6 +59,7 @@
 - Frontend profile/follow panel jest podłączony do backendu: `GET /users/maria`, `POST /users/:username/follow` i `DELETE /users/:username/follow`, z loading/error state i auth guard.
 - Frontend profile posts preview jest podłączony do backendu: `GET /users/maria/posts?limit=3&offset=0`, z loading/error/empty state w prawym panelu.
 - Frontend owner actions są podłączone do backendu: `PATCH/DELETE /posts/:id` i `PATCH/DELETE /comments/:id`, widoczne tylko dla autora posta/komentarza.
+- Owner action controls mają pierwszy polish UX: spójne pill controls, inline post edit panel i czystszy comment edit layout.
 - Backend ma idempotentny seed demo: `cd backend && npm run seed:demo`, tworzący stałe konta `z1gonzo`, `maria`, `adam`, `kasia`, demo posty, follow relacje i komentarze.
 - Backend ma bezpieczny cleanup starych smoke-test records: `cd backend && npm run cleanup:smoke` jako dry-run oraz `npm run cleanup:smoke:apply` jako jawne usuwanie.
 
@@ -67,9 +68,15 @@
 Zweryfikowane przez `npm run lint && npm run prisma:validate && npm run build && npm test && npm run test:e2e` w `backend/` na 2026-06-29:
 
 - Reportowanie profilu/avatarów jest świadomie w backlogu, nie w bieżącym zakresie.
-- Pozostają mockowe elementy prezentacyjne, stare losowe smoke-test records w lokalnej DB dopóki nie uruchomimy `cleanup:smoke:apply`, brak pełnego widoku profilu i brak polish UX dla inline owner actions; core API integration dla Fazy 2 jest minimalnie domknięte.
+- Pozostają mockowe elementy prezentacyjne, stare losowe smoke-test records w lokalnej DB dopóki nie uruchomimy `cleanup:smoke:apply`, brak pełnego widoku profilu i brak większego całościowego polish UX; core API integration dla Fazy 2 jest minimalnie domknięte.
 
 ## Ostatnio wykonane
+
+Data: 2026-07-02 — Owner actions UX polish
+
+- Dopolerowano inline `Edit/Delete` dla postów i komentarzy ręcznie przez supervisora, bez Kimi.
+- Usunięto inline styles z owner edit controls i przeniesiono styling do `frontend/src/styles.css`.
+- Browser smoke potwierdził spójny wygląd post/comment edit panels; konsola JS bez błędów.
 
 Data: 2026-07-02 — Future roadmap notes
 

@@ -2,6 +2,13 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-07-02 — Owner actions UX polish
+
+- Dopolerowano frontend owner controls dla postów i komentarzy bez udziału Kimi.
+- Post `Edit/Delete` ma spójną pill grupę i inline edit panel zgodny z Focus Dark.
+- Comment edit/delete ma czystsze inline controls oraz responsive guard.
+- Zweryfikowano frontend/backend build i browser smoke; konsola JS bez błędów.
+
 ## 2026-07-02 — Future roadmap notes
 
 - Dopisano przyszłe kierunki: realtime messaging/komunikator, obrazy w postach i komentarzach oraz publiczny deployment MVP.

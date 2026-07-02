@@ -1229,16 +1229,20 @@ function PostCard({
         <VisibilityBadge visibility={post.visibility} />
       </header>
       {isEditingPost ? (
-        <div style={{ marginTop: 10 }}>
+        <div className="post-edit-panel">
+          <div className="edit-panel-heading">
+            <span>Editing post</span>
+            <small>Owner controls</small>
+          </div>
           <textarea
+            className="post-edit-textarea"
             rows={3}
-            style={{ width: '100%', padding: 8, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }}
             value={editPostContent}
             onChange={(e) => setEditPostContent(e.target.value)}
           />
-          <div style={{ display: 'flex', gap: 8, marginTop: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+          <div className="edit-panel-actions">
             <select
-              style={{ fontSize: 12, padding: '6px 10px', borderRadius: 999, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }}
+              className="visibility-select"
               value={editPostVisibility}
               onChange={(e) => setEditPostVisibility(e.target.value as Visibility)}
             >
@@ -1262,7 +1266,7 @@ function PostCard({
             >
               Cancel
             </button>
-            {postActionError && <span className="comment-error" style={{ fontSize: 13 }}>{postActionError}</span>}
+            {postActionError && <span className="comment-error inline-error">{postActionError}</span>}
           </div>
         </div>
       ) : (
@@ -1274,14 +1278,14 @@ function PostCard({
         </button>
         <button type="button">↗ Share</button>
         {isOwner && (
-          <>
-            <button onClick={() => setIsEditingPost((p) => !p)} disabled={postActionStatus === 'updating'} type="button">
+          <div className="owner-action-group" aria-label="Post owner actions">
+            <button className="owner-action-button" onClick={() => setIsEditingPost((p) => !p)} disabled={postActionStatus === 'updating'} type="button">
               {isEditingPost ? 'Close' : 'Edit'}
             </button>
-            <button onClick={() => void submitPostDelete()} disabled={postActionStatus === 'deleting'} type="button">
+            <button className="owner-action-button danger" onClick={() => void submitPostDelete()} disabled={postActionStatus === 'deleting'} type="button">
               {postActionStatus === 'deleting' ? 'Deleting…' : 'Delete'}
             </button>
-          </>
+          </div>
         )}
       </footer>
       {postActionError && !isEditingPost && <span className="comment-error">{postActionError}</span>}
@@ -1310,29 +1314,29 @@ function PostCard({
               return (
                 <div className="comment-row" key={comment.id}>
                   <Avatar accent={pickAuthorAccent(comment.author.username)} initials={comment.author.initials} small />
-                  <div style={{ minWidth: 0 }}>
+                  <div className="comment-content">
                     <strong>{comment.author.name}</strong>
                     {editingCommentId === comment.id ? (
-                      <div style={{ marginTop: 4 }}>
+                      <div className="comment-edit-panel">
                         <input
-                          style={{ width: '100%', padding: '4px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }}
+                          className="comment-edit-input"
                           value={editingCommentText}
                           onChange={(e) => setEditingCommentText(e.target.value)}
                         />
-                        <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+                        <div className="comment-edit-actions">
                           <button className="button primary compact" disabled={commentActionStatus === 'loading'} onClick={() => void submitCommentEdit()} type="button">Save</button>
                           <button className="button ghost compact" disabled={commentActionStatus === 'loading'} onClick={() => setEditingCommentId(null)} type="button">Cancel</button>
                         </div>
-                        {commentActionStatus === 'error' && <span className="comment-error" style={{ fontSize: 13 }}>{commentError}</span>}
+                        {commentActionStatus === 'error' && <span className="comment-error inline-error">{commentError}</span>}
                       </div>
                     ) : (
                       <span>{comment.text}</span>
                     )}
                   </div>
                   {commentOwner && editingCommentId !== comment.id && (
-                    <div style={{ display: 'flex', gap: 6, marginLeft: 'auto' }}>
-                      <button className="button ghost compact" onClick={() => startEditComment(comment)} type="button">Edit</button>
-                      <button className="button ghost compact" onClick={() => void submitCommentDelete(comment.id)} type="button">Delete</button>
+                    <div className="comment-owner-actions" aria-label="Comment owner actions">
+                      <button className="owner-action-button compact" onClick={() => startEditComment(comment)} type="button">Edit</button>
+                      <button className="owner-action-button compact danger" onClick={() => void submitCommentDelete(comment.id)} type="button">Delete</button>
                     </div>
                   )}
                 </div>
