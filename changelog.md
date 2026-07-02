@@ -2,6 +2,13 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-07-02 — Deterministic demo seed data
+
+- Dodano `backend/scripts/seed-demo.ts` i backendowy script `npm run seed:demo`.
+- Seed tworzy stałe demo konta `z1gonzo`, `maria`, `adam`, `kasia` z hasłem `DemoPass123!`.
+- Seed dodaje/upsertuje demo posty, follow relacje i komentarze bez duplikowania records przy kolejnym uruchomieniu.
+- Zweryfikowano `npm run build`, dwukrotne `npm run seed:demo` i liczniki demo danych w DB.
+
 ## 2026-07-01 — Frontend owner edit/delete actions
 
 - Dodano helpery API `updatePost`, `deletePost`, `updateComment`, `deleteComment`.

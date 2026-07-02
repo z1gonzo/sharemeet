@@ -4,11 +4,11 @@
 
 ## Status
 
-- Etap: Faza 2 — Core Social MVP / Frontend owner edit/delete actions
+- Etap: Faza 2 — Core Social MVP / Deterministic demo seed data
 - Ostatnia sesja: 2026-07-01
 - Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
-- Główne ryzyko: minimalny frontend social MVP działa, ale wymaga polish UX, seed data i cleanupu mocków.
-- Następny krok: demo seed data / cleanup mockowych tekstów albo lekki polish owner action controls.
+- Główne ryzyko: minimalny frontend social MVP działa, ale wymaga cleanupu starych losowych smoke records i późniejszego polish UX.
+- Następny krok: cleanup mockowych/starych smoke-test records albo lekki polish owner action controls.
 
 ## Organizacja projektu
 
@@ -59,15 +59,23 @@
 - Frontend profile/follow panel jest podłączony do backendu: `GET /users/maria`, `POST /users/:username/follow` i `DELETE /users/:username/follow`, z loading/error state i auth guard.
 - Frontend profile posts preview jest podłączony do backendu: `GET /users/maria/posts?limit=3&offset=0`, z loading/error/empty state w prawym panelu.
 - Frontend owner actions są podłączone do backendu: `PATCH/DELETE /posts/:id` i `PATCH/DELETE /comments/:id`, widoczne tylko dla autora posta/komentarza.
+- Backend ma idempotentny seed demo: `cd backend && npm run seed:demo`, tworzący stałe konta `z1gonzo`, `maria`, `adam`, `kasia`, demo posty, follow relacje i komentarze.
 
 ## Co nie działa / wymaga naprawy
 
 Zweryfikowane przez `npm run lint && npm run prisma:validate && npm run build && npm test && npm run test:e2e` w `backend/` na 2026-06-29:
 
 - Reportowanie profilu/avatarów jest świadomie w backlogu, nie w bieżącym zakresie.
-- Pozostają mockowe elementy prezentacyjne, brak pełnego widoku profilu i brak polish UX dla inline owner actions; core API integration dla Fazy 2 jest minimalnie domknięte.
+- Pozostają mockowe elementy prezentacyjne, stare losowe smoke-test records w lokalnej DB, brak pełnego widoku profilu i brak polish UX dla inline owner actions; core API integration dla Fazy 2 jest minimalnie domknięte.
 
 ## Ostatnio wykonane
+
+Data: 2026-07-02 — Deterministic demo seed data
+
+- Dodano `backend/scripts/seed-demo.ts` oraz npm script `seed:demo`.
+- Seed tworzy/upsertuje stałych userów `z1gonzo`, `maria`, `adam`, `kasia` z hasłem `DemoPass123!`.
+- Seed tworzy 8 postów, 4 follow relacje i 4 komentarze; można odpalać go wielokrotnie bez duplikowania demo records.
+- Zweryfikowano `npm run build` oraz dwukrotne `npm run seed:demo`; DB pokazuje 4 demo users, 8 demo posts, 4 follows i 4 comments.
 
 Data: 2026-07-01 — Frontend owner edit/delete actions
 

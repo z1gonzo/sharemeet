@@ -103,6 +103,7 @@ Przygotować repo pod spokojną sesję kodowania w VSCode/Cline i ustabilizować
   - [x] Podłączyć comments list/create przez `GET /posts/:postId/comments` i `POST /posts/:postId/comments`
   - [x] Podłączyć profile/follow przez `GET /users/:username` i `POST/DELETE /users/:username/follow`
   - [x] Podłączyć owner edit/delete dla własnych postów i komentarzy
+  - [x] Dodać deterministyczny demo seed data
 
 ## Faza 3 — Media i aktywność
 
