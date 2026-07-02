@@ -2,6 +2,11 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-07-02 — Future roadmap notes
+
+- Dopisano przyszłe kierunki: realtime messaging/komunikator, obrazy w postach i komentarzach oraz publiczny deployment MVP.
+- Dodano w planie zasadę pracy nad UX/design: Kimi może robić małe eksperymenty lub warianty, ale decyzje designowe zatwierdza supervisor/użytkownik.
+
 ## 2026-07-02 — Safe smoke-test cleanup
 
 - Dodano `backend/scripts/cleanup-smoke-data.ts`.

@@ -42,6 +42,12 @@ To zostało formalnie potwierdzone decyzją z 2026-06-27 w `docs/decisions.md`.
 3. Potem frontend i podstawowy flow użytkownika w ustalonym kierunku Focus Dark social-tech.
 4. Dopiero po MVP: Redis, GraphQL, WebSockets, queues.
 
+## Przyszłe rozszerzenia social platform
+
+- Realtime komunikator jest ważnym elementem docelowej social platformy, ale powinien wejść po ustabilizowaniu obecnego MVP. Pierwszy rozsądny slice to prywatne rozmowy 1:1, model wiadomości w PostgreSQL i WebSocket gateway w NestJS; presence, typing indicators i read receipts zostają na później.
+- Media w postach i komentarzach są osobnym etapem: najpierw metadata i storage abstraction, potem obrazy w postach, następnie obrazy w komentarzach. Lokalny dev storage może wystarczyć do nauki, ale publiczne demo powinno używać S3-compatible storage, np. Cloudflare R2 albo Supabase Storage.
+- Publiczny deployment MVP powinien rozdzielić frontend, backend i bazę: frontend na Vercel/Netlify/Cloudflare Pages, backend na Render/Fly.io/Railway/VPS, PostgreSQL na Neon/Supabase/Railway/Render. Przed deploymentem trzeba dopracować env, CORS, migracje i seed demo.
+
 ## Ryzyka
 
 - Za szybkie wejście w wiele technologii naraz.

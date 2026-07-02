@@ -109,18 +109,43 @@ Przygotować repo pod spokojną sesję kodowania w VSCode/Cline i ustabilizować
 ## Faza 3 — Media i aktywność
 
 - [ ] Media uploads / metadata
+  - [ ] Obrazy w postach
+  - [ ] Obrazy w komentarzach
+  - [ ] Storage plan: lokalny dev storage, później S3-compatible object storage
 - [ ] Activity logs
 - [ ] Notifications
+- [ ] Realtime messaging / komunikator
+  - [ ] Prywatne rozmowy 1:1 jako pierwszy slice
+  - [ ] WebSocket gateway po stronie backendu dopiero po ustabilizowaniu MVP
+  - [ ] Model wiadomości i uczestników rozmów w PostgreSQL
+  - [ ] Presence/typing/read receipts jako późniejszy backlog, nie pierwszy slice
 - [ ] Redis/caching — dopiero jeśli potrzebne
+
+## Faza 4 — Deployment / public demo
+
+- [ ] Przygotować działający publiczny deployment MVP
+  - [ ] Frontend: Vercel / Netlify / Cloudflare Pages
+  - [ ] Backend: Render / Fly.io / Railway / VPS
+  - [ ] PostgreSQL: Neon / Supabase / Railway Postgres / Render Postgres
+  - [ ] Media storage w przyszłości: Cloudflare R2 / Supabase Storage / S3-compatible bucket
+  - [ ] Ustalić env/secrets, CORS, migration workflow i seed demo dla środowiska demo
+  - [ ] Dodać deployment README/checklistę przed pierwszym publicznym linkiem
 
 ## Backlog
 
 - GraphQL
-- WebSockets
+- WebSockets dla realtime messaging, presence i powiadomień live
 - Kolejki/background jobs
 - Feed ranking
 - Zaawansowane media
 - Publiczny/portfolio devlog zbudowany z `devlog/`
+
+## Zasady pracy nad UX/design
+
+- Kimi/coding worker może dostać mały UX task tylko jako eksperyment lub wariant, najlepiej w łatwym do cofnięcia commicie.
+- Decyzje estetyczne i kierunek design systemu zatwierdza supervisor/użytkownik, nie coding worker.
+- Dla większych zmian UX preferujemy najpierw mockup/variant review, potem implementację.
+- Premium Focus Dark i recruiter-friendly jakość są ważniejsze niż szybkie „byle działało”.
 
 ## Zakazane na tym etapie
 

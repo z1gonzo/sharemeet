@@ -8,7 +8,7 @@
 - Ostatnia sesja: 2026-07-01
 - Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
 - Główne ryzyko: minimalny frontend social MVP działa, ale wymaga świadomego apply cleanupu starych losowych smoke records i późniejszego polish UX.
-- Następny krok: opcjonalnie uruchomić `cd backend && npm run cleanup:smoke:apply` po review dry-run albo przejść do lekkiego polish owner action controls.
+- Następny krok: opcjonalnie uruchomić `cd backend && npm run cleanup:smoke:apply` po review dry-run albo przejść do lekkiego polish owner action controls. UX/design taski dla Kimi traktować tylko jako łatwo odwracalne eksperymenty/warianty, nie jako źródło decyzji designowych.
 
 ## Organizacja projektu
 
@@ -70,6 +70,11 @@ Zweryfikowane przez `npm run lint && npm run prisma:validate && npm run build &&
 - Pozostają mockowe elementy prezentacyjne, stare losowe smoke-test records w lokalnej DB dopóki nie uruchomimy `cleanup:smoke:apply`, brak pełnego widoku profilu i brak polish UX dla inline owner actions; core API integration dla Fazy 2 jest minimalnie domknięte.
 
 ## Ostatnio wykonane
+
+Data: 2026-07-02 — Future roadmap notes
+
+- Dopisano do planu przyszłe kierunki: realtime messaging/komunikator, media uploads dla postów/komentarzy oraz deployment/public demo.
+- Ustalono zasadę: Kimi może pomagać w UX jako eksperyment/wariant, ale kierunek designu zatwierdza supervisor/użytkownik.
 
 Data: 2026-07-02 — Safe cleanup for old smoke-test data
 
