@@ -8,6 +8,8 @@
   "scripts": {
     "build": "nest build",
     "seed:demo": "ts-node scripts/seed-demo.ts",
+    "cleanup:smoke": "ts-node scripts/cleanup-smoke-data.ts",
+    "cleanup:smoke:apply": "ts-node scripts/cleanup-smoke-data.ts --apply",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "prisma:generate": "prisma generate",
     "prisma:validate": "prisma validate",

@@ -2,6 +2,13 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-07-02 — Safe smoke-test cleanup
+
+- Dodano `backend/scripts/cleanup-smoke-data.ts`.
+- Dodano npm scripts `cleanup:smoke` (dry-run) i `cleanup:smoke:apply` (jawne usuwanie).
+- Cleanup chroni demo konta `z1gonzo`, `maria`, `adam`, `kasia` i targetuje tylko znane lokalne smoke-test patterns.
+- Zweryfikowano `npm run build`, `npm run prisma:validate` i dry-run `npm run cleanup:smoke`; realnego apply nie uruchamiano.
+
 ## 2026-07-02 — Deterministic demo seed data
 
 - Dodano `backend/scripts/seed-demo.ts` i backendowy script `npm run seed:demo`.

@@ -4,11 +4,11 @@
 
 ## Status
 
-- Etap: Faza 2 — Core Social MVP / Deterministic demo seed data
+- Etap: Faza 2 — Core Social MVP / Safe smoke-test data cleanup
 - Ostatnia sesja: 2026-07-01
 - Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
-- Główne ryzyko: minimalny frontend social MVP działa, ale wymaga cleanupu starych losowych smoke records i późniejszego polish UX.
-- Następny krok: cleanup mockowych/starych smoke-test records albo lekki polish owner action controls.
+- Główne ryzyko: minimalny frontend social MVP działa, ale wymaga świadomego apply cleanupu starych losowych smoke records i późniejszego polish UX.
+- Następny krok: opcjonalnie uruchomić `cd backend && npm run cleanup:smoke:apply` po review dry-run albo przejść do lekkiego polish owner action controls.
 
 ## Organizacja projektu
 
@@ -60,15 +60,23 @@
 - Frontend profile posts preview jest podłączony do backendu: `GET /users/maria/posts?limit=3&offset=0`, z loading/error/empty state w prawym panelu.
 - Frontend owner actions są podłączone do backendu: `PATCH/DELETE /posts/:id` i `PATCH/DELETE /comments/:id`, widoczne tylko dla autora posta/komentarza.
 - Backend ma idempotentny seed demo: `cd backend && npm run seed:demo`, tworzący stałe konta `z1gonzo`, `maria`, `adam`, `kasia`, demo posty, follow relacje i komentarze.
+- Backend ma bezpieczny cleanup starych smoke-test records: `cd backend && npm run cleanup:smoke` jako dry-run oraz `npm run cleanup:smoke:apply` jako jawne usuwanie.
 
 ## Co nie działa / wymaga naprawy
 
 Zweryfikowane przez `npm run lint && npm run prisma:validate && npm run build && npm test && npm run test:e2e` w `backend/` na 2026-06-29:
 
 - Reportowanie profilu/avatarów jest świadomie w backlogu, nie w bieżącym zakresie.
-- Pozostają mockowe elementy prezentacyjne, stare losowe smoke-test records w lokalnej DB, brak pełnego widoku profilu i brak polish UX dla inline owner actions; core API integration dla Fazy 2 jest minimalnie domknięte.
+- Pozostają mockowe elementy prezentacyjne, stare losowe smoke-test records w lokalnej DB dopóki nie uruchomimy `cleanup:smoke:apply`, brak pełnego widoku profilu i brak polish UX dla inline owner actions; core API integration dla Fazy 2 jest minimalnie domknięte.
 
 ## Ostatnio wykonane
+
+Data: 2026-07-02 — Safe cleanup for old smoke-test data
+
+- Dodano `backend/scripts/cleanup-smoke-data.ts` oraz npm scripts `cleanup:smoke` i `cleanup:smoke:apply`.
+- Domyślny tryb jest dry-run i tylko wypisuje kandydatów; realne kasowanie wymaga jawnego `--apply`.
+- Skrypt chroni demo konta `z1gonzo`, `maria`, `adam`, `kasia` i targetuje tylko znane lokalne smoke-test patterns.
+- Zweryfikowano dry-run: 12 kandydatów users, 6 posts, 2 comments, 2 follows; żadnych zmian w DB.
 
 Data: 2026-07-02 — Deterministic demo seed data
 

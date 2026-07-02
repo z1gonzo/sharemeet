@@ -91,6 +91,23 @@ Demo accounts use the password `DemoPass123!`:
 | `adam` | `adam@sharemeet.local` |
 | `kasia` | `kasia@sharemeet.local` |
 
+### Smoke-test data cleanup
+
+Preview old random smoke-test records without deleting anything:
+
+```bash
+cd backend
+npm run cleanup:smoke
+```
+
+Apply cleanup only after reviewing the dry-run output:
+
+```bash
+npm run cleanup:smoke:apply
+```
+
+The cleanup script protects deterministic demo users (`z1gonzo`, `maria`, `adam`, `kasia`) and only targets known local smoke-test patterns.
+
 ### Frontend
 
 ```bash
@@ -99,7 +116,7 @@ npm install
 npm run dev
 ```
 
-> Current state: backend is build-green with Prisma 6, PostgreSQL on local port `5433`, email/password JWT auth, DTO validation, protected `GET /auth/me`, profile endpoints with follow counts and `isFollowing`, text posts CRUD/global feed/following feed/my-posts/user-posts endpoints with `PUBLIC`/`FOLLOWERS`/`PRIVATE` visibility and `commentsCount`, comments on public posts, follow relationships (`POST/DELETE /users/:username/follow`, followers/following lists), and deterministic demo seed data (`npm run seed:demo`). Frontend has Focus Dark shell with connected auth (`register`, `login`, JWT local storage, `GET /auth/me`, logout), global feed (`GET /posts`), following feed (`GET /posts/following`), composer (`POST /posts`), My posts (`GET /posts/me`), comments list/create/edit/delete, profile/follow, profile posts preview, and owner edit/delete for posts. Avatar/profile reporting is documented as future backlog. Backend tests pass; frontend `npm run build` passes. See `project_state.md`.
+> Current state: backend is build-green with Prisma 6, PostgreSQL on local port `5433`, email/password JWT auth, DTO validation, protected `GET /auth/me`, profile endpoints with follow counts and `isFollowing`, text posts CRUD/global feed/following feed/my-posts/user-posts endpoints with `PUBLIC`/`FOLLOWERS`/`PRIVATE` visibility and `commentsCount`, comments on public posts, follow relationships (`POST/DELETE /users/:username/follow`, followers/following lists), deterministic demo seed data (`npm run seed:demo`), and dry-run-first smoke-test cleanup (`npm run cleanup:smoke`). Frontend has Focus Dark shell with connected auth (`register`, `login`, JWT local storage, `GET /auth/me`, logout), global feed (`GET /posts`), following feed (`GET /posts/following`), composer (`POST /posts`), My posts (`GET /posts/me`), comments list/create/edit/delete, profile/follow, profile posts preview, and owner edit/delete for posts. Avatar/profile reporting is documented as future backlog. Backend tests pass; frontend `npm run build` passes. See `project_state.md`.
 
 ## AI-assisted workflow
 
