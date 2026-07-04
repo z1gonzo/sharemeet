@@ -7,8 +7,8 @@
 - Etap: Faza 2 — Core Social MVP / Owner actions UX polish
 - Ostatnia sesja: 2026-07-01
 - Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
-- Główne ryzyko: minimalny frontend social MVP działa, ale wymaga świadomego apply cleanupu starych losowych smoke records i późniejszego większego UX/design passu.
-- Następny krok: opcjonalnie uruchomić `cd backend && npm run cleanup:smoke:apply` po review dry-run albo przygotować deployment checklist/public demo plan. UX/design taski dla Kimi traktować tylko jako łatwo odwracalne eksperymenty/warianty, nie jako źródło decyzji designowych.
+- Główne ryzyko: minimalny frontend social MVP działa i lokalna DB jest wyczyszczona do deterministycznych demo danych; pozostaje większy całościowy UX/design pass oraz przygotowanie publicznego deploymentu.
+- Następny krok: przygotować deployment checklist/public demo plan albo większy UX/design pass. UX/design taski dla Kimi traktować tylko jako łatwo odwracalne eksperymenty/warianty, nie jako źródło decyzji designowych.
 
 ## Organizacja projektu
 
@@ -61,16 +61,22 @@
 - Frontend owner actions są podłączone do backendu: `PATCH/DELETE /posts/:id` i `PATCH/DELETE /comments/:id`, widoczne tylko dla autora posta/komentarza.
 - Owner action controls mają pierwszy polish UX: spójne pill controls, inline post edit panel i czystszy comment edit layout.
 - Backend ma idempotentny seed demo: `cd backend && npm run seed:demo`, tworzący stałe konta `z1gonzo`, `maria`, `adam`, `kasia`, demo posty, follow relacje i komentarze.
-- Backend ma bezpieczny cleanup starych smoke-test records: `cd backend && npm run cleanup:smoke` jako dry-run oraz `npm run cleanup:smoke:apply` jako jawne usuwanie.
+- Backend ma bezpieczny cleanup starych smoke-test records: `cd backend && npm run cleanup:smoke` jako dry-run oraz `npm run cleanup:smoke:apply` jako jawne usuwanie; realny cleanup lokalnej DB został wykonany 2026-07-04, a potem odtworzono demo seed.
 
 ## Co nie działa / wymaga naprawy
 
 Zweryfikowane przez `npm run lint && npm run prisma:validate && npm run build && npm test && npm run test:e2e` w `backend/` na 2026-06-29:
 
 - Reportowanie profilu/avatarów jest świadomie w backlogu, nie w bieżącym zakresie.
-- Pozostają mockowe elementy prezentacyjne, stare losowe smoke-test records w lokalnej DB dopóki nie uruchomimy `cleanup:smoke:apply`, brak pełnego widoku profilu i brak większego całościowego polish UX; core API integration dla Fazy 2 jest minimalnie domknięte.
+- Pozostają mockowe elementy prezentacyjne, brak pełnego widoku profilu i brak większego całościowego polish UX; core API integration dla Fazy 2 jest minimalnie domknięte. Lokalna DB została oczyszczona ze starych smoke-test records i odtworzona przez `seed:demo`.
 
 ## Ostatnio wykonane
+
+Data: 2026-07-04 — Applied smoke-test data cleanup
+
+- Uruchomiono `cd backend && npm run cleanup:smoke:apply` po dry-run review.
+- Usunięto 12 starych smoke-test users wraz z zależnymi rekordami kaskadowymi.
+- Ponowny dry-run nie znalazł kandydatów; `npm run seed:demo` odtworzył czysty demo stan: 4 users, 8 posts, 4 comments, 4 follows.
 
 Data: 2026-07-02 — Owner actions UX polish
 

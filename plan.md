@@ -105,6 +105,7 @@ Przygotować repo pod spokojną sesję kodowania w VSCode/Cline i ustabilizować
   - [x] Podłączyć owner edit/delete dla własnych postów i komentarzy
   - [x] Dodać deterministyczny demo seed data
   - [x] Dodać bezpieczny dry-run cleanup starych smoke-test records
+  - [x] Uruchomić realny cleanup starych smoke-test records i odtworzyć demo seed
   - [x] Dopolerować UX inline owner actions dla postów i komentarzy
 
 ## Faza 3 — Media i aktywność

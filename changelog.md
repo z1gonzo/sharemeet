@@ -2,6 +2,12 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-07-04 — Applied smoke-test cleanup
+
+- Po dry-run review uruchomiono realny lokalny cleanup starych smoke-test records: `cd backend && npm run cleanup:smoke:apply`.
+- Usunięto 12 smoke-test users oraz zależne rekordy przez cascade.
+- Ponowny dry-run nie znalazł kandydatów; `npm run seed:demo` odtworzył czysty stan demo: 4 users, 8 posts, 4 comments, 4 follows.
+
 ## 2026-07-02 — Owner actions UX polish
 
 - Dopolerowano frontend owner controls dla postów i komentarzy bez udziału Kimi.
