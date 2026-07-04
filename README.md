@@ -50,6 +50,7 @@ Current/planned stack:
 - `AGENTS.md` — rules for Hermes/Cline/Codex/other coding agents
 - `docs/architecture.md` — architecture and module boundaries
 - `docs/decisions.md` — ADR-style technical decisions
+- `docs/deployment.md` — first public MVP/demo deployment checklist
 - `docs/frontend-design.md` — selected frontend visual direction
 - `sketches/` — throwaway HTML mockups used to choose the frontend direction
 - `devlog/` — learning journal and explanations of why decisions were made
@@ -115,6 +116,18 @@ cd frontend
 npm install
 npm run dev
 ```
+
+Frontend API URL can be configured through `frontend/.env.example` / `VITE_API_URL`.
+
+### Deployment preparation
+
+First public demo deployment checklist:
+
+```text
+docs/deployment.md
+```
+
+Recommended initial path: Vercel frontend, Render backend, Neon or Supabase Postgres.
 
 > Current state: backend is build-green with Prisma 6, PostgreSQL on local port `5433`, email/password JWT auth, DTO validation, protected `GET /auth/me`, profile endpoints with follow counts and `isFollowing`, text posts CRUD/global feed/following feed/my-posts/user-posts endpoints with `PUBLIC`/`FOLLOWERS`/`PRIVATE` visibility and `commentsCount`, comments on public posts, follow relationships (`POST/DELETE /users/:username/follow`, followers/following lists), deterministic demo seed data (`npm run seed:demo`), and dry-run-first smoke-test cleanup (`npm run cleanup:smoke`). Frontend has Focus Dark shell with connected auth (`register`, `login`, JWT local storage, `GET /auth/me`, logout), global feed (`GET /posts`), following feed (`GET /posts/following`), composer (`POST /posts`), My posts (`GET /posts/me`), comments list/create/edit/delete, profile/follow, profile posts preview, and owner edit/delete for posts. Avatar/profile reporting is documented as future backlog. Backend tests pass; frontend `npm run build` passes. See `project_state.md`.
 

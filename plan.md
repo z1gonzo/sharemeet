@@ -126,12 +126,13 @@ Przygotować repo pod spokojną sesję kodowania w VSCode/Cline i ustabilizować
 ## Faza 4 — Deployment / public demo
 
 - [ ] Przygotować działający publiczny deployment MVP
-  - [ ] Frontend: Vercel / Netlify / Cloudflare Pages
-  - [ ] Backend: Render / Fly.io / Railway / VPS
-  - [ ] PostgreSQL: Neon / Supabase / Railway Postgres / Render Postgres
+  - [x] Frontend: Vercel / Netlify / Cloudflare Pages
+  - [x] Backend: Render / Fly.io / Railway / VPS
+  - [x] PostgreSQL: Neon / Supabase / Railway Postgres / Render Postgres
   - [ ] Media storage w przyszłości: Cloudflare R2 / Supabase Storage / S3-compatible bucket
-  - [ ] Ustalić env/secrets, CORS, migration workflow i seed demo dla środowiska demo
-  - [ ] Dodać deployment README/checklistę przed pierwszym publicznym linkiem
+  - [x] Ustalić env/secrets, CORS, migration workflow i seed demo dla środowiska demo
+  - [x] Dodać deployment README/checklistę przed pierwszym publicznym linkiem
+  - [ ] Utworzyć rzeczywiste usługi hostingowe i wykonać pierwszy deploy
 
 ## Backlog
 

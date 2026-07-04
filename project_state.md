@@ -4,11 +4,11 @@
 
 ## Status
 
-- Etap: Faza 2 — Core Social MVP / Owner actions UX polish
+- Etap: Faza 4 — Deployment preparation / public demo checklist
 - Ostatnia sesja: 2026-07-01
 - Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
-- Główne ryzyko: minimalny frontend social MVP działa i lokalna DB jest wyczyszczona do deterministycznych demo danych; pozostaje większy całościowy UX/design pass oraz przygotowanie publicznego deploymentu.
-- Następny krok: przygotować deployment checklist/public demo plan albo większy UX/design pass. UX/design taski dla Kimi traktować tylko jako łatwo odwracalne eksperymenty/warianty, nie jako źródło decyzji designowych.
+- Główne ryzyko: minimalny frontend social MVP działa i lokalna DB jest wyczyszczona do deterministycznych demo danych; publiczny deployment jest zaplanowany, ale rzeczywiste usługi hostingowe nie zostały jeszcze utworzone.
+- Następny krok: wybrać i utworzyć konkretne usługi hostingowe (rekomendacja: Vercel + Render + Neon/Supabase), skonfigurować env vars, uruchomić migracje/seed i zrobić browser smoke test.
 
 ## Organizacja projektu
 
@@ -62,6 +62,7 @@
 - Owner action controls mają pierwszy polish UX: spójne pill controls, inline post edit panel i czystszy comment edit layout.
 - Backend ma idempotentny seed demo: `cd backend && npm run seed:demo`, tworzący stałe konta `z1gonzo`, `maria`, `adam`, `kasia`, demo posty, follow relacje i komentarze.
 - Backend ma bezpieczny cleanup starych smoke-test records: `cd backend && npm run cleanup:smoke` jako dry-run oraz `npm run cleanup:smoke:apply` jako jawne usuwanie; realny cleanup lokalnej DB został wykonany 2026-07-04, a potem odtworzono demo seed.
+- Repo ma deployment checklistę `docs/deployment.md`; backend obsługuje `PORT`, CORS przez `FRONTEND_URL`/`CORS_ORIGINS`, `npm run prisma:migrate:deploy` i poprawiony `npm run start:prod`; frontend ma `frontend/.env.example` z `VITE_API_URL`.
 
 ## Co nie działa / wymaga naprawy
 
@@ -71,6 +72,12 @@ Zweryfikowane przez `npm run lint && npm run prisma:validate && npm run build &&
 - Pozostają mockowe elementy prezentacyjne, brak pełnego widoku profilu i brak większego całościowego polish UX; core API integration dla Fazy 2 jest minimalnie domknięte. Lokalna DB została oczyszczona ze starych smoke-test records i odtworzona przez `seed:demo`.
 
 ## Ostatnio wykonane
+
+Data: 2026-07-04 — Deployment preparation
+
+- Dodano `docs/deployment.md` z checklistą pierwszego publicznego MVP/demo deploymentu.
+- Przyjęto rekomendację: Vercel frontend, Render backend, Neon lub Supabase Postgres.
+- Przygotowano env/deploy hooks: backend CORS z `FRONTEND_URL`/`CORS_ORIGINS`, `prisma:migrate:deploy`, poprawny `start:prod`, `prisma generate` w buildzie, frontend `VITE_API_URL`.
 
 Data: 2026-07-04 — Applied smoke-test data cleanup
 

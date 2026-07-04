@@ -2,6 +2,13 @@
 
 > Ludzki skrót istotnych zmian. Szczegółowa historia techniczna jest w git log.
 
+## 2026-07-04 — Deployment preparation
+
+- Dodano `docs/deployment.md` z checklistą publicznego MVP/demo deploymentu.
+- Przyjęto rekomendowaną pierwszą ścieżkę: Vercel frontend, Render backend, Neon lub Supabase Postgres.
+- Przygotowano backend pod deploy: poprawny `start:prod`, `prisma:migrate:deploy`, `prisma generate` w buildzie oraz CORS z `FRONTEND_URL`/`CORS_ORIGINS`.
+- Dodano `frontend/.env.example` z `VITE_API_URL`.
+
 ## 2026-07-04 — Applied smoke-test cleanup
 
 - Po dry-run review uruchomiono realny lokalny cleanup starych smoke-test records: `cd backend && npm run cleanup:smoke:apply`.
