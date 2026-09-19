@@ -5,10 +5,10 @@
 ## Status
 
 - Etap: Faza 4 — Deployment preparation / public demo checklist
-- Ostatnia sesja: 2026-07-04
-- Repo: lokalny git zainicjalizowany w głównym projekcie `sharemeet/`, remote ustawiony na `git@github.com:z1gonzo/sharemeet.git`
+- Ostatnia sesja: 2026-09-19 — remote bootstrap and pre-format backup verification
+- Repo: główny projekt `sharemeet/`, branch `master` wypchnięty na `git@github.com:z1gonzo/sharemeet.git` at `c0f402a`
 - Główne ryzyko: minimalny frontend social MVP działa i lokalna DB jest wyczyszczona do deterministycznych demo danych; publiczny deployment jest zaplanowany, ale rzeczywiste usługi hostingowe nie zostały jeszcze utworzone.
-- Następny krok: wybrać i utworzyć konkretne usługi hostingowe (rekomendacja: Vercel + Render + Neon/Supabase), skonfigurować env vars, uruchomić migracje/seed i zrobić browser smoke test.
+- Następny krok: wybrać i utworzyć konkretne usługi hostingowe (rekomendacja: Vercel + Render + Neon/Supabase), skonfigurować env vars, uruchomić migracje/seed i zrobić browser smoke test; repo jest odtwarzalne z GitHuba.
 
 ## Organizacja projektu
 

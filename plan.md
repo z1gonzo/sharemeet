@@ -10,7 +10,7 @@ Równie ważny cel: dokumentować proces nauki — dlaczego wybieramy konkretne 
 
 ## Aktualny priorytet
 
-Przygotować repo pod spokojną sesję kodowania w VSCode/Cline i ustabilizować fundament backendu/auth.
+Utrzymać stabilny fundament backendu/auth i przejść do przygotowania pierwszego publicznego demo/deploymentu. Repo jest już wypchnięte na GitHub; przed hostingiem trzeba skonfigurować usługi, sekrety, migracje/seed i smoke test.
 
 - [x] Ustalić, że główny projekt to `sharemeet/`, a devlog żyje w repo jako `devlog/`
 - [x] Usunąć osobny pusty projekt `sharemeet-devlog` z aktywnego workspace przez archiwizację
